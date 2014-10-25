@@ -53,7 +53,6 @@ Usage
 =====
 Just run `graphite-beacon`::
 
-::
     $ graphite-beacon
     [I 141025 11:16:23 core:141] Read configuration
     [I 141025 11:16:23 core:55] Memory (10minute): init
@@ -210,5 +209,4 @@ Licensed under a `MIT license`_.
 
 .. _Graphite: http://graphite.wikidot.com/
 .. _BSD license: http://www.linfo.org/mitlicense.html
-.. |logo| image:: https://raw.github.com/klen/graphite-beacon/develop/beacon.jpg
-                  :width: 100
+.. |logo| image:: https://raw.github.com/klen/graphite-beacon/develop/beacon.png
