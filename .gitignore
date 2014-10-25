@@ -56,3 +56,4 @@ target/
 /todo.txt
 /pid
 /*.deb
+/bintray

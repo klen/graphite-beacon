@@ -58,7 +58,7 @@ upload: clean
 BUILD=$(CURDIR)/build
 TARGET=/opt/graphite/beacon
 PACKAGE_POSTFIX?=
-PACKAGE_VERSION?=$(shell git describe --tags `git rev-list master --tags --max-count=1`) 
+PACKAGE_VERSION?=$(shell git describe --tags `git rev-list master --tags --max-count=1` | tr -d ' ') 
 PACKAGE_NAME="graphite-beacon"
 PACKAGE_FULLNAME=$(PACKAGE_NAME)$(PACKAGE_POSTFIX)
 PACKAGE_MAINTAINER="Kirill Klenov <horneds@gmail.com>"
@@ -85,6 +85,9 @@ deb: clean
 	    -C $(CURDIR)/build \
 	    -d "python2.7" \
 	    opt etc
+	for name in *.deb; do \
+	    [ -f bintray ] && curl -T "$$name" -uklen:`cat bintray` https://api.bintray.com/content/klen/deb/graphite-beacon/all/$$name ; \
+	done
 
 # =============
 #  Development

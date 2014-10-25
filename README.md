@@ -34,7 +34,15 @@ Installation
 
 ### Debian package
 
-TODO
+Using the command line, add the following to your /etc/apt/sources.list system config file: 
+
+    echo "deb http://dl.bintray.com/klen/deb /" | sudo tee -a /etc/apt/sources.list 
+    echo "deb-src http://dl.bintray.com/klen/deb /" | sudo tee -a /etc/apt/sources.list
+
+Install the package using apt-get:
+
+    apt-get update
+    apt-get install graphite-beacon
 
 Usage
 -----
