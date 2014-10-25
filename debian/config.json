@@ -1,0 +1,41 @@
+// Graphite-beacon configuration file (default values)
+{
+    // Path to config file
+    "config": "config.json",
+
+    // Graphite server URL
+    "graphite_url": "http://localhost",
+
+    // HTTP AUTH username
+    "graphite_user": null,
+
+    // HTTP AUTH password
+    "graphite_password": null,
+
+    // Path to a pidfile
+    "pidfile": null,
+
+    // Default query interval
+    // Can be redfined for each alert.
+    // [eg. 15second, 30minute, 2hour, 1day, 3month, 1year]
+    "interval": "10minute",
+
+    // Default loglevel
+    "logging": "info",
+
+    // Default method (average, last_value).
+    "method": "average",
+
+    // Default prefix (used for notifications)
+    "prefix": "[BEACON]",
+
+    // Default handlers (log, smtp, hipchat)
+    "critical_handlers": ["log", "smtp"],
+    "warning_handlers": ["log", "smtp"],
+    "normal_handlers": ["log", "smtp"],
+
+    // Place your alerts here
+    "alerts": [
+      
+    ]
+}

@@ -60,7 +60,7 @@ Just run `graphite-beacon`:
 
 **Graphite-beacon** default options are:
 
-> Comment lines are not allowed in real JSON!
+> Comment lines are not allowed in JSON, but Graphite-beacon strips them
 
 ```js
 
@@ -109,7 +109,7 @@ You can setup options with a configuration file. See
 
 ### Setup alerts
 
-> Comment lines are not allowed in real JSON!
+> Comment lines are not allowed in JSON, but Graphite-beacon strips them
 
 ```js
 

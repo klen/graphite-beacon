@@ -1,9 +1,11 @@
+// Comments is allowed here
 {
   "interval": "10minute",
   "logging": "debug",
 
   "alerts": [
     {
+      // An another comment
       "name": "Memory",
       "query": "*.memory.memory-free",
       "rules": [

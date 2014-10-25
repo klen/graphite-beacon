@@ -68,7 +68,7 @@ PACKAGE_DESCRIPTION="Simple allerting system for Graphite metrics."
 PACKAGE_URL=https://github.com/klen/graphite-beacon.git
 deb: clean
 	@mkdir -p $(BUILD)/etc/init $(BUILD)/$(TARGET)
-	@cp -r $(CURDIR)/graphite_beacon $(BUILD)/$(TARGET)/.
+	@cp -r $(CURDIR)/graphite_beacon debian/config.json $(BUILD)/$(TARGET)/.
 	@cp $(CURDIR)/debian/upstart.conf $(BUILD)/etc/init/graphite-beacon.conf
 	@fpm -s dir -t deb -a all \
 	    -n $(PACKAGE_FULLNAME) \

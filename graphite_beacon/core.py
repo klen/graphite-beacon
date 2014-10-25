@@ -1,6 +1,6 @@
 import operator as op
 import os
-from re import compile as re
+from re import compile as re, M
 
 import json
 from tornado import ioloop, log, httpclient as hc, gen
@@ -27,6 +27,7 @@ TIME_UNIT_SIZE = {
 }
 
 TIME_RE = re('(\d+)')
+COMMENT_RE = re('//\s+.*$', M)
 
 
 class Alert(object):
@@ -150,7 +151,8 @@ class Reactor(object):
         if config:
             try:
                 with open(config) as fconfig:
-                    self.options.update(json.load(fconfig))
+                    source = COMMENT_RE.sub("", fconfig.read())
+                    self.options.update(json.loads(source))
             except (IOError, ValueError):
                 LOGGER.error('Invalid config file: %s' % config)
 
