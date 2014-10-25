@@ -1,0 +1,18 @@
+{
+  "interval": "10minute",
+  "logging": "debug",
+
+  "alerts": [
+    {
+      "name": "Memory",
+      "query": "*.memory.memory-free",
+      "rules": [
+        {
+          "level": "critical",
+          "operator": "gt",
+          "value": 10000000
+        }
+      ]
+    }
+  ]
+}

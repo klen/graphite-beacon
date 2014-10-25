@@ -1,4 +1,4 @@
 graphite-beacon
 ===============
 
-Simple allerting system for Graphite metrics
+Simple allerting system for Graphite metrics.
