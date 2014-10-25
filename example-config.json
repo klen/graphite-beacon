@@ -7,8 +7,8 @@
     // An graphite alert
     {
       "name": "Memory",
-      "query": "*.memory.memory-free",
-      "interval": "10second",
+      "query": "aliasByNode(*.memory.memory-free, 1)",
+      "interval": "10minute",
       "rules": [
         {
           "level": "critical",
@@ -22,8 +22,8 @@
       "name": "Site",
       // Source (graphite, url). By default: graphite
       "source": "url",
-      "query": "http://google.com",
-      "interval": "5second",
+      "query": "http://google.com2",
+      "interval": "20second",
       "rules": [
         {
           "level": "critical",

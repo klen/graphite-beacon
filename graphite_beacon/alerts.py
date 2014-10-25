@@ -2,7 +2,7 @@ import operator as op
 from re import compile as re
 from . import _compat as _
 
-from tornado import ioloop, httpclient as hc, gen, log
+from tornado import ioloop, httpclient as hc, gen, log, escape
 
 from .graphite import GraphiteRecord
 
@@ -113,8 +113,9 @@ class GraphiteAlert(BaseAlert):
         self.method = options.get('method', self.reactor.options['method'])
         assert self.method in METHODS, "Method is invalid"
 
+        query = escape.url_escape(self.query)
         self.url = "%(base)s/render/?target=%(query)s&rawData=true&from=-%(interval)s" % {
-            'base': self.reactor.options['graphite_url'], 'query': self.query,
+            'base': self.reactor.options['graphite_url'], 'query': query,
             'interval': self.interval}
 
     @gen.coroutine
@@ -144,7 +145,7 @@ class URLAlert(BaseAlert):
 
     @gen.coroutine
     def load(self):
-        LOGGER.debug('%s: start checking: %s' % (self.name, self.url))
+        LOGGER.debug('%s: start checking: %s' % (self.name, self.query))
         if self.waiting:
             self.notify('warning', 'waiting for metrics')
         else:
