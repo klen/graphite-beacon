@@ -60,7 +60,6 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         self.name = name
         assert rules, "%s: Alert's rules is invalid" % name
         self.rules = sorted(rules, key=lambda r: LEVELS.get(r.get('level'), 99))
-        import ipdb; ipdb.set_trace()  # XXX BREAKPOINT
         assert query, "%s: Alert's query is invalid" % self.name
         self.query = query
         self.interval = options.get('interval', self.reactor.options['interval'])
