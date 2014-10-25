@@ -14,6 +14,7 @@ Features:
 
 [![Build status](http://img.shields.io/travis/klen/graphite-beacon.svg?style=flat-square)](http://travis-ci.org/klen/graphite-beacon)
 [![Coverage](http://img.shields.io/coveralls/klen/graphite-beacon.svg?style=flat-square)](https://coveralls.io/r/klen/graphite-beacon)
+[![Version](http://img.shields.io/pypi/v/graphite-beacon.svg?style=flat-square)](https://pypi.python.org/pypi/graphite_beacon/0.2.1)
 [![Donate](http://img.shields.io/gratipay/klen.svg?style=flat-square)](https://www.gratipay.com/klen/)
 
 
@@ -120,10 +121,10 @@ You can setup options with a configuration file. See
       // Alert query (required)
       "query": "*.memory.memory-free",
 
-      // Alert method (optional)
+      // Alert method (optional) [average, last_value]
       "method": "average",
 
-      // Alert interval (optional)
+      // Alert interval (optional) [eg. 15second, 30minute, 2hour, 1day, 3month, 1year]
       "interval": "1minute",
 
       // Alert rules
