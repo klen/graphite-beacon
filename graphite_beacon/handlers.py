@@ -82,11 +82,12 @@ class SmtpHandler(AbstractHandler):
     def init_handler(self):
         self._from = self.reactor.options.get('smtp_from', 'beacon@graphite')
         self.host = self.reactor.options.get('smtp_host', 'smtp.gmail.com')
-        self.password = self.reactor.options['smtp_password']
+        self.password = self.reactor.options.get('smtp_password')
         self.port = self.reactor.options.get('smtp_port', 587)
-        self.to = self.reactor.options['smtp_to']
         self.use_tls = self.reactor.options.get('smtp_use_tls', True)
-        self.username = self.reactor.options['smtp_username']
+        self.username = self.reactor.options.get('smtp_username')
+        self.to = self.reactor.options.get('smtp_to')
+        assert self.to, 'Recepients list is empty. SMTP disabled.'
 
     @gen.coroutine
     def notify(self, level, alert, value, comment):

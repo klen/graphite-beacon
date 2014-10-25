@@ -57,7 +57,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         self.waiting = False
         self.level = 'normal'
 
-        LOGGER.info("%s: init" % self)
+        LOGGER.info("Alert '%s': has inited" % self)
 
     def configure(self, name=None, rules=None, query=None, **options):
         assert name, "Alert's name is invalid"
@@ -77,11 +77,11 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         _, count, unit = TIME_RE.split(interval)
         return int(count) * TIME_UNIT_SIZE[unit]
 
-    def notify(self, level, value, record=None):
+    def notify(self, level, value, comment=None):
         if self.level == level:
             return False
         self.level = level
-        return self.reactor.notify(level, self, value, record=record)
+        return self.reactor.notify(level, self, value, comment=comment)
 
     def start(self):
         self.callback.start()

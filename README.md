@@ -167,19 +167,22 @@ configuration.
     "smtp_from": "beacon@graphite",
 
     // Set "to" email
-    "smtp_to": ["me@mymail.com"]
+    "smtp_to": []
 
     // Set SMTP host
-    "smtp_host": "smtp.gmail.com",
+    "smtp_host": "localhost",
+
+    // Set SMTP port
+    "smtp_port": 25,
 
     // Set SMTP user
-    "smtp_user": "me",
+    "smtp_username": null,
 
     // Set SMTP password
-    "smtp_password": "mypassword",
+    "smtp_password": null,
 
     // Use TLS
-    "smtp_use_tls": true,
+    "smtp_use_tls": false,
 
     ...
 }

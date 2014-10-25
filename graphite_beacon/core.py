@@ -37,7 +37,6 @@ class Reactor(object):
         self.loop = ioloop.IOLoop.instance()
         self.options = dict(self.defaults)
         self.reinit(**options)
-        LOGGER.setLevel(self.options.get('logging', 'info').upper())
 
     def reinit(self, *args, **options):
         LOGGER.info('Read configuration')
@@ -53,6 +52,7 @@ class Reactor(object):
             except (IOError, ValueError):
                 LOGGER.error('Invalid config file: %s' % config)
 
+        LOGGER.setLevel(self.options.get('logging', 'info').upper())
         registry.clean()
 
         self.handlers = {'warning': set(), 'critical': set(), 'normal': set()}
@@ -67,8 +67,8 @@ class Reactor(object):
         self.alerts = set(
             BaseAlert.get(self, **opts).start() for opts in self.options.get('alerts', []))
 
-        LOGGER.info('Loaded with options:')
-        LOGGER.info(json.dumps(self.options, indent=2))
+        LOGGER.debug('Loaded with options:')
+        LOGGER.debug(json.dumps(self.options, indent=2))
         return self
 
     def reinit_handlers(self, level='warning'):
