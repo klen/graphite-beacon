@@ -10,6 +10,11 @@ from .utils import convert, parse_interval
 OPERATORS = {'lt': op.lt, 'le': op.le, 'eq': op.eq, 'gt': op.gt, 'ge': op.ge}
 LOGGER = log.gen_log
 METHODS = "average", "last_value"
+LEVELS = {
+    'critical': 0,
+    'warning': 10,
+    'normal': 20,
+}
 
 
 class AlertFabric(type):
@@ -54,11 +59,15 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         assert name, "Alert's name is invalid"
         self.name = name
         assert rules, "%s: Alert's rules is invalid" % name
-        self.rules = rules
+        self.rules = sorted(rules, key=lambda r: LEVELS.get(r.get('level'), 99))
+        import ipdb; ipdb.set_trace()  # XXX BREAKPOINT
         assert query, "%s: Alert's query is invalid" % self.name
         self.query = query
         self.interval = options.get('interval', self.reactor.options['interval'])
-        self.callback = ioloop.PeriodicCallback(self.load, parse_interval(self.interval))
+        if self.reactor.options.get('debug'):
+            self.callback = ioloop.PeriodicCallback(self.load, 5000)
+        else:
+            self.callback = ioloop.PeriodicCallback(self.load, parse_interval(self.interval))
         self._format = options.get('format', self.reactor.options['format'])
 
     def convert(self, value):

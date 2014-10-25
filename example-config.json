@@ -12,6 +12,8 @@
   "smtp_from": "horneds@gmail.com",
   "smtp_to": ["horneds@gmail.com"],
 
+  "debug": true,
+
   "alerts": [
     // An graphite alert
     {
@@ -21,9 +23,14 @@
       "format": "bytes",
       "rules": [
         {
+          "level": "warning",
+          "operator": "lt",
+          "value": 20000000000
+        },
+        {
           "level": "critical",
-          "operator": "gt",
-          "value": 10000000
+          "operator": "lt",
+          "value": 10000000000
         }
       ]
     },

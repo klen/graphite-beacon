@@ -1,4 +1,4 @@
-## 0.5.2
+## 0.6.1
 
 - Support units format (bytes, s, ms, short, percent)
 - HTML emails

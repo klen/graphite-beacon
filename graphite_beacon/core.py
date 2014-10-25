@@ -24,6 +24,7 @@ class Reactor(object):
         'config': 'config.json',
         'critical_handlers': ['log', 'smtp'],
         'format': 'short',
+        'debug': False,
         'graphite_url': 'http://localhost',
         'interval': '10minute',
         'repeat_interval': '2hour',

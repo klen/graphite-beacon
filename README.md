@@ -45,6 +45,10 @@ Install the package using apt-get:
     apt-get update
     apt-get install graphite-beacon
 
+### Ansible role
+
+There is an ansible role to install the package: https://github.com/Stouts/Stouts.graphite-beacon
+
 Usage
 -----
 
