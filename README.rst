@@ -14,12 +14,12 @@ Features:
 
 .. _badges:
 
-.. image:: https://secure.travis-ci.org/klen/mixer.png?branch=develop
-    :target: http://travis-ci.org/klen/mixer
+.. image:: https://secure.travis-ci.org/klen/graphite-beacon.png?branch=develop
+    :target: http://travis-ci.org/klen/graphite-beacon
     :alt: Build Status
 
-.. image:: https://coveralls.io/repos/klen/mixer/badge.png?branch=develop
-    :target: https://coveralls.io/r/klen/mixer
+.. image:: https://coveralls.io/repos/klen/graphite-beacon/badge.png?branch=develop
+    :target: https://coveralls.io/r/klen/graphite-beacon
     :alt: Coverals
 
 .. image:: https://dl.dropboxusercontent.com/u/487440/reformal/donate.png
