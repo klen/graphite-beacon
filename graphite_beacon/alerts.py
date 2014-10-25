@@ -119,7 +119,7 @@ class GraphiteAlert(BaseAlert):
 
     @gen.coroutine
     def load(self):
-        LOGGER.debug('%s: start checking' % self.name)
+        LOGGER.debug('%s: start checking: %s' % (self.name, self.url))
         if self.waiting:
             self.notify('warning', 'waiting for metrics')
         else:
@@ -144,7 +144,7 @@ class URLAlert(BaseAlert):
 
     @gen.coroutine
     def load(self):
-        LOGGER.debug('%s: start checking' % self.name)
+        LOGGER.debug('%s: start checking: %s' % (self.name, self.url))
         if self.waiting:
             self.notify('warning', 'waiting for metrics')
         else:
