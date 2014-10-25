@@ -23,7 +23,7 @@ setup(
     version=_version,
     license=_license,
     description=_read('DESCRIPTION'),
-    long_description=_read('README.rst'),
+    long_description=_read('README.md'),
     platforms=('Any'),
     keywords="graphite alerts monitoring system".split(), # noqa
 
