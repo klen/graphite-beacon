@@ -14,16 +14,16 @@ Features:
 
 .. _badges:
 
-.. image:: https://secure.travis-ci.org/klen/graphite-beacon.png?branch=develop
+.. image:: http://img.shields.io/travis/klen/graphite-beacon.svg?style=flat-square
     :target: http://travis-ci.org/klen/graphite-beacon
     :alt: Build Status
 
-.. image:: https://coveralls.io/repos/klen/graphite-beacon/badge.png?branch=develop
+.. image:: http://img.shields.io/coverals/klen/graphite-beacon.svg?style=flat-square
     :target: https://coveralls.io/r/klen/graphite-beacon
     :alt: Coverals
 
-.. image:: https://dl.dropboxusercontent.com/u/487440/reformal/donate.png
-    :target: https://www.gittip.com/klen/
+.. image:: http://img.shields.io/gratipay/klen.svg?style=flat-square
+    :target: https://www.gratipay.com/klen/
     :alt: Donate
 
 .. _contents:
