@@ -155,6 +155,49 @@ At the moment **Graphite-beacon** supports two type of alerts:
   ]
 ```
 
+### Setup SMTP
+
+Enable "smtp" handler (enabled by default) and set the options in your beacon
+configuration.
+
+```js
+{
+    ...
+    // Set from email
+    "smtp_from": "beacon@graphite",
+
+    // Set "to" email
+    "smtp_to": ["me@mymail.com"]
+
+    // Set SMTP host
+    "smtp_host": "smtp.gmail.com",
+
+    // Set SMTP user
+    "smtp_user": "me",
+
+    // Set SMTP password
+    "smtp_password": "mypassword",
+
+    // Use TLS
+    "smtp_use_tls": true,
+
+    ...
+}
+```
+
+### Setup HipChat
+
+Enable "hipchat" handler and set the options in your beacon configuration.
+
+```js
+{
+    ...
+    "hipchat_room": "myroom",
+    "hipchat_key": "mykey",
+    ...
+}
+```
+
 ### Command line
 
 ```

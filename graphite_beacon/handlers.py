@@ -85,7 +85,7 @@ class SmtpHandler(AbstractHandler):
         self.password = self.reactor.options['smtp_password']
         self.port = self.reactor.options.get('smtp_port', 587)
         self.to = self.reactor.options['smtp_to']
-        self.use_tls = self.reactor.options.get('use_tls', True)
+        self.use_tls = self.reactor.options.get('smtp_use_tls', True)
         self.username = self.reactor.options['smtp_username']
 
     @gen.coroutine
