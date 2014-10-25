@@ -79,7 +79,11 @@ class Alert(object):
         else:
             self.waiting = True
             try:
-                response = yield self.client.fetch(self.url)
+                response = yield self.client.fetch(
+                    self.url,
+                    auth_username=self.reactor.options.get('graphite_user'),
+                    auth_password=self.reactor.options.get('graphite_pass'),
+                )
                 for record in (GraphiteRecord(line) for line in response.buffer):
                     self.check(record)
             except Exception as e:
