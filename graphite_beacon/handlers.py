@@ -13,8 +13,10 @@ class HandlerMeta(type):
 
     def __new__(mcs, name, bases, params):
         cls = super(HandlerMeta, mcs).__new__(mcs, name, bases, params)
-        if params.get('name'):
-            mcs.handlers[params['name']] = cls
+        name = params.get('name')
+        if name:
+            mcs.handlers[name] = cls
+            log.gen_log.info("Register Handler: %s" % name)
         return cls
 
     @classmethod
@@ -43,7 +45,7 @@ class AbstractHandler(_.with_metaclass(HandlerMeta)):
         self.prefix = self.reactor.options.get('prefix', '')
         self.init_handler()
 
-    def get_message(self, level, alert, value, record=None):
+    def get_message(self, level, alert, value, comment=None):
         tmpl = self.templates.get(level)
         return tmpl % {
             'prefix': self.prefix, 'level': level.upper(), 'alert': alert.name, 'value': value}
@@ -52,7 +54,7 @@ class AbstractHandler(_.with_metaclass(HandlerMeta)):
         """ Init configuration here."""
         raise NotImplementedError()
 
-    def notify(self, level, alert, value, record=None):
+    def notify(self, level, alert, value, comment=None):
         raise NotImplementedError()
 
 
@@ -87,8 +89,8 @@ class SmtpHandler(AbstractHandler):
         self.username = self.reactor.options['smtp_username']
 
     @gen.coroutine
-    def notify(self, level, alert, value, record):
-        msg = text('%s %s value is %s' % (record.target, alert.method, value))
+    def notify(self, level, alert, value, comment):
+        msg = text('%s %s value is %s' % (comment, alert.method, value))
         msg['Subject'] = self.get_message(level, alert, value)
         msg['From'] = self._from
         msg['To'] = ", ".join(self.to)
@@ -138,7 +140,7 @@ class HipChatHandler(AbstractHandler):
         self.client = hc.AsyncHTTPClient()
 
     @gen.coroutine
-    def notify(self, level, alert, value, record=None):
+    def notify(self, level, alert, value, comment=None):
         message = self.get_message(level, alert, value)
         data = {
             'room_id': self.room,

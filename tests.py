@@ -19,10 +19,19 @@ def test_reactor():
 
 
 def test_alert(reactor):
-    from graphite_beacon.core import Alert
+    from graphite_beacon.alerts import BaseAlert, GraphiteAlert, URLAlert
 
-    alert = Alert(reactor, name='Test', query='*')
+    alert = BaseAlert.get(reactor, name='Test', query='*', rules=[{}])
     assert alert
+    assert isinstance(alert, GraphiteAlert)
+
+    alert = BaseAlert.get(reactor, name='Test', query='*', source='url', rules=[{}])
+    assert isinstance(alert, URLAlert)
+
+
+def test_invalid_handler(reactor):
+    reactor.reinit(critical_handlers=['log', 'unknown'])
+    assert len(reactor.handlers['critical']) == 1
 
 
 def test_invalid_method():
@@ -50,10 +59,6 @@ def test_warning():
 
 
 def test_critical():
-    pass
-
-
-def test_invalid_handler():
     pass
 
 

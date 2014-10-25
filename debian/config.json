@@ -7,10 +7,10 @@
     "graphite_url": "http://localhost",
 
     // HTTP AUTH username
-    "graphite_user": null,
+    "auth_username": null,
 
     // HTTP AUTH password
-    "graphite_password": null,
+    "auth_password": null,
 
     // Path to a pidfile
     "pidfile": null,

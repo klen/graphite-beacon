@@ -4,15 +4,31 @@
   "logging": "debug",
 
   "alerts": [
+    // An graphite alert
     {
-      // An another comment
       "name": "Memory",
       "query": "*.memory.memory-free",
+      "interval": "10second",
       "rules": [
         {
           "level": "critical",
           "operator": "gt",
           "value": 10000000
+        }
+      ]
+    },
+    // An ping alert
+    {
+      "name": "Site",
+      // Source (graphite, url). By default: graphite
+      "source": "url",
+      "query": "http://google.com",
+      "interval": "5second",
+      "rules": [
+        {
+          "level": "critical",
+          "operator": "eq",
+          "value": 500
         }
       ]
     }

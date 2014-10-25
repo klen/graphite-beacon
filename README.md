@@ -72,10 +72,10 @@ Just run `graphite-beacon`:
         "graphite_url": "http://localhost",
 
         // HTTP AUTH username
-        "graphite_user": null,
+        "auth_usernamename": null,
 
         // HTTP AUTH password
-        "graphite_password": null,
+        "auth_password": null,
 
         // Path to a pidfile
         "pidfile": null,
@@ -109,6 +109,10 @@ You can setup options with a configuration file. See
 
 ### Setup alerts
 
+At the moment **Graphite-beacon** supports two type of alerts:
+- Graphite alert (default) - check graphite metrics
+- URL alert (default) - load http and check status
+
 > Comment lines are not allowed in JSON, but Graphite-beacon strips them
 
 ```js
@@ -120,6 +124,9 @@ You can setup options with a configuration file. See
 
       // Alert query (required)
       "query": "*.memory.memory-free",
+
+      // Source (optional) What kind of alert is it
+      "source": "graphite",
 
       // Alert method (optional) [average, last_value]
       "method": "average",
