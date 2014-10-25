@@ -18,18 +18,19 @@ class Reactor(object):
     """ Class description. """
 
     defaults = {
-        'config': 'config.json',
-        'graphite_url': 'http://localhost',
-        'auth_username': None,
         'auth_password': None,
-        'pidfile': None,
+        'auth_username': None,
+        'config': 'config.json',
+        'critical_handlers': ['log', 'smtp'],
+        'format': 'short',
+        'graphite_url': 'http://localhost',
         'interval': '10minute',
         'logging': 'info',
         'method': 'average',
-        'prefix': '[BEACON]',
-        'critical_handlers': ['log', 'smtp'],
-        'warning_handlers': ['log', 'smtp'],
         'normal_handlers': ['log', 'smtp'],
+        'pidfile': None,
+        'prefix': '[BEACON]',
+        'warning_handlers': ['log', 'smtp'],
     }
 
     def __init__(self, **options):

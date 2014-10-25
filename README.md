@@ -80,6 +80,10 @@ Just run `graphite-beacon`:
         // Path to a pidfile
         "pidfile": null,
 
+        // Default values format (none, bytes, s, ms, short)
+        // Can be redfined for each alert.
+        "format": "short",
+
         // Default query interval
         // Can be redfined for each alert.
         "interval": "10minute",
@@ -127,6 +131,9 @@ At the moment **Graphite-beacon** supports two type of alerts:
 
       // Source (optional) What kind of alert is it
       "source": "graphite",
+
+      // Default values format (optional) (none, bytes, s, ms, short)
+      "format": "bytes",
 
       // Alert method (optional) [average, last_value]
       "method": "average",

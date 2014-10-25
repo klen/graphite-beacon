@@ -3,12 +3,22 @@
   "interval": "10minute",
   "logging": "debug",
 
+  // Gmail example
+  "smtp_username": "example@gmail.com",
+  "smtp_password": "password",
+  "smtp_use_tls": true,
+  "smtp_host": "smtp.gmail.com",
+  "smtp_port": 587,
+  "smtp_from": "horneds@gmail.com",
+  "smtp_to": ["horneds@gmail.com"],
+
   "alerts": [
     // An graphite alert
     {
       "name": "Memory",
       "query": "aliasByNode(*.memory.memory-free, 1)",
       "interval": "10minute",
+      "format": "bytes",
       "rules": [
         {
           "level": "critical",

@@ -1,6 +1,7 @@
 import operator as op
 from re import compile as re
 from . import _compat as _
+from .utils import convert
 
 from tornado import ioloop, httpclient as hc, gen, log, escape
 
@@ -68,6 +69,10 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         self.query = query
         self.interval = options.get('interval', self.reactor.options['interval'])
         self.callback = ioloop.PeriodicCallback(self.load, self.parse_interval(self.interval))
+        self._format = options.get('format', self.reactor.options['format'])
+
+    def convert(self, value):
+        return convert(value, self._format)
 
     def __str__(self):
         return "%s (%s)" % (self.name, self.interval)
@@ -138,6 +143,12 @@ class GraphiteAlert(BaseAlert):
                 self.notify('critical', e)
             self.waiting = False
 
+    def get_graph_url(self, target):
+        query = escape.url_escape(target)
+        return "%(base)s/render/?target=%(query)s&from=-%(interval)s" % {
+            'base': self.reactor.options['graphite_url'], 'query': query,
+            'interval': self.interval}
+
 
 class URLAlert(BaseAlert):
 
@@ -157,6 +168,6 @@ class URLAlert(BaseAlert):
                     auth_password=self.reactor.options.get('graphite_pass'),
                 )
                 self.check(response.code)
-            except Exception as e:
-                self.notify('critical', e)
+            except Exception:
+                self.notify('critical', 'unknown')
             self.waiting = False

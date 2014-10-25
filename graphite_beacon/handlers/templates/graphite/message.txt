@@ -1,0 +1,17 @@
+{{ reactor.options.get('prefix') }} {{ level.upper() }}
+{{ '=' * len(reactor.options.get('prefix') + level)}}
+
+Alert: {{ alert.name }}
+Status: {{ level }}
+
+Time: {{ dt.datetime.now().strftime('%H:%M %d/%m/%Y') }}
+Value: {{ alert.convert(value) }} ({{value}})
+Target: {{ comment }}
+
+View the graph: {{ alert.get_graph_url(alert.query) }}
+
+--
+
+You can configure alerts for notifications in your congifuration file.
+See https://github.com/klen/graphite-beacon
+
