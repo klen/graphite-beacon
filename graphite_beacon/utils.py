@@ -1,3 +1,6 @@
+from re import compile as re
+
+
 CONVERT = {
     "bytes": (
         ("GB", 1000000000.0),
@@ -26,6 +29,15 @@ CONVERT = {
     )
 }
 CONVERT['ms'] = list((n, v * 1000) for n, v in CONVERT['s'])
+TIME_RE = re('(\d+)')
+TIME_UNIT_SIZE = {
+    "second": 1000,
+    "minute": 60 * 1000,
+    "hour": 60 * 60 * 1000,
+    "day": 24 * 60 * 60 * 1000,
+    "month": 30 * 24 * 60 * 60 * 1000,
+    "year": 365.2425 * 24 * 60 * 60 * 1000
+}
 
 
 def convert(value, frmt):
@@ -40,3 +52,8 @@ def convert(value, frmt):
         value /= size
         value = ("%.1f" % value).rstrip('0').rstrip('.')
     return "%s%s" % (value, name)
+
+
+def parse_interval(interval):
+    _, count, unit = TIME_RE.split(interval)
+    return int(count) * TIME_UNIT_SIZE.get(unit, 1000)

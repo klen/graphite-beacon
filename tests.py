@@ -59,6 +59,15 @@ def test_convert():
     assert convert(34, 'ms') == "34ms"
 
 
+def test_parse_interval():
+    from graphite_beacon.utils import parse_interval
+
+    assert parse_interval('10') == 10000
+    assert parse_interval('15s') == 15000
+    assert parse_interval('5minute') == 300000
+    assert parse_interval('5month') == 12960000000
+
+
 def test_invalid_method():
     pass
 

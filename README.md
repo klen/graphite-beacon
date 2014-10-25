@@ -88,6 +88,10 @@ Just run `graphite-beacon`:
         // Can be redfined for each alert.
         "interval": "10minute",
 
+        // Notification repeat interval
+        // If an alert is failed, its notification will be repeated with the interval below
+        "repeat_interval": "2hour",
+
         // Default loglevel
         "logging": "info",
 

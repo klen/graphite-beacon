@@ -5,6 +5,7 @@ import json
 from tornado import ioloop, log
 
 from .alerts import BaseAlert
+from .utils import parse_interval
 from .handlers import registry
 
 
@@ -25,6 +26,7 @@ class Reactor(object):
         'format': 'short',
         'graphite_url': 'http://localhost',
         'interval': '10minute',
+        'repeat_interval': '2hour',
         'logging': 'info',
         'method': 'average',
         'normal_handlers': ['log', 'smtp'],
@@ -38,6 +40,8 @@ class Reactor(object):
         self.loop = ioloop.IOLoop.instance()
         self.options = dict(self.defaults)
         self.reinit(**options)
+        self.callback = ioloop.PeriodicCallback(
+            self.repeat, parse_interval(self.options['repeat_interval']))
 
     def reinit(self, *args, **options):
         LOGGER.info('Read configuration')
@@ -79,14 +83,21 @@ class Reactor(object):
             except Exception as e:
                 LOGGER.error('Handler "%s" did not init. Error: %s' % (name, e))
 
+    def repeat(self):
+        LOGGER.info('Reset alerts')
+        for alert in self.alerts:
+            alert.level = 'normal'
+
     def start(self, *args):
         if self.options.get('pidfile'):
             with open(self.options.get('pidfile'), 'w') as fpid:
                 fpid.write(str(os.getpid()))
+        self.callback.start()
         LOGGER.info('Reactor starts')
         self.loop.start()
 
     def stop(self, *args):
+        self.callback.stop()
         self.loop.stop()
         if self.options.get('pidfile'):
             os.unlink(self.options.get('pidfile'))

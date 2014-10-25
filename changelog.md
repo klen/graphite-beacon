@@ -1,7 +1,8 @@
-## 0.5.0
+## 0.5.2
 
 - Support units format (bytes, s, ms, short, percent)
 - HTML emails
+- Added `repeat_interval`
 
 ## 0.4.0
 

@@ -1,25 +1,15 @@
 import operator as op
-from re import compile as re
-from . import _compat as _
-from .utils import convert
 
 from tornado import ioloop, httpclient as hc, gen, log, escape
 
+from . import _compat as _
 from .graphite import GraphiteRecord
+from .utils import convert, parse_interval
 
 
 OPERATORS = {'lt': op.lt, 'le': op.le, 'eq': op.eq, 'gt': op.gt, 'ge': op.ge}
 LOGGER = log.gen_log
 METHODS = "average", "last_value"
-TIME_RE = re('(\d+)')
-TIME_UNIT_SIZE = {
-    "second": 1000,
-    "minute": 60 * 1000,
-    "hour": 60 * 60 * 1000,
-    "day": 24 * 60 * 60 * 1000,
-    "month": 30 * 24 * 60 * 60 * 1000,
-    "year": 365.2425 * 24 * 60 * 60 * 1000
-}
 
 
 class AlertFabric(type):
@@ -68,7 +58,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         assert query, "%s: Alert's query is invalid" % self.name
         self.query = query
         self.interval = options.get('interval', self.reactor.options['interval'])
-        self.callback = ioloop.PeriodicCallback(self.load, self.parse_interval(self.interval))
+        self.callback = ioloop.PeriodicCallback(self.load, parse_interval(self.interval))
         self._format = options.get('format', self.reactor.options['format'])
 
     def convert(self, value):
@@ -76,11 +66,6 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
 
     def __str__(self):
         return "%s (%s)" % (self.name, self.interval)
-
-    @staticmethod
-    def parse_interval(interval):
-        _, count, unit = TIME_RE.split(interval)
-        return int(count) * TIME_UNIT_SIZE[unit]
 
     def notify(self, level, value, comment=None):
         if self.level == level:
