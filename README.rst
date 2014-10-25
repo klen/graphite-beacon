@@ -201,12 +201,12 @@ Contributors
 .. _license:
 
 License
-=======
+========
 
 Licensed under a `MIT license`_.
 
 .. _links:
 
 .. _Graphite: http://graphite.wikidot.com/
-.. _BSD license: http://www.linfo.org/mitlicense.html
+.. _MIT license: http://www.linfo.org/mitlicense.html
 .. |logo| image:: https://raw.github.com/klen/graphite-beacon/develop/beacon.png
