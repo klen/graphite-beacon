@@ -29,7 +29,7 @@ setup(
 
     author='Kirill Klenov',
     author_email='horneds@gmail.com',
-    url='http://github.com/klen/beam',
+    url='http://github.com/klen/graphite-beacon',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
@@ -48,4 +48,5 @@ setup(
     packages=['graphite_beacon'],
     include_package_data=True,
     install_requires=install_requires,
+    entry_points={'console_scripts': ['graphite-beacon = graphite_beacon.app:run']},
 )

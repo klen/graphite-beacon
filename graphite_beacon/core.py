@@ -135,9 +135,6 @@ class Reactor(object):
         self.loop = ioloop.IOLoop.instance()
         self.options = dict(self.defaults)
         self.reinit(**options)
-        if self.options.get('pidfile'):
-            with open(self.options.get('pidfile'), 'w') as fpid:
-                fpid.write(str(os.getpid()))
         LOGGER.setLevel(self.options.get('logging', 'info').upper())
 
     def reinit(self, *args, **options):
@@ -178,11 +175,16 @@ class Reactor(object):
                 LOGGER.error('Handler "%s" did not init. Error: %s' % (name, e))
 
     def start(self, *args):
+        if self.options.get('pidfile'):
+            with open(self.options.get('pidfile'), 'w') as fpid:
+                fpid.write(str(os.getpid()))
         LOGGER.info('Reactor starts')
         self.loop.start()
 
     def stop(self, *args):
         self.loop.stop()
+        if self.options.get('pidfile'):
+            os.unlink(self.options.get('pidfile'))
         LOGGER.info('Reactor has stopped')
 
     def notify(self, level, alert, value, record=None):
