@@ -18,7 +18,7 @@ def test_reactor():
     assert rr.reinit()
 
     rr = Reactor(include=['example-config.json'], alerts=[
-        {'name': 'test', 'query': '*', 'rules': [{}]}])
+        {'name': 'test', 'query': '*', 'rules': ["normal: == 0"]}])
     assert rr.options['interval'] == '20minute'
     assert len(rr.alerts) == 3
 
@@ -26,23 +26,22 @@ def test_reactor():
 def test_alert(reactor):
     from graphite_beacon.alerts import BaseAlert, GraphiteAlert, URLAlert
 
-    alert1 = BaseAlert.get(reactor, name='Test', query='*', rules=[{}])
+    alert1 = BaseAlert.get(reactor, name='Test', query='*', rules=["normal: == 0"])
     assert alert1
     assert isinstance(alert1, GraphiteAlert)
 
-    alert2 = BaseAlert.get(reactor, name='Test', query='*', source='url', rules=[{}])
+    alert2 = BaseAlert.get(reactor, name='Test', query='*', source='url', rules=["normal: == 0"])
     assert isinstance(alert2, URLAlert)
 
     assert alert1 != alert2
 
-    alert3 = BaseAlert.get(reactor, name='Test', query='*', interval='2m', rules=[{}])
+    alert3 = BaseAlert.get(reactor, name='Test', query='*', interval='2m', rules=["normal: == 0"])
     assert alert3.interval == '2minute'
 
     assert alert1 == alert3
     assert set([alert1, alert3]) == set([alert1])
 
-    alert = BaseAlert.get(reactor, name='Test', query='*', rules=[{
-        'name': 'test', 'value': '3MB'}])
+    alert = BaseAlert.get(reactor, name='Test', query='*', rules=["warning: >= 3MB"])
     assert alert.rules[0]['value'] == 3000000
 
 
@@ -103,6 +102,18 @@ def test_interval_to_graphite():
     assert interval_to_graphite('10m') == '10minute'
     assert interval_to_graphite('875') == '875second'
     assert interval_to_graphite('2hour') == '2hour'
+
+
+def test_parse_rule():
+    from graphite_beacon.utils import parse_rule
+    import operator as op
+
+    with pytest.raises(ValueError):
+        assert parse_rule('invalid')
+
+    assert parse_rule('normal: == 0') == {'level': 'normal', 'op': op.eq, 'value': 0}
+    assert parse_rule('critical: < 30MB') == {'level': 'critical', 'op': op.lt, 'value': 30000000}
+    assert parse_rule('warning: >= 30MB') == {'level': 'warning', 'op': op.ge, 'value': 30000000}
 
 
 def test_invalid_method():

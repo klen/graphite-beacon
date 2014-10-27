@@ -1,4 +1,5 @@
 from re import compile as re
+import operator as op
 
 
 NUMBER_RE = re('(\d*\.?\d*)')
@@ -37,6 +38,14 @@ TIME_UNIT_SYN = {"microsecond": "ms", "second": "s", "minute": "m", "hour": "h",
 TIME_UNIT_SYN2 = dict([(v, n) for (n, v) in TIME_UNIT_SYN.items()])
 
 
+OPERATORS = {'>': op.gt, '>=': op.ge, '<': op.lt, '<=': op.le, '==': op.eq, '!=': op.ne}
+RULE_RE = re(
+    '(critical|warning|normal):\s+(%s)\s+(\d+\.?\d*(?:%s)?)' % (
+        "|".join(OPERATORS.keys()),
+        "|".join(CONVERT_HASH.keys())
+    ))
+
+
 def convert_to_format(value, frmt=None):
     try:
         value = float(value)
@@ -58,7 +67,7 @@ def convert_to_format(value, frmt=None):
 def convert_from_format(value):
     _, num, unit = NUMBER_RE.split(str(value))
     if not unit:
-        return value
+        return float(value)
     return float(num) * CONVERT_HASH.get(unit, 1)
 
 
@@ -72,3 +81,15 @@ def interval_to_graphite(interval):
     _, num, unit = NUMBER_RE.split(interval)
     unit = TIME_UNIT_SYN2.get(unit, unit) or 'second'
     return num + unit
+
+
+def parse_rule(rule):
+    match = RULE_RE.match(rule)
+    if not match:
+        raise ValueError('Invalid rule: %s' % rule)
+    level, cond, value = match.groups()
+    value = convert_from_format(value)
+    if cond not in OPERATORS:
+        raise ValueError('Invalid operator: %s for rule %s' % (cond, rule))
+    op = OPERATORS.get(cond)
+    return {'level': level, 'op': op, 'value': value}

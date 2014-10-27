@@ -21,18 +21,7 @@
       "query": "aliasByNode(*.memory.memory-free, 1)",
       "interval": "10minute",
       "format": "bytes",
-      "rules": [
-        {
-          "level": "warning",
-          "operator": "lt",
-          "value": "300MB"
-        },
-        {
-          "level": "critical",
-          "operator": "lt",
-          "value": "200MB"
-        }
-      ]
+      "rules": ["warning: < 300MB", "critical: < 200MB"]
     },
     // An ping alert
     {
@@ -41,13 +30,7 @@
       "source": "url",
       "query": "http://google.com2",
       "interval": "20second",
-      "rules": [
-        {
-          "level": "critical",
-          "operator": "eq",
-          "value": 500
-        }
-      ]
+      "rules": ["critical: != 200"]
     }
   ]
 }

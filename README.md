@@ -17,6 +17,23 @@ Features:
 [![Version](http://img.shields.io/pypi/v/graphite-beacon.svg?style=flat-square)](https://pypi.python.org/pypi/graphite_beacon/0.2.1)
 [![Donate](http://img.shields.io/gratipay/klen.svg?style=flat-square)](https://www.gratipay.com/klen/)
 
+Example:
+```js
+{
+"graphite_url": "http://g.server.org"
+"smtp_from": "beacon@server.org"
+"smtp_to": ["me@gmail.com"]
+"alerts": [
+    {   "name": "MEM",
+        "format": "bytes",
+        "query": "aliasByNode(sumSeriesWithWildcards(collectd.*.memory.{memory-free,memory-cached}, 3), 1)",
+        "rules": ["critical: < 200MB", "warning: < 400MB"] },
+    {   "name": "CPU",
+        "format": "percent",
+        "query": "aliasByNode(sumSeriesWithWildcards(collectd.*.cpu-*.cpu-user, 2), 1)",
+        "rules": ["critical: >= 80%", "warning: >= 70%"] }
+]}
+```
 
 Requirements
 ------------
@@ -149,41 +166,30 @@ At the moment **Graphite-beacon** supports two type of alerts:
 
   "alerts": [
     {
-      // Alert name (required)
+      // (required) Alert name
       "name": "Memory",
 
-      // Alert query (required)
+      // (required) Alert query
       "query": "*.memory.memory-free",
 
-      // Source (optional) What kind of alert is it
+      //(optional) Alert type (graphite, url)
       "source": "graphite",
 
-      // Default values format (optional) (none, bytes, s, ms, short)
+      //(optional)  Default values format (none, bytes, s, ms, short)
       "format": "bytes",
 
-      // Alert method (optional) [average, last_value]
+      // (optional) Alert method (average, last_value)
       "method": "average",
 
-      // Alert interval (optional) [eg. 15second, 30minute, 2hour, 1day, 3month, 1year]
+      // (optional) Alert interval [eg. 15second, 30minute, 2hour, 1day, 3month, 1year]
       "interval": "1minute",
 
-      // Alert rules
-      "rules": [
-        {
-          // Level
-          "level": "critical",
-          // Conditional (gt (>), ge (>=), lt (<), le (<=), eq (==))
-          "operator": "lt",
-
-          // Value to compare (absolute value: 3000000 or short form 3MB)
-          "value": "200MB"
-        },
-        {
-          "level": "warning",
-          "operator": "lt",
-          "value": "300MB"
-        }
-      ]
+      // (required) Alert rules
+      // Rule format: "{level}: {operator} {value}"
+      // Level one of [critical, warning, normal]
+      // Operator one of [>, <, >=, <=, ==, !=]
+      // Value (absolute value: 3000000 or short form like 3MB/12minute)
+      "rules": [ "critical: < 200MB", "warning: < 300MB" ]
     }
   ]
 ```

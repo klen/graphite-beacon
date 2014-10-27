@@ -1,7 +1,8 @@
-## 0.8.0
+## 0.9.0
 
 - Update units system
 - Support `include`
+- Easiest rules format
 
 ## 0.6.1
 

@@ -4,7 +4,7 @@ from tornado import ioloop, httpclient as hc, gen, log, escape
 
 from . import _compat as _
 from .graphite import GraphiteRecord
-from .utils import convert_to_format, parse_interval, interval_to_graphite, convert_from_format
+from .utils import convert_to_format, parse_interval, interval_to_graphite, parse_rule
 
 
 OPERATORS = {'lt': op.lt, 'le': op.le, 'eq': op.eq, 'gt': op.gt, 'ge': op.ge}
@@ -65,9 +65,8 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         assert name, "Alert's name is invalid"
         self.name = name
         assert rules, "%s: Alert's rules is invalid" % name
-        self.rules = sorted(rules, key=lambda r: LEVELS.get(r.get('level'), 99))
-        for rule in self.rules:
-            rule['value'] = convert_from_format(rule.get('value', 1))
+        self.rules = [parse_rule(rule) for rule in rules]
+        self.rules = list(sorted(self.rules, key=lambda r: LEVELS.get(r.get('level'), 99)))
         assert query, "%s: Alert's query is invalid" % self.name
         self.query = query
         self.interval = interval_to_graphite(options.get('interval',
@@ -104,7 +103,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
             if op(value, rule['value']):
                 return self.notify(rule.get('level', 'warning'), value, comment)
 
-        self.notify('normal', value, comment)
+        return self.notify('normal', value, comment)
 
     def load(self):
         raise NotImplementedError()
@@ -140,6 +139,7 @@ class GraphiteAlert(BaseAlert):
                 )
                 for record in (GraphiteRecord(line) for line in response.buffer):
                     value = getattr(record, self.method)
+                    LOGGER.debug("%s: %s", record.target, value)
                     self.check(value, comment=record.target)
             except Exception as e:
                 self.notify('critical', e)
