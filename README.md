@@ -3,7 +3,7 @@ graphite-beacon
 
 ![logo](https://raw.github.com/klen/graphite-beacon/develop/beacon.png)
 
-Simple allerting system for [Graphite](http://graphite.wikidot.com/) metrics.
+Simple alerting system for [Graphite](http://graphite.wikidot.com/) metrics.
 
 Features:
 
@@ -48,7 +48,7 @@ Installation
 
 **Graphite-beacon** could be installed using pip:
 
-    pip intall graphite-beacon
+    pip install graphite-beacon
 
 ### Debian package
 
