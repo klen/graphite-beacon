@@ -42,7 +42,7 @@ OPERATORS = {'>': op.gt, '>=': op.ge, '<': op.lt, '<=': op.le, '==': op.eq, '!='
 RULE_RE = re(
     '(critical|warning|normal):\s+(%s)\s+(\d+\.?\d*(?:%s)?)' % (
         "|".join(OPERATORS.keys()),
-        "|".join(CONVERT_HASH.keys())
+        "|".join(sorted(CONVERT_HASH.keys(), reverse=True))
     ))
 
 
