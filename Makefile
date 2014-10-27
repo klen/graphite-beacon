@@ -85,6 +85,7 @@ deb: clean
 	    --deb-user root \
 	    --deb-group root \
 	    --config-files /etc/init/graphite-beacon.conf \
+	    --config-files /opt/graphite/beacon/config.json \
 	    --before-install $(CURDIR)/debian/before_install.sh \
 	    --before-remove $(CURDIR)/debian/before_remove.sh \
 	    --after-install $(CURDIR)/debian/after_install.sh \
