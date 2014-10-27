@@ -62,7 +62,17 @@ Just run `graphite-beacon`:
 
 ### Configuration
 
+___
+
 **Graphite-beacon** default options are:
+
+> Time units: '2second', '3.5minute', '4hour', '5.2day', '6week', '7month', '8year'
+> short formats are: '2s', '3m', '4.1h' ...
+
+> Value units:
+> short: '2K', '3Mil', '4Bil', '5Tri'
+> bytes: '2KB', '3MB', '4GB'
+> time: '2s', '3m', '4h', '5d'
 
 > Comment lines are not allowed in JSON, but Graphite-beacon strips them
 
@@ -155,15 +165,15 @@ At the moment **Graphite-beacon** supports two type of alerts:
           // Level
           "level": "critical",
           // Conditional (gt (>), ge (>=), lt (<), le (<=), eq (==))
-          "operator": "gt",
+          "operator": "lt",
 
-          // Value to compare
-          "value": 80
+          // Value to compare (absolute value: 3000000 or short form 3MB)
+          "value": "200MB"
         },
         {
           "level": "warning",
-          "operator": "gt",
-          "value": 60
+          "operator": "lt",
+          "value": "300MB"
         }
       ]
     }

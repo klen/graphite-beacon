@@ -1,6 +1,7 @@
 from re import compile as re
 
 
+NUMBER_RE = re('(\d*\.?\d*)')
 CONVERT = {
     "bytes": (
         ("GB", 1000000000.0),
@@ -29,18 +30,15 @@ CONVERT = {
     )
 }
 CONVERT['ms'] = list((n, v * 1000) for n, v in CONVERT['s'])
-TIME_RE = re('(\d+)')
-TIME_UNIT_SIZE = {
-    "second": 1000,
-    "minute": 60 * 1000,
-    "hour": 60 * 60 * 1000,
-    "day": 24 * 60 * 60 * 1000,
-    "month": 30 * 24 * 60 * 60 * 1000,
-    "year": 365.2425 * 24 * 60 * 60 * 1000
-}
+CONVERT_HASH = {name: value for _types in CONVERT.values() for (name, value) in _types}
+CONVERT_HASH['%'] = 1
+TIME_UNIT_SIZE = dict(CONVERT['ms'])
+TIME_UNIT_SYN = {"microsecond": "ms", "second": "s", "minute": "m", "hour": "h", "day": "d",
+                 "week": "w", "month": "M", "year": "y"}
+TIME_UNIT_SYN2 = dict([(v, n) for (n, v) in TIME_UNIT_SYN.items()])
 
 
-def convert(value, frmt):
+def convert_to_format(value, frmt=None):
     units = CONVERT.get(frmt, [])
     for name, size in units:
         if size < value:
@@ -54,6 +52,20 @@ def convert(value, frmt):
     return "%s%s" % (value, name)
 
 
+def convert_from_format(value):
+    _, num, unit = NUMBER_RE.split(str(value))
+    if not unit:
+        return value
+    return float(num) * CONVERT_HASH.get(unit, 1)
+
+
 def parse_interval(interval):
-    _, count, unit = TIME_RE.split(interval)
-    return int(count) * TIME_UNIT_SIZE.get(unit, 1000)
+    _, num, unit = NUMBER_RE.split(interval)
+    num = float(num)
+    return num * TIME_UNIT_SIZE.get(unit, TIME_UNIT_SIZE[TIME_UNIT_SYN.get(unit, 's')])
+
+
+def interval_to_graphite(interval):
+    _, num, unit = NUMBER_RE.split(interval)
+    unit = TIME_UNIT_SYN2.get(unit, unit) or 'second'
+    return num + unit

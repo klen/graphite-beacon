@@ -38,6 +38,10 @@ minor: release
 patch:
 	make release VERSION=patch
 
+.PHONY: major
+major:
+	make release VERSION=major
+
 # ===============
 #  Build package
 # ===============

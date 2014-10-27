@@ -4,7 +4,7 @@ from tornado import ioloop, httpclient as hc, gen, log, escape
 
 from . import _compat as _
 from .graphite import GraphiteRecord
-from .utils import convert, parse_interval
+from .utils import convert_to_format, parse_interval, interval_to_graphite, convert_from_format
 
 
 OPERATORS = {'lt': op.lt, 'le': op.le, 'eq': op.eq, 'gt': op.gt, 'ge': op.ge}
@@ -60,9 +60,12 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         self.name = name
         assert rules, "%s: Alert's rules is invalid" % name
         self.rules = sorted(rules, key=lambda r: LEVELS.get(r.get('level'), 99))
+        for rule in self.rules:
+            rule['value'] = convert_from_format(rule.get('value', 1))
         assert query, "%s: Alert's query is invalid" % self.name
         self.query = query
-        self.interval = options.get('interval', self.reactor.options['interval'])
+        self.interval = interval_to_graphite(options.get('interval',
+                                                         self.reactor.options['interval']))
         if self.reactor.options.get('debug'):
             self.callback = ioloop.PeriodicCallback(self.load, 5000)
         else:
@@ -70,7 +73,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         self._format = options.get('format', self.reactor.options['format'])
 
     def convert(self, value):
-        return convert(value, self._format)
+        return convert_to_format(value, self._format)
 
     def __str__(self):
         return "%s (%s)" % (self.name, self.interval)

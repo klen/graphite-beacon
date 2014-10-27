@@ -1,3 +1,7 @@
+## 0.7.0
+
+- Update units system
+
 ## 0.6.1
 
 - Support units format (bytes, s, ms, short, percent)

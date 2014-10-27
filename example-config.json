@@ -25,12 +25,12 @@
         {
           "level": "warning",
           "operator": "lt",
-          "value": 20000000000
+          "value": "300MB"
         },
         {
           "level": "critical",
           "operator": "lt",
-          "value": 10000000000
+          "value": "200MB"
         }
       ]
     },
