@@ -2,15 +2,18 @@
 {
   "interval": "20minute",
   "logging": "debug",
+  "graphite_url": "http://g.ticketscloud.org",
+  "auth_username": "ticketscloud",
+  "auth_password": "634536739",
 
   // Gmail example
-  "smtp_username": "example@gmail.com",
-  "smtp_password": "password",
-  "smtp_use_tls": true,
-  "smtp_host": "smtp.gmail.com",
-  "smtp_port": 587,
-  "smtp_from": "horneds@gmail.com",
-  "smtp_to": ["horneds@gmail.com"],
+  // "smtp_username": "example@gmail.com",
+  // "smtp_password": "password",
+  // "smtp_use_tls": true,
+  // "smtp_host": "smtp.gmail.com",
+  // "smtp_port": 587,
+  // "smtp_from": "horneds@gmail.com",
+  // "smtp_to": ["horneds@gmail.com"],
 
   "debug": true,
 
@@ -18,17 +21,17 @@
     // An graphite alert
     {
       "name": "Memory",
-      "query": "aliasByNode(*.memory.memory-free, 1)",
+      "query": "aliasByNode(collectd.*.memory.memory-free, 1)",
       "interval": "10minute",
       "format": "bytes",
-      "rules": ["warning: < 300MB", "critical: < 200MB"]
+      "rules": ["warning: < 300MB", "critical: > 200MB"]
     },
     // An ping alert
     {
       "name": "Site",
       // Source (graphite, url). By default: graphite
       "source": "url",
-      "query": "http://google.com2",
+      "query": "http://google.com",
       "interval": "20second",
       "rules": ["critical: != 200"]
     }
