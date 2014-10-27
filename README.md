@@ -134,9 +134,7 @@ You can setup options with a configuration file. See
 You can include any configuration files:
 ```js
 ...
-include:
-- path/to/config1.json
-- path/to/config2.json
+"include": [ "path/to/config1.json", "path/to/config2.json"]
 ```
 
 #### Setup alerts
