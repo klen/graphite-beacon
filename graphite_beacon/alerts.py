@@ -137,7 +137,7 @@ class GraphiteAlert(BaseAlert):
                 response = yield self.client.fetch(
                     self.url,
                     auth_username=self.reactor.options.get('auth_username'),
-                    auth_password=self.reactor.options.get('graphite_pass'),
+                    auth_password=self.reactor.options.get('auth_password'),
                 )
                 records = (GraphiteRecord(line) for line in response.buffer)
                 self.check([(getattr(record, self.method), record.target) for record in records])
@@ -166,10 +166,8 @@ class URLAlert(BaseAlert):
             try:
                 response = yield self.client.fetch(
                     self.query, method=self.options.get('method', 'GET'),
-                    auth_username=self.reactor.options.get('auth_username'),
-                    auth_password=self.reactor.options.get('graphite_pass'),
                 )
-                self.check(response.code)
+                self.check([(response.code, self.query)])
             except Exception as e:
                 self.notify('critical', 'Loading error: %s' % e, target='loading', ntype='common')
             self.waiting = False
