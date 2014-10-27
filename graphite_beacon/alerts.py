@@ -55,6 +55,12 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
 
         LOGGER.info("Alert '%s': has inited" % self)
 
+    def __hash__(self):
+        return hash(self.name) ^ hash(self.source)
+
+    def __eq__(self, other):
+        return hash(self) == hash(other)
+
     def configure(self, name=None, rules=None, query=None, **options):
         assert name, "Alert's name is invalid"
         self.name = name
@@ -123,7 +129,7 @@ class GraphiteAlert(BaseAlert):
     def load(self):
         LOGGER.debug('%s: start checking: %s' % (self.name, self.url))
         if self.waiting:
-            self.notify('warning', 'waiting for metrics')
+            self.notify('warning', 'ERROR', 'waiting for metrics')
         else:
             self.waiting = True
             try:

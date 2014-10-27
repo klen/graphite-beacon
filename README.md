@@ -64,8 +64,6 @@ Just run `graphite-beacon`:
 
 ___
 
-**Graphite-beacon** default options are:
-
 > Time units: '2second', '3.5minute', '4hour', '5.2day', '6week', '7month', '8year'
 > short formats are: '2s', '3m', '4.1h' ...
 
@@ -73,6 +71,8 @@ ___
 > short: '2K', '3Mil', '4Bil', '5Tri'
 > bytes: '2KB', '3MB', '4GB'
 > time: '2s', '3m', '4h', '5d'
+
+**Graphite-beacon** default options are:
 
 > Comment lines are not allowed in JSON, but Graphite-beacon strips them
 
@@ -129,7 +129,17 @@ ___
 You can setup options with a configuration file. See
 `example-config.json`.
 
-### Setup alerts
+#### Include
+
+You can include any configuration files:
+```js
+...
+include:
+- path/to/config1.json
+- path/to/config2.json
+```
+
+#### Setup alerts
 
 At the moment **Graphite-beacon** supports two type of alerts:
 - Graphite alert (default) - check graphite metrics

@@ -1,6 +1,6 @@
 // Comments is allowed here
 {
-  "interval": "10minute",
+  "interval": "20minute",
   "logging": "debug",
 
   // Gmail example

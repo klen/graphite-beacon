@@ -29,8 +29,8 @@ CONVERT = {
         ("%", .01),
     )
 }
-CONVERT['ms'] = list((n, v * 1000) for n, v in CONVERT['s'])
 CONVERT_HASH = {name: value for _types in CONVERT.values() for (name, value) in _types}
+CONVERT['ms'] = list((n, v * 1000) for n, v in CONVERT['s'])
 CONVERT_HASH['%'] = 1
 TIME_UNIT_SIZE = dict(CONVERT['ms'])
 TIME_UNIT_SYN = {"microsecond": "ms", "second": "s", "minute": "m", "hour": "h", "day": "d",
@@ -39,6 +39,11 @@ TIME_UNIT_SYN2 = dict([(v, n) for (n, v) in TIME_UNIT_SYN.items()])
 
 
 def convert_to_format(value, frmt=None):
+    try:
+        value = float(value)
+    except (ValueError, TypeError):
+        return value
+
     units = CONVERT.get(frmt, [])
     for name, size in units:
         if size < value:
@@ -46,9 +51,8 @@ def convert_to_format(value, frmt=None):
     else:
         return value
 
-    if size != 1:
-        value /= size
-        value = ("%.1f" % value).rstrip('0').rstrip('.')
+    value /= size
+    value = ("%.1f" % value).rstrip('0').rstrip('.')
     return "%s%s" % (value, name)
 
 

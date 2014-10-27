@@ -13,23 +13,33 @@ def reactor():
 def test_reactor():
     from graphite_beacon.core import Reactor
 
-    r = Reactor()
-    assert r
-    assert r.reinit()
+    rr = Reactor()
+    assert rr
+    assert rr.reinit()
+
+    rr = Reactor(include=['example-config.json'], alerts=[
+        {'name': 'test', 'query': '*', 'rules': [{}]}])
+    assert rr.options['interval'] == '20minute'
+    assert len(rr.alerts) == 3
 
 
 def test_alert(reactor):
     from graphite_beacon.alerts import BaseAlert, GraphiteAlert, URLAlert
 
-    alert = BaseAlert.get(reactor, name='Test', query='*', rules=[{}])
-    assert alert
-    assert isinstance(alert, GraphiteAlert)
+    alert1 = BaseAlert.get(reactor, name='Test', query='*', rules=[{}])
+    assert alert1
+    assert isinstance(alert1, GraphiteAlert)
 
-    alert = BaseAlert.get(reactor, name='Test', query='*', source='url', rules=[{}])
-    assert isinstance(alert, URLAlert)
+    alert2 = BaseAlert.get(reactor, name='Test', query='*', source='url', rules=[{}])
+    assert isinstance(alert2, URLAlert)
 
-    alert = BaseAlert.get(reactor, name='Test', query='*', interval='2m', rules=[{}])
-    assert alert.interval == '2minute'
+    assert alert1 != alert2
+
+    alert3 = BaseAlert.get(reactor, name='Test', query='*', interval='2m', rules=[{}])
+    assert alert3.interval == '2minute'
+
+    assert alert1 == alert3
+    assert set([alert1, alert3]) == set([alert1])
 
     alert = BaseAlert.get(reactor, name='Test', query='*', rules=[{
         'name': 'test', 'value': '3MB'}])
@@ -67,9 +77,9 @@ def test_convert():
     assert convert_from_format('4.6Bil') == 4600000000
 
     assert convert_to_format(789, 's') == "13.2m"
-    assert convert_from_format('13.2m') == 792000
+    assert convert_from_format('13.2m') == 792
     assert convert_to_format(789456, 's') == "1.3w"
-    assert convert_from_format('1.3w') == 786240000
+    assert convert_from_format('1.3w') == 786240
     assert convert_to_format(789456234, 's') == "25y"
 
     assert convert_to_format(79456234, 'ms') == "22.1h"

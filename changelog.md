@@ -1,6 +1,7 @@
-## 0.7.0
+## 0.8.0
 
 - Update units system
+- Support `include`
 
 ## 0.6.1
 

@@ -49,14 +49,9 @@ class Reactor(object):
 
         self.options.update(options)
 
-        config = self.options.get('config')
-        if config:
-            try:
-                with open(config) as fconfig:
-                    source = COMMENT_RE.sub("", fconfig.read())
-                    self.options.update(json.loads(source))
-            except (IOError, ValueError):
-                LOGGER.error('Invalid config file: %s' % config)
+        self.include_config(self.options.get('config'))
+        for config in self.options.pop('include', []):
+            self.include_config(config)
 
         LOGGER.setLevel(self.options.get('logging', 'info').upper())
         registry.clean()
@@ -76,6 +71,19 @@ class Reactor(object):
         LOGGER.debug('Loaded with options:')
         LOGGER.debug(json.dumps(self.options, indent=2))
         return self
+
+    def include_config(self, config):
+        LOGGER.info('Load configuration: %s' % config)
+        if config:
+            try:
+                with open(config) as fconfig:
+                    source = COMMENT_RE.sub("", fconfig.read())
+                    config = json.loads(source)
+                    alerts = self.options.get('alerts', [])
+                    self.options.update(config)
+                    self.options['alerts'] = alerts + self.options.get('alerts', [])
+            except (IOError, ValueError):
+                LOGGER.error('Invalid config file: %s' % config)
 
     def reinit_handlers(self, level='warning'):
         for name in self.options['%s_handlers' % level]:
