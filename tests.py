@@ -151,5 +151,14 @@ def test_parse_rule():
         assert parse_rule('invalid')
 
     assert parse_rule('normal: == 0') == {'level': 'normal', 'op': op.eq, 'value': 0}
+
+    from graphite_beacon.utils import RULE_RE
+    rule = 'critical: < 30MB'
+    match = RULE_RE.match(rule)
+    level, cond, value = match.groups()
+    assert level == 'critical'
+    assert cond == '<'
+    assert value == '30MB'
+
     assert parse_rule('critical: < 30MB') == {'level': 'critical', 'op': op.lt, 'value': 30000000}
     assert parse_rule('warning: >= 30MB') == {'level': 'warning', 'op': op.ge, 'value': 30000000}
