@@ -58,7 +58,6 @@ def test_convert():
     assert convert_from_format(789874)
     assert convert_to_format(45, 'percent') == "45%"
     assert convert_from_format('45%') == 45
-    assert convert_to_format(.25, 'percent') == "25%"
 
     assert convert_to_format(789, 'bytes') == 789
     assert convert_to_format(456789, 'bytes') == '456.8KB'

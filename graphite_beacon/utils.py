@@ -26,7 +26,6 @@ CONVERT = {
     ),
     "percent": (
         ("%", 1),
-        ("%", .01),
     )
 }
 CONVERT_HASH = {name: value for _types in CONVERT.values() for (name, value) in _types}
