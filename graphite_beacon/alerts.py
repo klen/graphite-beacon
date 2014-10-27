@@ -1,5 +1,3 @@
-import operator as op
-
 from tornado import ioloop, httpclient as hc, gen, log, escape
 
 from . import _compat as _
@@ -7,7 +5,6 @@ from .graphite import GraphiteRecord
 from .utils import convert_to_format, parse_interval, interval_to_graphite, parse_rule
 
 
-OPERATORS = {'lt': op.lt, 'le': op.le, 'eq': op.eq, 'gt': op.gt, 'ge': op.ge}
 LOGGER = log.gen_log
 METHODS = "average", "last_value"
 LEVELS = {
@@ -52,6 +49,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
 
         self.waiting = False
         self.level = 'normal'
+        self.state = {None: "normal"}
 
         LOGGER.info("Alert '%s': has inited" % self)
 
@@ -60,6 +58,9 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
 
     def __eq__(self, other):
         return hash(self) == hash(other)
+
+    def __str__(self):
+        return "%s (%s)" % (self.name, self.interval)
 
     def configure(self, name=None, rules=None, query=None, **options):
         assert name, "Alert's name is invalid"
@@ -80,14 +81,8 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
     def convert(self, value):
         return convert_to_format(value, self._format)
 
-    def __str__(self):
-        return "%s (%s)" % (self.name, self.interval)
-
-    def notify(self, level, value, comment=None):
-        if self.level == level:
-            return False
-        self.level = level
-        return self.reactor.notify(level, self, value, comment=comment)
+    def reset(self):
+        self.state = {None: "normal"}
 
     def start(self):
         self.callback.start()
@@ -97,13 +92,20 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         self.callback.stop()
         return self
 
-    def check(self, value, comment=""):
-        for rule in self.rules:
-            op = OPERATORS[rule['operator']]
-            if op(value, rule['value']):
-                return self.notify(rule.get('level', 'warning'), value, comment)
+    def check(self, records):
+        for value, target in records:
+            LOGGER.debug("%s: %s", target, value)
+            for rule in self.rules:
+                if rule['op'](value, rule['value']):
+                    self.notify(rule['level'], value, target)
+                    break
+            else:
+                self.notify('normal', value, target)
 
-        return self.notify('normal', value, comment)
+    def notify(self, level, value, target=None, ntype=None):
+        if level != self.state.get(target, 'normal'):
+            self.state[target] = level
+            return self.reactor.notify(level, self, value, target=target, ntype=ntype)
 
     def load(self):
         raise NotImplementedError()
@@ -128,7 +130,7 @@ class GraphiteAlert(BaseAlert):
     def load(self):
         LOGGER.debug('%s: start checking: %s' % (self.name, self.url))
         if self.waiting:
-            self.notify('warning', 'ERROR', 'waiting for metrics')
+            self.notify('warning', 'Process takes too much time', 'waiting', 'common')
         else:
             self.waiting = True
             try:
@@ -137,12 +139,10 @@ class GraphiteAlert(BaseAlert):
                     auth_username=self.reactor.options.get('auth_username'),
                     auth_password=self.reactor.options.get('graphite_pass'),
                 )
-                for record in (GraphiteRecord(line) for line in response.buffer):
-                    value = getattr(record, self.method)
-                    LOGGER.debug("%s: %s", record.target, value)
-                    self.check(value, comment=record.target)
+                records = (GraphiteRecord(line) for line in response.buffer)
+                self.check([(getattr(record, self.method), record.target) for record in records])
             except Exception as e:
-                self.notify('critical', e)
+                self.notify('critical', 'Loading error: %s' % e, target='loading', ntype='common')
             self.waiting = False
 
     def get_graph_url(self, target):
@@ -160,7 +160,7 @@ class URLAlert(BaseAlert):
     def load(self):
         LOGGER.debug('%s: start checking: %s' % (self.name, self.query))
         if self.waiting:
-            self.notify('warning', 'waiting for metrics')
+            self.reactor.notify('warning', 'Process takes too much time', ntype='common')
         else:
             self.waiting = True
             try:
@@ -170,6 +170,6 @@ class URLAlert(BaseAlert):
                     auth_password=self.reactor.options.get('graphite_pass'),
                 )
                 self.check(response.code)
-            except Exception:
-                self.notify('critical', 'unknown')
+            except Exception as e:
+                self.notify('critical', 'Loading error: %s' % e, target='loading', ntype='common')
             self.waiting = False

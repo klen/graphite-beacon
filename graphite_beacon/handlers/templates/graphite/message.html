@@ -26,8 +26,8 @@
 {% block content2 %}
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
     <tr>
-        <td valign="top" class="textContent">
-            <h3>{{ dt.datetime.now().strftime('%H:%M %d/%m/%Y') }}: {{ comment or alert.query }}</h3>
+        <td align="center" valign="top" class="textContent">
+            <h3>{{ dt.datetime.now().strftime('%H:%M %d/%m/%Y') }}: {{ target or alert.query }}</h3>
             <br />
             <img src="{{alert.get_graph_url(alert.query)}}" alt="graph"/>
         </td>

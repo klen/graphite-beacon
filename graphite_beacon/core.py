@@ -95,7 +95,7 @@ class Reactor(object):
     def repeat(self):
         LOGGER.info('Reset alerts')
         for alert in self.alerts:
-            alert.level = 'normal'
+            alert.reset()
 
     def start(self, *args):
         if self.options.get('pidfile'):
@@ -112,6 +112,9 @@ class Reactor(object):
             os.unlink(self.options.get('pidfile'))
         LOGGER.info('Reactor has stopped')
 
-    def notify(self, level, alert, value, comment=None):
+    def notify(self, level, alert, value, target=None, ntype=None):
+        if ntype is None:
+            ntype = alert.source
+
         for handler in self.handlers[level]:
-            handler.notify(level, alert, value, comment=comment)
+            handler.notify(level, alert, value, target=target, ntype=ntype)

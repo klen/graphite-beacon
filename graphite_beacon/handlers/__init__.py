@@ -15,6 +15,11 @@ TEMPLATES = {
         'text': LOADER.load('url/message.txt'),
         'short': LOADER.load('url/short.txt'),
     },
+    'common': {
+        'html': LOADER.load('common/message.html'),
+        'text': LOADER.load('common/message.txt'),
+        'short': LOADER.load('common/short.txt'),
+    },
 }
 
 LOGGER = log.gen_log
@@ -53,15 +58,16 @@ class AbstractHandler(_.with_metaclass(HandlerMeta)):
         self.prefix = self.reactor.options.get('prefix', '')
         self.init_handler()
 
-    def get_short(self, level, alert, value, comment=None):
-        tmpl = TEMPLATES[alert.source]['short']
-        return tmpl.generate(level=level, reactor=self.reactor, alert=alert, value=value).strip()
+    def get_short(self, level, alert, value, target=None, ntype=None):
+        tmpl = TEMPLATES[ntype]['short']
+        return tmpl.generate(
+            level=level, reactor=self.reactor, alert=alert, value=value, target=target).strip()
 
     def init_handler(self):
         """ Init configuration here."""
         raise NotImplementedError()
 
-    def notify(self, level, alert, value, comment=None):
+    def notify(self, level, alert, value, target=None, ntype=None):
         raise NotImplementedError()
 
 registry = HandlerMeta

@@ -1,6 +1,7 @@
 """ TODO: Implement the tests. """
 
 import pytest
+import mock
 
 
 @pytest.fixture
@@ -43,6 +44,44 @@ def test_alert(reactor):
 
     alert = BaseAlert.get(reactor, name='Test', query='*', rules=["warning: >= 3MB"])
     assert alert.rules[0]['value'] == 3000000
+
+
+def test_multimetrics(reactor):
+    from graphite_beacon.alerts import BaseAlert
+
+    alert = BaseAlert.get(
+        reactor, name="Test", query="*", rules=["critical: > 100", "warning: > 50"])
+    reactor.alerts = set([alert])
+
+    with mock.patch.object(reactor, 'notify'):
+        alert.check([(110, 'metric1'), (60, 'metric2'), (30, 'metric3')])
+        assert reactor.notify.call_count == 2
+        assert reactor.notify.call_args_list[0][0][0] == 'critical'
+        assert reactor.notify.call_args_list[0][1]['target'] == 'metric1'
+        assert reactor.notify.call_args_list[1][0][0] == 'warning'
+        assert reactor.notify.call_args_list[1][1]['target'] == 'metric2'
+
+    with mock.patch.object(reactor, 'notify'):
+        alert.check([(60, 'metric1'), (60, 'metric2'), (30, 'metric3')])
+        assert reactor.notify.call_count == 1
+        assert reactor.notify.call_args_list[0][0][0] == 'warning'
+        assert reactor.notify.call_args_list[0][1]['target'] == 'metric1'
+
+    with mock.patch.object(reactor, 'notify'):
+        alert.check([(60, 'metric1'), (30, 'metric2'), (105, 'metric3')])
+        assert reactor.notify.call_count == 2
+        assert reactor.notify.call_args_list[0][0][0] == 'normal'
+        assert reactor.notify.call_args_list[0][1]['target'] == 'metric2'
+        assert reactor.notify.call_args_list[1][0][0] == 'critical'
+        assert reactor.notify.call_args_list[1][1]['target'] == 'metric3'
+
+    with mock.patch.object(reactor, 'notify'):
+        alert.check([(60, 'metric1'), (30, 'metric2'), (105, 'metric3')])
+        assert reactor.notify.call_count == 0
+
+    assert alert.state['metric1'] == 'warning'
+    reactor.repeat()
+    assert alert.state == {None: 'normal'}
 
 
 def test_invalid_handler(reactor):
@@ -114,35 +153,3 @@ def test_parse_rule():
     assert parse_rule('normal: == 0') == {'level': 'normal', 'op': op.eq, 'value': 0}
     assert parse_rule('critical: < 30MB') == {'level': 'critical', 'op': op.lt, 'value': 30000000}
     assert parse_rule('warning: >= 30MB') == {'level': 'warning', 'op': op.ge, 'value': 30000000}
-
-
-def test_invalid_method():
-    pass
-
-
-def test_invalid_url():
-    pass
-
-
-def test_invalid_rule():
-    pass
-
-
-def test_load_error():
-    pass
-
-
-def test_alert_error():
-    pass
-
-
-def test_warning():
-    pass
-
-
-def test_critical():
-    pass
-
-
-def test_graphite_record():
-    pass

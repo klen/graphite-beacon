@@ -19,8 +19,8 @@ class HipChatHandler(AbstractHandler):
         self.client = hc.AsyncHTTPClient()
 
     @gen.coroutine
-    def notify(self, level, alert, value, comment=None):
-        message = self.get_short(level, alert, value)
+    def notify(self, level, *args, **kwargs):
+        message = self.get_short(level, *args, **kwargs)
         data = {
             'room_id': self.room,
             'from': self.prefix,
@@ -30,6 +30,5 @@ class HipChatHandler(AbstractHandler):
             'message_format': 'text',
         }
         body = urllib.urlencode(data)
-        yield self.client.fetch(
-            'https://api.hipchat.com/v1/rooms/message?auth_token=' + self.key,
-            method='POST', body=body)
+        yield self.client.fetch('https://api.hipchat.com/v1/rooms/message?auth_token=' + self.key,
+                                method='POST', body=body)

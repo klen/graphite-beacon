@@ -22,9 +22,9 @@ class SMTPHandler(AbstractHandler):
         assert self.to, 'Recepients list is empty. SMTP disabled.'
 
     @gen.coroutine
-    def notify(self, level, alert, value, comment):
-        msg = self.get_message(level, alert, value, comment)
-        msg['Subject'] = self.get_short(level, alert, value)
+    def notify(self, *args, **kwargs):
+        msg = self.get_message(*args, **kwargs)
+        msg['Subject'] = self.get_short(*args, **kwargs)
         msg['From'] = self._from
         msg['To'] = ", ".join(self.to)
 
@@ -43,11 +43,11 @@ class SMTPHandler(AbstractHandler):
         finally:
             smtp.quit()
 
-    def get_message(self, level, alert, value, comment):
-        html_tmpl = TEMPLATES[alert.source]['html']
-        txt_tmpl = TEMPLATES[alert.source]['text']
+    def get_message(self, level, alert, value, target=None, ntype=None):
+        html_tmpl = TEMPLATES[ntype]['html']
+        txt_tmpl = TEMPLATES[ntype]['text']
         ctx = {'reactor': self.reactor, 'alert': alert, 'value': value, 'level': level,
-               'comment': comment, 'dt': dt}
+               'target': target, 'dt': dt}
         msg = MIMEMultipart('alternative')
         plain = MIMEText(txt_tmpl.generate(**ctx), 'plain')
         html = MIMEText(html_tmpl.generate(**ctx), 'html')

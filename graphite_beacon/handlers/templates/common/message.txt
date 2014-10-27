@@ -2,13 +2,8 @@
 {{ '=' * len(reactor.options.get('prefix') + level)}}
 
 Alert: {{ alert.name }}
-Status: {{ level }}
-
+Message: {{ value }}
 Time: {{ dt.datetime.now().strftime('%H:%M %d/%m/%Y') }}
-Value: {{ alert.convert(value) }} ({{value}})
-Target: {{ target }}
-
-View the graph: {{ alert.get_graph_url(alert.query) }}
 
 --
 

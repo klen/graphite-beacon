@@ -11,13 +11,7 @@
                         {{ level.upper() }}
                     </td>
                 </tr>
-                <tr>
-                    <td align="center" valign="top" class="statusValue">
-                        Response: {{ value }}
-                    </td>
-                </tr>
             </table>
-
         </td>
     </tr>
 </table>
@@ -27,7 +21,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
     <tr>
         <td align="center" valign="top" class="textContent">
-            <h3>{{ dt.datetime.now().strftime('%H:%M %d/%m/%Y') }}: {{ alert.query }}</h3>
+            <h3>{{ dt.datetime.now().strftime('%H:%M %d/%m/%Y') }}: {{ value }}</h3>
         </td>
     </tr>
 </table>
