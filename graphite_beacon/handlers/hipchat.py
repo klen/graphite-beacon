@@ -7,6 +7,13 @@ from . import AbstractHandler
 class HipChatHandler(AbstractHandler):
 
     name = 'hipchat'
+
+    # Default options
+    defaults = {
+        'room': None,
+        'key': None,
+    }
+
     colors = {
         'critical': 'red',
         'warning': 'magenta',
@@ -14,8 +21,10 @@ class HipChatHandler(AbstractHandler):
     }
 
     def init_handler(self):
-        self.room = self.reactor.options['hipchat_room']
-        self.key = self.reactor.options['hipchat_key']
+        self.room = self.options.get('room')
+        self.key = self.options.get('key')
+        assert self.room, 'Hipchat room is not defined.'
+        assert self.key, 'Hipchat key is not defined.'
         self.client = hc.AsyncHTTPClient()
 
     @gen.coroutine

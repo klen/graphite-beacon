@@ -21,8 +21,10 @@ Example:
 ```js
 {
 "graphite_url": "http://g.server.org"
-"smtp_from": "beacon@server.org"
-"smtp_to": ["me@gmail.com"]
+"smtp": {
+    "from": "beacon@server.org",
+    "to": ["me@gmail.com"]
+},
 "alerts": [
     {   "name": "MEM",
         "format": "bytes",
@@ -202,26 +204,31 @@ configuration.
 ```js
 {
     ...
-    // Set from email
-    "smtp_from": "beacon@graphite",
+    // SMTP default options
+    "smtp": {
 
-    // Set "to" email
-    "smtp_to": []
+        // Set from email
+        "from": "beacon@graphite",
 
-    // Set SMTP host
-    "smtp_host": "localhost",
+        // Set "to" email
+        "to": [],
 
-    // Set SMTP port
-    "smtp_port": 25,
+        // Set SMTP host
+        "host": "localhost",
 
-    // Set SMTP user
-    "smtp_username": null,
+        // Set SMTP port
+        "port": 25,
 
-    // Set SMTP password
-    "smtp_password": null,
+        // Set SMTP user
+        "username": null,
 
-    // Use TLS
-    "smtp_use_tls": false,
+        // Set SMTP password
+        "password": null,
+
+        // Use TLS
+        "use_tls": false,
+
+    }
 
     ...
 }
@@ -234,8 +241,10 @@ Enable "hipchat" handler and set the options in your beacon configuration.
 ```js
 {
     ...
-    "hipchat_room": "myroom",
-    "hipchat_key": "mykey",
+    "hipchat": {
+        "room": "myroom",
+        "key": "mykey",
+    }
     ...
 }
 ```
