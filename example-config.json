@@ -2,9 +2,6 @@
 {
   "interval": "20minute",
   "logging": "debug",
-  "graphite_url": "http://g.ticketscloud.org",
-  "auth_username": "ticketscloud",
-  "auth_password": "634536739",
 
   // Gmail example
   // "smtp": {

@@ -57,3 +57,4 @@ target/
 /pid
 /*.deb
 /bintray
+/local.json

@@ -108,7 +108,7 @@ $(VENV): requirements.txt
 # target: run - Run graphite-beacon
 run: $(VENV)
 	@$(VENV)/bin/pip install -r requirements-test.txt
-	$(VENV)/bin/python -m graphite_beacon.app --config=example-config.json --pidfile=pid --graphite_url=http://zoo.local:8000
+	$(VENV)/bin/python -m graphite_beacon.app --config=local.json
 
 .PHONY: t
 # target: t - Runs tests
