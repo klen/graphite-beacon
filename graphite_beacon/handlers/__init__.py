@@ -52,11 +52,14 @@ class HandlerMeta(type):
 class AbstractHandler(_.with_metaclass(HandlerMeta)):
 
     name = None
+    defaults = {}
 
     def __init__(self, reactor):
         self.reactor = reactor
-        self.prefix = self.reactor.options.get('prefix', '')
+        self.options = dict(self.defaults)
+        self.options.update(self.reactor.options.get(self.name, {}))
         self.init_handler()
+        LOGGER.debug('Handler "%s" has inited: %s', self.name, self.options)
 
     def get_short(self, level, alert, value, target=None, ntype=None):
         tmpl = TEMPLATES[ntype]['short']

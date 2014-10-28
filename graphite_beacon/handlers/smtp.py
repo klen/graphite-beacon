@@ -1,45 +1,55 @@
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from smtplib import SMTP
-from tornado import log, gen, concurrent
 import datetime as dt
 
-from . import AbstractHandler, TEMPLATES
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from smtplib import SMTP
+from tornado import gen, concurrent
+
+from . import AbstractHandler, TEMPLATES, LOGGER
 
 
 class SMTPHandler(AbstractHandler):
 
     name = 'smtp'
 
+    # Default options
+    defaults = {
+        'host': 'localhost',
+        'port': 25,
+        'username': None,
+        'password': None,
+        'from': 'beacon@graphite',
+        'to': None,
+        'use_tls': False,
+        'html': True,
+    }
+
     def init_handler(self):
-        self._from = self.reactor.options.get('smtp_from', 'beacon@graphite')
-        self.host = self.reactor.options.get('smtp_host', 'smtp.gmail.com')
-        self.password = self.reactor.options.get('smtp_password')
-        self.port = self.reactor.options.get('smtp_port', 587)
-        self.use_tls = self.reactor.options.get('smtp_use_tls', True)
-        self.username = self.reactor.options.get('smtp_username')
-        self.to = self.reactor.options.get('smtp_to')
-        assert self.to, 'Recepients list is empty. SMTP disabled.'
+        """ Check self options. """
+        assert self.options.get('host') and self.options.get('port'), "Invalid options"
+        assert self.options.get('to'), 'Recepients list is empty. SMTP disabled.'
+        if not isinstance(self.options['to'], (list, tuple)):
+            self.options['to'] = [self.options['to']]
 
     @gen.coroutine
     def notify(self, *args, **kwargs):
         msg = self.get_message(*args, **kwargs)
         msg['Subject'] = self.get_short(*args, **kwargs)
-        msg['From'] = self._from
-        msg['To'] = ", ".join(self.to)
+        msg['From'] = self.options['from']
+        msg['To'] = ", ".join(self.options['to'])
 
         smtp = SMTP()
-        yield smtp_connect(smtp, self.host, self.port)
+        yield smtp_connect(smtp, self.options['host'], self.options['port'])
 
-        if self.use_tls:
+        if self.options['use_tls']:
             yield smtp_starttls(smtp)
 
-        if self.username and self.password:
-            yield smtp_login(smtp, self.username, self.password)
+        if self.options['username'] and self.options['password']:
+            yield smtp_login(smtp, self.options['username'], self.options['password'])
 
         try:
-            log.gen_log.debug("Send message to: %s" % ", ".join(self.to))
-            smtp.sendmail(self._from, self.to, msg.as_string())
+            LOGGER.debug("Send message to: %s" % ", ".join(self.options['to']))
+            smtp.sendmail(self.options['from'], self.options['to'], msg.as_string())
         finally:
             smtp.quit()
 

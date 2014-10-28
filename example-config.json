@@ -7,13 +7,15 @@
   "auth_password": "634536739",
 
   // Gmail example
-  // "smtp_username": "example@gmail.com",
-  // "smtp_password": "password",
-  // "smtp_use_tls": true,
-  // "smtp_host": "smtp.gmail.com",
-  // "smtp_port": 587,
-  // "smtp_from": "horneds@gmail.com",
-  // "smtp_to": ["horneds@gmail.com"],
+  // "smtp": {
+    // "username": "example@gmail.com",
+    // "password": "password",
+    // "use_tls": true,
+    // "host": "smtp.gmail.com",
+    // "port": 587,
+    // "from": "myemail@gmail.com",
+    // "to": ["myemail@gmail.com"]
+  // },
 
   "debug": true,
 

@@ -130,7 +130,7 @@ class GraphiteAlert(BaseAlert):
     def load(self):
         LOGGER.debug('%s: start checking: %s' % (self.name, self.url))
         if self.waiting:
-            self.notify('warning', 'Process takes too much time', 'waiting', 'common')
+            self.notify('warning', 'Process takes too much time', target='waiting', ntype='common')
         else:
             self.waiting = True
             try:
@@ -161,14 +161,14 @@ class URLAlert(BaseAlert):
     def load(self):
         LOGGER.debug('%s: start checking: %s' % (self.name, self.query))
         if self.waiting:
-            self.reactor.notify('warning', 'Process takes too much time', ntype='common')
+            self.notify('warning', 'Process takes too much time', target='waiting', ntype='common')
         else:
             self.waiting = True
             try:
                 response = yield self.client.fetch(
-                    self.query, method=self.options.get('method', 'GET'),
-                )
+                    self.query, method=self.options.get('method', 'GET'))
                 self.check([(response.code, self.query)])
+                self.notify('normal', 'Metrics are loaded', target='loading', ntype='common')
             except Exception as e:
                 self.notify('critical', 'Loading error: %s' % e, target='loading', ntype='common')
             self.waiting = False

@@ -1,3 +1,7 @@
+## 0.12.0
+
+- Change format of handlers options
+
 ## 0.11.0
 
 - Fix release 0.9.0
