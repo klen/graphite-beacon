@@ -141,6 +141,7 @@ class GraphiteAlert(BaseAlert):
                 )
                 records = (GraphiteRecord(line) for line in response.buffer)
                 self.check([(getattr(record, self.method), record.target) for record in records])
+                self.notify('normal', 'Metrics are loaded', target='loading', ntype='common')
             except Exception as e:
                 self.notify('critical', 'Loading error: %s' % e, target='loading', ntype='common')
             self.waiting = False
