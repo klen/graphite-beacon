@@ -68,6 +68,13 @@ Install the package using apt-get:
 
 There is an ansible role to install the package: https://github.com/Stouts/Stouts.graphite-beacon
 
+## Docker
+
+To run this Docker container just run:
+
+    docker run -v /path/to/config.json:/config.json deliverous/graphite-beacon
+
+
 Usage
 -----
 
@@ -290,6 +297,8 @@ Contributors
 -------------
 
 * Kirill Klenov     (https://github.com/klen, horneds@gmail.com)
+
+* Thomas Clavier (https://github.com/tclavier)
 
 License
 --------
