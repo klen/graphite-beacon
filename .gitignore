@@ -58,3 +58,6 @@ target/
 /*.deb
 /bintray
 /local.json
+
+# Vim backup files
+*~
