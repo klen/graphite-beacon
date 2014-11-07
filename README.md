@@ -147,6 +147,9 @@ ___
         "warning_handlers": ["log", "smtp"],
         "normal_handlers": ["log", "smtp"],
 
+        // Send initial values (Send current values when reactor starts)
+        "send_initial": true,
+
         // Default alerts (see configuration below)
         "alerts": []
     }
@@ -234,6 +237,12 @@ configuration.
 
         // Use TLS
         "use_tls": false,
+
+        // Send HTML emails
+        "html": true,
+
+        // Graphite link for emails (By default is equal to main graphite_url)
+        "graphite_url": null
 
     }
 

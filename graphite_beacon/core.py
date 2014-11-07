@@ -33,6 +33,7 @@ class Reactor(object):
         'normal_handlers': ['log', 'smtp'],
         'pidfile': None,
         'prefix': '[BEACON]',
+        'send_initial': False,
         'warning_handlers': ['log', 'smtp'],
     }
 

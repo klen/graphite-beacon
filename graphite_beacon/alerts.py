@@ -48,8 +48,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
             raise ValueError("Invalid alert configuration: %s" % e)
 
         self.waiting = False
-        self.level = 'normal'
-        self.state = {None: "normal"}
+        self.state = {None: "normal", "waiting": "normal", "loading": "normal"}
 
         LOGGER.info("Alert '%s': has inited" % self)
 
@@ -82,7 +81,13 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         return convert_to_format(value, self._format)
 
     def reset(self):
-        self.state = {None: "normal"}
+        """ Reset state to normal for all targets.
+
+        It will repeat notification if a metric is still failed.
+
+        """
+        for target in self.state:
+            self.state[target] = "normal"
 
     def start(self):
         self.callback.start()
@@ -103,9 +108,15 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
                 self.notify('normal', value, target)
 
     def notify(self, level, value, target=None, ntype=None):
-        if level != self.state.get(target, 'normal'):
-            self.state[target] = level
-            return self.reactor.notify(level, self, value, target=target, ntype=ntype)
+        if target in self.state and level == self.state[target]:
+            return False
+
+        if target not in self.state and level == 'normal' \
+                and not self.reactor.options['send_initial']:
+            return False
+
+        self.state[target] = level
+        return self.reactor.notify(level, self, value, target=target, ntype=ntype)
 
     def load(self):
         raise NotImplementedError()
@@ -146,10 +157,10 @@ class GraphiteAlert(BaseAlert):
                 self.notify('critical', 'Loading error: %s' % e, target='loading', ntype='common')
             self.waiting = False
 
-    def get_graph_url(self, target):
+    def get_graph_url(self, target, graphite_url=None):
         query = escape.url_escape(target)
         return "%(base)s/render/?target=%(query)s&from=-%(interval)s" % {
-            'base': self.reactor.options['graphite_url'], 'query': query,
+            'base': graphite_url or self.reactor.options['graphite_url'], 'query': query,
             'interval': self.interval}
 
 

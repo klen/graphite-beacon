@@ -81,7 +81,10 @@ def test_multimetrics(reactor):
 
     assert alert.state['metric1'] == 'warning'
     reactor.repeat()
-    assert alert.state == {None: 'normal'}
+
+    assert alert.state == {
+        None: 'normal', 'metric1': 'normal', 'metric2': 'normal', 'metric3': 'normal',
+        'waiting': 'normal', 'loading': 'normal'}
 
 
 def test_invalid_handler(reactor):
@@ -153,3 +156,30 @@ def test_parse_rule():
     assert parse_rule('normal: == 0') == {'level': 'normal', 'op': op.eq, 'value': 0}
     assert parse_rule('critical: < 30MB') == {'level': 'critical', 'op': op.lt, 'value': 30000000}
     assert parse_rule('warning: >= 30MB') == {'level': 'warning', 'op': op.ge, 'value': 30000000}
+
+
+def test_html_template(reactor):
+    from graphite_beacon.handlers.smtp import SMTPHandler
+    from graphite_beacon.alerts import BaseAlert
+
+    galert = BaseAlert.get(reactor, name='Test', query='*', rules=["normal: == 0"])
+
+    reactor.options['smtp'] = {
+        'to': 'user@com.com', 'graphite_url': 'http://graphite.myhost.com'}
+    smtp = SMTPHandler(reactor)
+
+    message = smtp.get_message('critical', galert, '3000000', 'node.com', 'graphite')
+    assert message
+
+    assert len(message._payload) == 2
+    _, html = message._payload
+    assert 'graphite.myhost.com' in html.as_string()
+
+    ualert = BaseAlert.get(
+        reactor, source='url', name='Test', query='http://google.com', rules=["critical: != 200"])
+    message = smtp.get_message('critical', ualert, '3000000', 'node.com', 'url')
+    assert message
+
+    assert len(message._payload) == 2
+    _, html = message._payload
+    assert 'google.com' in html.as_string()
