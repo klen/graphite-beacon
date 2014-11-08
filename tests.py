@@ -8,7 +8,7 @@ import mock
 def reactor():
     from graphite_beacon.core import Reactor
 
-    return Reactor()
+    return Reactor(history_size=4)
 
 
 def test_reactor():
@@ -50,7 +50,8 @@ def test_multimetrics(reactor):
     from graphite_beacon.alerts import BaseAlert
 
     alert = BaseAlert.get(
-        reactor, name="Test", query="*", rules=["critical: > 100", "warning: > 50"])
+        reactor, name="Test", query="*", rules=[
+            "critical: > 100", "warning: > 50", "warning: < historical / 2"])
     reactor.alerts = set([alert])
 
     with mock.patch.object(reactor, 'notify'):
@@ -61,11 +62,15 @@ def test_multimetrics(reactor):
         assert reactor.notify.call_args_list[1][0][0] == 'warning'
         assert reactor.notify.call_args_list[1][1]['target'] == 'metric2'
 
+    assert list(alert.history['metric1']) == [110]
+
     with mock.patch.object(reactor, 'notify'):
         alert.check([(60, 'metric1'), (60, 'metric2'), (30, 'metric3')])
         assert reactor.notify.call_count == 1
         assert reactor.notify.call_args_list[0][0][0] == 'warning'
         assert reactor.notify.call_args_list[0][1]['target'] == 'metric1'
+
+    assert list(alert.history['metric1']) == [110, 60]
 
     with mock.patch.object(reactor, 'notify'):
         alert.check([(60, 'metric1'), (30, 'metric2'), (105, 'metric3')])
@@ -75,11 +80,21 @@ def test_multimetrics(reactor):
         assert reactor.notify.call_args_list[1][0][0] == 'critical'
         assert reactor.notify.call_args_list[1][1]['target'] == 'metric3'
 
+    assert list(alert.history['metric1']) == [110, 60, 60]
+
     with mock.patch.object(reactor, 'notify'):
         alert.check([(60, 'metric1'), (30, 'metric2'), (105, 'metric3')])
         assert reactor.notify.call_count == 0
 
+    with mock.patch.object(reactor, 'notify'):
+        alert.check([(70, 'metric1'), (21, 'metric2'), (105, 'metric3')])
+        assert reactor.notify.call_count == 1
+        assert reactor.notify.call_args_list[0][0][0] == 'warning'
+        assert reactor.notify.call_args_list[0][1]['target'] == 'metric2'
+
+    assert list(alert.history['metric1']) == [60, 60, 60, 70]
     assert alert.state['metric1'] == 'warning'
+
     reactor.repeat()
 
     assert alert.state == {
@@ -147,15 +162,23 @@ def test_interval_to_graphite():
 
 
 def test_parse_rule():
-    from graphite_beacon.utils import parse_rule
+    from graphite_beacon.utils import parse_rule, DEFAULT_MOD
     import operator as op
 
     with pytest.raises(ValueError):
         assert parse_rule('invalid')
 
-    assert parse_rule('normal: == 0') == {'level': 'normal', 'op': op.eq, 'value': 0}
-    assert parse_rule('critical: < 30MB') == {'level': 'critical', 'op': op.lt, 'value': 30000000}
-    assert parse_rule('warning: >= 30MB') == {'level': 'warning', 'op': op.ge, 'value': 30000000}
+    assert parse_rule('normal: == 0') == {
+        'level': 'normal', 'op': op.eq, 'value': 0, 'mod': DEFAULT_MOD}
+    assert parse_rule('critical: < 30MB') == {
+        'level': 'critical', 'op': op.lt, 'value': 30000000, 'mod': DEFAULT_MOD}
+    assert parse_rule('warning: >= 30MB') == {
+        'level': 'warning', 'op': op.ge, 'value': 30000000, 'mod': DEFAULT_MOD}
+    assert parse_rule('warning: >= historical') == {
+        'level': 'warning', 'op': op.ge, 'value': 'historical', 'mod': DEFAULT_MOD}
+    rule = parse_rule('warning: >= historical * 1.2')
+    assert rule['mod']
+    assert rule['mod'](5) == 6
 
 
 def test_html_template(reactor):

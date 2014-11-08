@@ -27,6 +27,7 @@ class Reactor(object):
         'debug': False,
         'graphite_url': 'http://localhost',
         'interval': '10minute',
+        'history_size': 60,
         'repeat_interval': '2hour',
         'logging': 'info',
         'method': 'average',

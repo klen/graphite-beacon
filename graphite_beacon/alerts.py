@@ -2,7 +2,8 @@ from tornado import ioloop, httpclient as hc, gen, log, escape
 
 from . import _compat as _
 from .graphite import GraphiteRecord
-from .utils import convert_to_format, parse_interval, interval_to_graphite, parse_rule
+from .utils import convert_to_format, parse_interval, interval_to_graphite, parse_rule, HISTORICAL
+from collections import deque, defaultdict
 
 
 LOGGER = log.gen_log
@@ -49,6 +50,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
 
         self.waiting = False
         self.state = {None: "normal", "waiting": "normal", "loading": "normal"}
+        self.history = defaultdict(lambda: deque([], self.reactor.options['history_size']))
 
         LOGGER.info("Alert '%s': has inited" % self)
 
@@ -101,11 +103,22 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         for value, target in records:
             LOGGER.debug("%s: %s", target, value)
             for rule in self.rules:
-                if rule['op'](value, rule['value']):
+                rvalue = rule['value']
+                if rvalue == HISTORICAL:
+                    history = self.history[target]
+                    if len(history) < self.reactor.options['history_size']:
+                        continue
+                    rvalue = sum(history) / len(history)
+
+                rvalue = rule['mod'](rvalue)
+
+                if rule['op'](value, rvalue):
                     self.notify(rule['level'], value, target)
                     break
             else:
                 self.notify('normal', value, target)
+
+            self.history[target].append(value)
 
     def notify(self, level, value, target=None, ntype=None):
         if target in self.state and level == self.state[target]:

@@ -20,8 +20,12 @@ class GraphiteRecord(object):
 
     @property
     def average(self):
-        return sum(self.values) / len(self.values)
+        return self.sum / len(self.values)
 
     @property
     def last_value(self):
         return self.values[-1]
+
+    @property
+    def sum(self):
+        return sum(self.values)

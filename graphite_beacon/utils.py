@@ -36,13 +36,17 @@ TIME_UNIT_SIZE = dict(CONVERT['ms'])
 TIME_UNIT_SYN = {"microsecond": "ms", "second": "s", "minute": "m", "hour": "h", "day": "d",
                  "week": "w", "month": "M", "year": "y"}
 TIME_UNIT_SYN2 = dict([(v, n) for (n, v) in TIME_UNIT_SYN.items()])
+DEFAULT_MOD = lambda x: x
 
 
+HISTORICAL = 'historical'
 OPERATORS = {'>': op.gt, '>=': op.ge, '<': op.lt, '<=': op.le, '==': op.eq, '!=': op.ne}
 RULE_RE = re(
-    '(critical|warning|normal):\s+(%s)\s+(\d+\.?\d*(?:%s)?)' % (
+    '(critical|warning|normal):\s+(%s)\s+(\d+\.?\d*(?:%s)?|%s)\s*((?:\*|\+|-|\/)\s*\d+\.?\d*)?' %
+    (
         "|".join(OPERATORS.keys()),
-        "|".join(sorted(CONVERT_HASH.keys(), reverse=True))
+        "|".join(sorted(CONVERT_HASH.keys(), reverse=True)),
+        HISTORICAL,
     ))
 
 
@@ -87,9 +91,15 @@ def parse_rule(rule):
     match = RULE_RE.match(rule)
     if not match:
         raise ValueError('Invalid rule: %s' % rule)
-    level, cond, value = match.groups()
-    value = convert_from_format(value)
+    level, cond, value, mod = match.groups()
+    if value != HISTORICAL:
+        value = convert_from_format(value)
+
+    if mod:
+        mod = 'lambda x: x ' + mod
+        mod = eval(mod, {}, {})
+
     if cond not in OPERATORS:
         raise ValueError('Invalid operator: %s for rule %s' % (cond, rule))
-    op = OPERATORS.get(cond)
-    return {'level': level, 'op': op, 'value': value}
+    op = OPERATORS[cond]
+    return {'level': level, 'op': op, 'value': value, 'mod': mod or DEFAULT_MOD}
