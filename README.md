@@ -97,6 +97,8 @@ ___
 > Value units:
 > short: '2K', '3Mil', '4Bil', '5Tri'
 > bytes: '2KB', '3MB', '4GB'
+> bits: '2Kb', '3Mb', '4Gb'
+> bps: '2Kbps', '3Mbps', '4Gbps'
 > time: '2s', '3m', '4h', '5d'
 
 **Graphite-beacon** default options are:

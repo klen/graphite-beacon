@@ -43,7 +43,7 @@ def test_alert(reactor):
     assert set([alert1, alert3]) == set([alert1])
 
     alert = BaseAlert.get(reactor, name='Test', query='*', rules=["warning: >= 3MB"])
-    assert alert.rules[0]['value'] == 3000000
+    assert alert.rules[0]['value'] == 3145728
 
 
 def test_multimetrics(reactor):
@@ -116,12 +116,15 @@ def test_convert():
     assert convert_from_format('45%') == 45
 
     assert convert_to_format(789, 'bytes') == 789
-    assert convert_to_format(456789, 'bytes') == '456.8KB'
-    assert convert_from_format('456.8KB') == 456800
-    assert convert_to_format(45678912, 'bytes') == '45.7MB'
-    assert convert_from_format('45.7MB') == 45700000
-    assert convert_to_format(4567891245, 'bytes') == '4.6GB'
-    assert convert_from_format('4.6GB') == 4600000000
+    assert convert_to_format(456789, 'bytes') == '446.1KB'
+    assert convert_from_format('456.8KB') == 467763.2
+    assert convert_to_format(45678912, 'bytes') == '43.6MB'
+    assert convert_from_format('45.7MB') == 47919923.2
+    assert convert_to_format(4567891245, 'bytes') == '4.3GB'
+    assert convert_from_format('4.6GB') == 4939212390.4
+
+    assert convert_from_format('456.8Kb') == 467763.2
+    assert convert_from_format('456.8Kbps') == 456800
 
     assert convert_to_format(789, 'short') == 789
     assert convert_to_format(456789, 'short') == '456.8K'
@@ -171,9 +174,9 @@ def test_parse_rule():
     assert parse_rule('normal: == 0') == {
         'level': 'normal', 'op': op.eq, 'value': 0, 'mod': DEFAULT_MOD}
     assert parse_rule('critical: < 30MB') == {
-        'level': 'critical', 'op': op.lt, 'value': 30000000, 'mod': DEFAULT_MOD}
+        'level': 'critical', 'op': op.lt, 'value': 31457280, 'mod': DEFAULT_MOD}
     assert parse_rule('warning: >= 30MB') == {
-        'level': 'warning', 'op': op.ge, 'value': 30000000, 'mod': DEFAULT_MOD}
+        'level': 'warning', 'op': op.ge, 'value': 31457280, 'mod': DEFAULT_MOD}
     assert parse_rule('warning: >= historical') == {
         'level': 'warning', 'op': op.ge, 'value': 'historical', 'mod': DEFAULT_MOD}
     rule = parse_rule('warning: >= historical * 1.2')
