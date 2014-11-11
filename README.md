@@ -8,7 +8,7 @@ Simple alerting system for [Graphite](http://graphite.wikidot.com/) metrics.
 Features:
 
 - Simplest installation (one python package dependency);
-- No software dependencies (Databases, AMPQ and etc);
+- No software dependencies (Databases, AMQP and etc);
 - Light and full asyncronous;
 - SMTP, Hipchat handlers (Please make a request for additional handlers);
 - Easy configurable and support "historical values"
