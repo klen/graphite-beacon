@@ -8,7 +8,7 @@
             <table border="0" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
                     <td align="center" valign="top" class="status_{{level}}">
-                        <{{ alert.name }}> {{ level.upper() }}
+                        {{ level.upper() }} [{{alert.name}}]
                     </td>
                 </tr>
             </table>
@@ -21,7 +21,8 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
     <tr>
         <td align="center" valign="top" class="textContent">
-            <h3>{{ dt.datetime.now().strftime('%H:%M %d/%m/%Y') }}: {{ value }}</h3>
+            <b>Time:</b> {{ dt.datetime.now().strftime('%H:%M %d/%m/%Y') }}</b> <br/>
+             <b>Value:</b> {{ value }}</b> <br/>
         </td>
     </tr>
 </table>

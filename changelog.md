@@ -1,3 +1,9 @@
+## 0.14.0
+
+- Add `smtp.graphite_url` option for set graphite_url in emails
+- Add `send_initial` option for send initial values when graphite-beacon starts
+- Update HTML email templates
+
 ## 0.12.0
 
 - Change format of handlers options

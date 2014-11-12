@@ -22,6 +22,7 @@ class SMTPHandler(AbstractHandler):
         'to': None,
         'use_tls': False,
         'html': True,
+        'graphite_url': None,
     }
 
     def init_handler(self):
@@ -55,14 +56,15 @@ class SMTPHandler(AbstractHandler):
 
     def get_message(self, level, alert, value, target=None, ntype=None):
         txt_tmpl = TEMPLATES[ntype]['text']
-        ctx = {'reactor': self.reactor, 'alert': alert, 'value': value, 'level': level,
-               'target': target, 'dt': dt}
+        ctx = dict(
+            reactor=self.reactor, alert=alert, value=value, level=level, target=target,
+            dt=dt, **self.options)
         msg = MIMEMultipart('alternative')
-        plain = MIMEText(txt_tmpl.generate(**ctx), 'plain')
+        plain = MIMEText(str(txt_tmpl.generate(**ctx)), 'plain')
         msg.attach(plain)
         if self.options['html']:
             html_tmpl = TEMPLATES[ntype]['html']
-            html = MIMEText(html_tmpl.generate(**ctx), 'html')
+            html = MIMEText(str(html_tmpl.generate(**ctx)), 'html')
             msg.attach(html)
         return msg
 

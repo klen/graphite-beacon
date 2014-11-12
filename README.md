@@ -8,9 +8,10 @@ Simple alerting system for [Graphite](http://graphite.wikidot.com/) metrics.
 Features:
 
 - Simplest installation (one python package dependency);
-- No software dependencies (Databases, AMPQ and etc);
+- No software dependencies (Databases, AMQP and etc);
 - Light and full asyncronous;
 - SMTP, Hipchat handlers (Please make a request for additional handlers);
+- Easy configurable and support "historical values"
 
 [![Build status](http://img.shields.io/travis/klen/graphite-beacon.svg?style=flat-square)](http://travis-ci.org/klen/graphite-beacon)
 [![Coverage](http://img.shields.io/coveralls/klen/graphite-beacon.svg?style=flat-square)](https://coveralls.io/r/klen/graphite-beacon)
@@ -29,11 +30,11 @@ Example:
     {   "name": "MEM",
         "format": "bytes",
         "query": "aliasByNode(sumSeriesWithWildcards(collectd.*.memory.{memory-free,memory-cached}, 3), 1)",
-        "rules": ["critical: < 200MB", "warning: < 400MB"] },
+        "rules": ["critical: < 200MB", "warning: < 400MB", "warning: < historical / 2"] },
     {   "name": "CPU",
         "format": "percent",
         "query": "aliasByNode(sumSeriesWithWildcards(collectd.*.cpu-*.cpu-user, 2), 1)",
-        "rules": ["critical: >= 80%", "warning: >= 70%"] }
+        "rules": ["critical: >= 80%", "warning: >= 70%"] },
 ]}
 ```
 
@@ -75,6 +76,13 @@ Install the package using apt-get:
 
 There is an ansible role to install the package: https://github.com/Stouts/Stouts.graphite-beacon
 
+## Docker
+
+To run this Docker container just run:
+
+    docker run -v /path/to/config.json:/config.json deliverous/graphite-beacon
+
+
 Usage
 -----
 
@@ -96,6 +104,8 @@ ___
 > Value units:
 > short: '2K', '3Mil', '4Bil', '5Tri'
 > bytes: '2KB', '3MB', '4GB'
+> bits: '2Kb', '3Mb', '4Gb'
+> bps: '2Kbps', '3Mbps', '4Gbps'
 > time: '2s', '3m', '4h', '5d'
 
 **Graphite-beacon** default options are:
@@ -135,7 +145,7 @@ ___
         // Default loglevel
         "logging": "info",
 
-        // Default method (average, last_value).
+        // Default method (average, last_value, sum).
         // Can be redfined for each alert.
         "method": "average",
 
@@ -146,6 +156,9 @@ ___
         "critical_handlers": ["log", "smtp"],
         "warning_handlers": ["log", "smtp"],
         "normal_handlers": ["log", "smtp"],
+
+        // Send initial values (Send current values when reactor starts)
+        "send_initial": true,
 
         // Default alerts (see configuration below)
         "alerts": []
@@ -187,7 +200,7 @@ At the moment **Graphite-beacon** supports two type of alerts:
       //(optional)  Default values format (none, bytes, s, ms, short)
       "format": "bytes",
 
-      // (optional) Alert method (average, last_value)
+      // (optional) Alert method (average, last_value, sum)
       "method": "average",
 
       // (optional) Alert interval [eg. 15second, 30minute, 2hour, 1day, 3month, 1year]
@@ -202,6 +215,25 @@ At the moment **Graphite-beacon** supports two type of alerts:
     }
   ]
 ```
+
+##### Historical values
+
+Graphite-beacon supports "historical" values for a rule.
+By example, you want to get warning when CPU usage is more than 150% from normal usage:
+
+    "warning: > historical * 1.5"
+
+Or memory is twice less than usual:
+
+    "warning: < historical / 2"
+
+
+Graphite-beacon keeps history of values for each target in metric. Historical value
+is average of values from history. "Historical" rule becames work when it has enough
+values (Read about history size bellow).
+
+History size is equal 60 by default. You can change it by using Reactor option
+'history_size'.
 
 ### Setup SMTP
 
@@ -234,6 +266,12 @@ configuration.
 
         // Use TLS
         "use_tls": false,
+
+        // Send HTML emails
+        "html": true,
+
+        // Graphite link for emails (By default is equal to main graphite_url)
+        "graphite_url": null
 
     }
 
@@ -297,6 +335,8 @@ Contributors
 -------------
 
 * Kirill Klenov     (https://github.com/klen, horneds@gmail.com)
+
+* Thomas Clavier (https://github.com/tclavier)
 
 License
 --------
