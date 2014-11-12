@@ -48,6 +48,7 @@ Run with Docker
 ----------------
 
 Build a config.json file and run :
+
     docker run -v /path/to/config.json:/config.json deliverous/graphite-beacon
    
 
