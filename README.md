@@ -99,14 +99,22 @@ Just run `graphite-beacon`:
 
 ___
 
-> Time units: '2second', '3.5minute', '4hour', '5.2day', '6week', '7month', '8year'
+Time units:
+
+> '2second', '3.5minute', '4hour', '5.2day', '6week', '7month', '8year'
+
 > short formats are: '2s', '3m', '4.1h' ...
 
-> Value units:
+Value units:
+
 > short: '2K', '3Mil', '4Bil', '5Tri'
+
 > bytes: '2KB', '3MB', '4GB'
+
 > bits: '2Kb', '3Mb', '4Gb'
+
 > bps: '2Kbps', '3Mbps', '4Gbps'
+
 > time: '2s', '3m', '4h', '5d'
 
 **Graphite-beacon** default options are:
@@ -153,7 +161,7 @@ ___
         // Default prefix (used for notifications)
         "prefix": "[BEACON]",
 
-        // Default handlers (log, smtp, hipchat)
+        // Default handlers (log, smtp, hipchat, http)
         "critical_handlers": ["log", "smtp"],
         "warning_handlers": ["log", "smtp"],
         "normal_handlers": ["log", "smtp"],
@@ -289,7 +297,28 @@ Enable "hipchat" handler and set the options in your beacon configuration.
     ...
     "hipchat": {
         "room": "myroom",
-        "key": "mykey",
+        "key": "mykey"
+    }
+    ...
+}
+```
+
+### Setup HttpHandler
+
+Enable "http" handler and set the options in your beacon configuration.
+
+```js
+{
+    ...
+    "http": {
+        "url": "http://myhook.com",
+
+        // (optional) Additional query(data) params
+        "params": {},
+
+        // (optional) HTTP method
+        "method": "GET"
+
     }
     ...
 }
