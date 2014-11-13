@@ -103,7 +103,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
 
     def check(self, records):
         for value, target in records:
-            LOGGER.debug("%s: %s", target, value)
+            LOGGER.info("%s [%s]: %s", self.name, target, value)
             for rule in self.rules:
                 rvalue = self.get_value_for_rule(rule, target)
                 if rvalue is None:
@@ -163,7 +163,7 @@ class GraphiteAlert(BaseAlert):
 
     @gen.coroutine
     def load(self):
-        LOGGER.debug('%s: start checking: %s' % (self.name, self.url))
+        LOGGER.debug('%s: start checking: %s' % (self.name, self.query))
         if self.waiting:
             self.notify('warning', 'Process takes too much time', target='waiting', ntype='common')
         else:
