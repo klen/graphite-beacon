@@ -6,7 +6,7 @@ Status: {{ level }}
 
 Time: {{ dt.datetime.now().strftime('%H:%M %d/%m/%Y') }}
 Value: {{ alert.convert(value) }} ({{value}})
-Method: {{ alert.options.get('method') }}
+Method: {{ alert.method }}
 {% if rule %}
 Rule: {{ rule['raw'] }}{% end %}
 {% if target %}

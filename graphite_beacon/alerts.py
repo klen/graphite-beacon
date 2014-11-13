@@ -109,10 +109,10 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
                 if rvalue is None:
                     continue
                 if rule['op'](value, rvalue):
-                    self.notify(rule['level'], value, target, rule)
+                    self.notify(rule['level'], value, target, rule=rule)
                     break
             else:
-                self.notify('normal', value, target)
+                self.notify('normal', value, target, rule=rule)
 
             self.history[target].append(value)
 

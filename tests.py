@@ -197,11 +197,12 @@ def test_html_template(reactor):
         'to': 'user@com.com', 'graphite_url': 'http://graphite.myhost.com'}
     smtp = SMTPHandler(reactor)
 
-    message = smtp.get_message('critical', galert, '3000000', 'node.com', 'graphite')
+    message = smtp.get_message(
+        'critical', galert, '3000000', 'node.com', 'graphite', galert.rules[0])
     assert message
 
     assert len(message._payload) == 2
-    _, html = message._payload
+    text, html = message._payload
     assert 'graphite.myhost.com' in html.as_string()
 
     ualert = BaseAlert.get(
