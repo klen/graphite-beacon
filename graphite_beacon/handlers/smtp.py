@@ -54,11 +54,11 @@ class SMTPHandler(AbstractHandler):
         finally:
             smtp.quit()
 
-    def get_message(self, level, alert, value, target=None, ntype=None):
+    def get_message(self, level, alert, value, target=None, ntype=None, rule=None):
         txt_tmpl = TEMPLATES[ntype]['text']
         ctx = dict(
             reactor=self.reactor, alert=alert, value=value, level=level, target=target,
-            dt=dt, **self.options)
+            dt=dt, rule=rule, **self.options)
         msg = MIMEMultipart('alternative')
         plain = MIMEText(str(txt_tmpl.generate(**ctx)), 'plain')
         msg.attach(plain)

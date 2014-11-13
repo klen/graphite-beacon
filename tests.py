@@ -172,13 +172,16 @@ def test_parse_rule():
         assert parse_rule('invalid')
 
     assert parse_rule('normal: == 0') == {
-        'level': 'normal', 'op': op.eq, 'value': 0, 'mod': DEFAULT_MOD}
+        'level': 'normal', 'op': op.eq, 'value': 0, 'mod': DEFAULT_MOD, 'raw': 'normal: == 0'}
     assert parse_rule('critical: < 30MB') == {
-        'level': 'critical', 'op': op.lt, 'value': 31457280, 'mod': DEFAULT_MOD}
+        'level': 'critical', 'op': op.lt, 'value': 31457280, 'mod': DEFAULT_MOD,
+        'raw': 'critical: < 30MB'}
     assert parse_rule('warning: >= 30MB') == {
-        'level': 'warning', 'op': op.ge, 'value': 31457280, 'mod': DEFAULT_MOD}
+        'level': 'warning', 'op': op.ge, 'value': 31457280, 'mod': DEFAULT_MOD,
+        'raw': 'warning: >= 30MB'}
     assert parse_rule('warning: >= historical') == {
-        'level': 'warning', 'op': op.ge, 'value': 'historical', 'mod': DEFAULT_MOD}
+        'level': 'warning', 'op': op.ge, 'value': 'historical', 'mod': DEFAULT_MOD,
+        'raw': 'warning: >= historical'}
     rule = parse_rule('warning: >= historical * 1.2')
     assert rule['mod']
     assert rule['mod'](5) == 6

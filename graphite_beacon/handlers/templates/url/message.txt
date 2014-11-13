@@ -3,10 +3,13 @@
 
 Alert: {{ alert.name }}
 Status: {{ level }}
+Value: {{value}}
 
 Time: {{ dt.datetime.now().strftime('%H:%M %d/%m/%Y') }}
 URL: {{ alert.query }}
 Status: {{ value }}
+{% if rule %}
+Rule: {{ rule['raw'] }}{% end %}
 
 --
 

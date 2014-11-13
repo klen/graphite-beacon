@@ -103,4 +103,4 @@ def parse_rule(rule):
     if cond not in OPERATORS:
         raise ValueError('Invalid operator: %s for rule %s' % (cond, rule))
     op = OPERATORS[cond]
-    return {'level': level, 'op': op, 'value': value, 'mod': mod or DEFAULT_MOD}
+    return {'level': level, 'op': op, 'value': value, 'mod': mod or DEFAULT_MOD, 'raw': rule}

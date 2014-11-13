@@ -17,6 +17,8 @@ LEVELS = {
 
 class AlertFabric(type):
 
+    """ Register alert's classes and produce an alert by source. """
+
     alerts = {}
 
     def __new__(mcs, name, bases, params):
@@ -103,33 +105,42 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         for value, target in records:
             LOGGER.debug("%s: %s", target, value)
             for rule in self.rules:
-                rvalue = rule['value']
-                if rvalue == HISTORICAL:
-                    history = self.history[target]
-                    if len(history) < self.reactor.options['history_size']:
-                        continue
-                    rvalue = sum(history) / len(history)
-
-                rvalue = rule['mod'](rvalue)
-
+                rvalue = self.get_value_for_rule(rule, target)
+                if rvalue is None:
+                    continue
                 if rule['op'](value, rvalue):
-                    self.notify(rule['level'], value, target)
+                    self.notify(rule['level'], value, target, rule)
                     break
             else:
                 self.notify('normal', value, target)
 
             self.history[target].append(value)
 
-    def notify(self, level, value, target=None, ntype=None):
+    def get_value_for_rule(self, rule, target):
+        rvalue = rule['value']
+        if rvalue == HISTORICAL:
+            history = self.history[target]
+            if len(history) < self.reactor.options['history_size']:
+                return None
+            rvalue = sum(history) / len(history)
+
+        rvalue = rule['mod'](rvalue)
+        return rvalue
+
+    def notify(self, level, value, target=None, ntype=None, rule=None):
+        """ Notify main reactor about event. """
+
+        # Did we see the event before?
         if target in self.state and level == self.state[target]:
             return False
 
+        # Do we see the event first time?
         if target not in self.state and level == 'normal' \
                 and not self.reactor.options['send_initial']:
             return False
 
         self.state[target] = level
-        return self.reactor.notify(level, self, value, target=target, ntype=ntype)
+        return self.reactor.notify(level, self, value, target=target, ntype=ntype, rule=rule)
 
     def load(self):
         raise NotImplementedError()

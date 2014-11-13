@@ -39,5 +39,6 @@ class HipChatHandler(AbstractHandler):
             'message_format': 'text',
         }
         body = urllib.urlencode(data)
-        yield self.client.fetch('https://api.hipchat.com/v1/rooms/message?auth_token=' + self.key,
-                                method='POST', body=body)
+        yield self.client.fetch(
+            'https://api.hipchat.com/v1/rooms/message?auth_token=' + self.key,
+            method='POST', body=body)

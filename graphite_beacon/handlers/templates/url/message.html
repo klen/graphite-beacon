@@ -31,6 +31,9 @@
             <b>Time:</b> {{ dt.datetime.now().strftime('%H:%M %d/%m/%Y') }}</b> <br/>
             {% if target %} <b>Target:</b> {{ target }}</b> <br/> {% end %}
              <b>Query:</b> {{ alert.query }}</b> <br/>
+            {% if rule %}
+                <b>Rule:</b> {{ rule['raw'] }}</b> <br/>
+            {% end %}
         </td>
     </tr>
 </table>

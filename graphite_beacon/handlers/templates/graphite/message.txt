@@ -6,7 +6,18 @@ Status: {{ level }}
 
 Time: {{ dt.datetime.now().strftime('%H:%M %d/%m/%Y') }}
 Value: {{ alert.convert(value) }} ({{value}})
+Method: {{ alert.options.get('method') }}
+{% if rule %}
+Rule: {{ rule['raw'] }}{% end %}
+{% if target %}
 Target: {{ target }}
+{% if alert.history[target] %}
+History: {{ [ alert.convert(v) for v in alert.histroy[target][:100] ] }} {% end %}
+{% end %}
+{% if target and rule %}
+Tested value: {{ alert.convert(alert.get_value_for_rule(rule, target)) }}
+{% end %}
+
 
 View the graph: {{ alert.get_graph_url(alert.query) }}
 
