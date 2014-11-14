@@ -52,7 +52,8 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
 
         self.waiting = False
         self.state = {None: "normal", "waiting": "normal", "loading": "normal"}
-        self.history = defaultdict(lambda: deque([], self.reactor.options['history_size']))
+        self.history_size = options.get('history_size', self.reactor.options['history_size'])
+        self.history = defaultdict(lambda: deque([], self.history_size))
 
         LOGGER.info("Alert '%s': has inited" % self)
 

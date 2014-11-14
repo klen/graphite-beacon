@@ -244,6 +244,31 @@ values (Read about history size bellow).
 History size is equal 60 by default. You can change it by using Reactor option
 'history_size'.
 
+By example, send warning when today' new user is less than 80% of average for last 10 days:
+
+```js
+...
+alerts: [
+...
+{
+  "name": "Registrations",
+  // Run once per day
+  "interval": "1day",
+  "query": "Your graphite query here",
+  // Get average for last 10 days
+  "history_size": 10,
+  "rules": [
+    // Warning if today's new user less than 80% of average for 10 days
+    "warning: < historical * 0.8",
+   // Critical if today's new user less than 50% of average for 10 days
+    "critical: < historical * 0.5"
+  ]
+}
+...
+],
+...
+```
+
 ### Setup SMTP
 
 Enable "smtp" handler (enabled by default) and set the options in your beacon
