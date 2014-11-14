@@ -15,7 +15,9 @@ Features:
 
 [![Build status](http://img.shields.io/travis/klen/graphite-beacon.svg?style=flat-square)](http://travis-ci.org/klen/graphite-beacon)
 [![Coverage](http://img.shields.io/coveralls/klen/graphite-beacon.svg?style=flat-square)](https://coveralls.io/r/klen/graphite-beacon)
-[![Version](http://img.shields.io/pypi/v/graphite-beacon.svg?style=flat-square)](https://pypi.python.org/pypi/graphite_beacon/0.2.1)
+[![Version](http://img.shields.io/pypi/v/graphite-beacon.svg?style=flat-square)](https://pypi.python.org/pypi/graphite_beacon)
+[![License](http://img.shields.io/pypi/l/graphite-beacon.svg?style=flat-square)](https://pypi.python.org/pypi/graphite_beacon)
+[![Downloads](http://img.shields.io/pypi/dm/graphite-beacon.svg?style=flat-square)](https://pypi.python.org/pypi/graphite_beacon)
 [![Donate](http://img.shields.io/gratipay/klen.svg?style=flat-square)](https://www.gratipay.com/klen/)
 
 Example:
