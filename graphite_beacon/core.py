@@ -117,6 +117,8 @@ class Reactor(object):
     def notify(self, level, alert, value, target=None, ntype=None, rule=None):
         """ Provide the event to the handlers. """
 
+        LOGGER.info('Notify %s:%s:%s:%s', level, alert, value, target or "")
+
         if ntype is None:
             ntype = alert.source
 

@@ -96,6 +96,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
 
     def start(self):
         self.callback.start()
+        self.load()
         return self
 
     def stop(self):

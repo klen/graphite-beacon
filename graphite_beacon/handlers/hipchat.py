@@ -1,7 +1,7 @@
 import urllib
 from tornado import gen, httpclient as hc
 
-from . import AbstractHandler
+from . import AbstractHandler, LOGGER
 
 
 class HipChatHandler(AbstractHandler):
@@ -29,6 +29,8 @@ class HipChatHandler(AbstractHandler):
 
     @gen.coroutine
     def notify(self, level, *args, **kwargs):
+        LOGGER.info("Handler (%s) %s", self.name, level)
+
         message = self.get_short(level, *args, **kwargs)
         data = {
             'room_id': self.room,

@@ -33,9 +33,11 @@ class SMTPHandler(AbstractHandler):
             self.options['to'] = [self.options['to']]
 
     @gen.coroutine
-    def notify(self, *args, **kwargs):
-        msg = self.get_message(*args, **kwargs)
-        msg['Subject'] = self.get_short(*args, **kwargs)
+    def notify(self, level, *args, **kwargs):
+        LOGGER.info("Handler (%s) %s", self.name, level)
+
+        msg = self.get_message(level, *args, **kwargs)
+        msg['Subject'] = self.get_short(level, *args, **kwargs)
         msg['From'] = self.options['from']
         msg['To'] = ", ".join(self.options['to'])
 
