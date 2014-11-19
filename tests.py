@@ -56,9 +56,14 @@ def test_multimetrics(reactor):
 
     with mock.patch.object(reactor, 'notify'):
         alert.check([(110, 'metric1'), (60, 'metric2'), (30, 'metric3')])
+
         assert reactor.notify.call_count == 2
+
+        # metric1 - critical
         assert reactor.notify.call_args_list[0][0][0] == 'critical'
         assert reactor.notify.call_args_list[0][1]['target'] == 'metric1'
+
+        # metric2 - warning
         assert reactor.notify.call_args_list[1][0][0] == 'warning'
         assert reactor.notify.call_args_list[1][1]['target'] == 'metric2'
 
@@ -67,6 +72,8 @@ def test_multimetrics(reactor):
     with mock.patch.object(reactor, 'notify'):
         alert.check([(60, 'metric1'), (60, 'metric2'), (30, 'metric3')])
         assert reactor.notify.call_count == 1
+
+        # metric1 - warning, metric2 didn't change
         assert reactor.notify.call_args_list[0][0][0] == 'warning'
         assert reactor.notify.call_args_list[0][1]['target'] == 'metric1'
 
@@ -75,8 +82,12 @@ def test_multimetrics(reactor):
     with mock.patch.object(reactor, 'notify'):
         alert.check([(60, 'metric1'), (30, 'metric2'), (105, 'metric3')])
         assert reactor.notify.call_count == 2
+
+        # metric2 - normal
         assert reactor.notify.call_args_list[0][0][0] == 'normal'
         assert reactor.notify.call_args_list[0][1]['target'] == 'metric2'
+
+        # metric3 - critical
         assert reactor.notify.call_args_list[1][0][0] == 'critical'
         assert reactor.notify.call_args_list[1][1]['target'] == 'metric3'
 
@@ -89,6 +100,8 @@ def test_multimetrics(reactor):
     with mock.patch.object(reactor, 'notify'):
         alert.check([(70, 'metric1'), (21, 'metric2'), (105, 'metric3')])
         assert reactor.notify.call_count == 1
+
+        # metric2 - historical warning
         assert reactor.notify.call_args_list[0][0][0] == 'warning'
         assert reactor.notify.call_args_list[0][1]['target'] == 'metric2'
 
@@ -191,14 +204,16 @@ def test_html_template(reactor):
     from graphite_beacon.handlers.smtp import SMTPHandler
     from graphite_beacon.alerts import BaseAlert
 
+    target = 'node.com'
     galert = BaseAlert.get(reactor, name='Test', query='*', rules=["normal: == 0"])
+    galert.history[target] += [1, 2, 3, 4, 5]
 
     reactor.options['smtp'] = {
         'to': 'user@com.com', 'graphite_url': 'http://graphite.myhost.com'}
     smtp = SMTPHandler(reactor)
 
     message = smtp.get_message(
-        'critical', galert, '3000000', 'node.com', 'graphite', galert.rules[0])
+        'critical', galert, 3000000, target=target, ntype='graphite', rule=galert.rules[0])
     assert message
 
     assert len(message._payload) == 2
@@ -207,7 +222,7 @@ def test_html_template(reactor):
 
     ualert = BaseAlert.get(
         reactor, source='url', name='Test', query='http://google.com', rules=["critical: != 200"])
-    message = smtp.get_message('critical', ualert, '3000000', 'node.com', 'url')
+    message = smtp.get_message('critical', ualert, '3000000', target, 'url')
     assert message
 
     assert len(message._payload) == 2

@@ -4,6 +4,7 @@ from . import _compat as _
 from .graphite import GraphiteRecord
 from .utils import convert_to_format, parse_interval, interval_to_graphite, parse_rule, HISTORICAL
 from collections import deque, defaultdict
+from itertools import islice
 
 
 LOGGER = log.gen_log
@@ -13,6 +14,15 @@ LEVELS = {
     'warning': 10,
     'normal': 20,
 }
+
+
+class sliceable_deque(deque):
+
+    def __getitem__(self, index):
+        try:
+            return deque.__getitem__(self, index)
+        except TypeError:
+            return type(self)(islice(self, index.start, index.stop, index.step))
 
 
 class AlertFabric(type):
@@ -53,7 +63,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         self.waiting = False
         self.state = {None: "normal", "waiting": "normal", "loading": "normal"}
         self.history_size = options.get('history_size', self.reactor.options['history_size'])
-        self.history = defaultdict(lambda: deque([], self.history_size))
+        self.history = defaultdict(lambda: sliceable_deque([], self.history_size))
 
         LOGGER.info("Alert '%s': has inited" % self)
 

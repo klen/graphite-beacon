@@ -12,7 +12,7 @@ Rule: {{ rule['raw'] }}{% end %}
 {% if target %}
 Target: {{ target }}
 {% if alert.history[target] %}
-History: {{ [ alert.convert(v) for v in alert.histroy[target][:100] ] }} {% end %}
+History: {{ [ alert.convert(v) for v in alert.history[target][:100] ] }} {% end %}
 {% end %}
 {% if target and rule %}
 Tested value: {{ alert.convert(alert.get_value_for_rule(rule, target)) }}

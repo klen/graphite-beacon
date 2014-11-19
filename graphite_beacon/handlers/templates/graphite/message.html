@@ -41,7 +41,7 @@
             {% if target %}
                 <b>Target:</b> {{ target }}</b> <br/>
                 {% if alert.history[target] %}
-                <b>History:</b> {{ [ alert.convert(v) for v in alert.histroy[target][:100] ] }} <br/> {% end %}
+                <b>History:</b> {{ [ alert.convert(v) for v in alert.history[target][:100] ] }} <br/> {% end %}
             {% end %}
 
             {% if target and rule %}
