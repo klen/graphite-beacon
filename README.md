@@ -46,13 +46,6 @@ Requirements
 - python (2.6, 2.7, 3.3, 3.4)
 - tornado
 
-Run with Docker
-----------------
-
-Build a config.json file and run :
-
-    docker run -v /path/to/config.json:/config.json deliverous/graphite-beacon
-   
 
 Installation
 ------------
@@ -81,7 +74,7 @@ There is an ansible role to install the package: https://github.com/Stouts/Stout
 
 ## Docker
 
-To run this Docker container just run:
+Build a config.json file and run :
 
     docker run -v /path/to/config.json:/config.json deliverous/graphite-beacon
 
