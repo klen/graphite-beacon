@@ -23,7 +23,7 @@ class HttpHandler(AbstractHandler):
 
     @gen.coroutine
     def notify(self, level, alert, value, target=None, ntype=None, rule=None):
-        LOGGER.info("Handler (%s) %s", self.name, level)
+        LOGGER.debug("Handler (%s) %s", self.name, level)
 
         message = self.get_short(level, alert, value, target=target, ntype=ntype, rule=rule)
         data = {'alert': alert.name, 'desc': message, 'level': level}

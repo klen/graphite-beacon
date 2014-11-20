@@ -29,7 +29,7 @@ class HipChatHandler(AbstractHandler):
 
     @gen.coroutine
     def notify(self, level, *args, **kwargs):
-        LOGGER.info("Handler (%s) %s", self.name, level)
+        LOGGER.debug("Handler (%s) %s", self.name, level)
 
         message = self.get_short(level, *args, **kwargs)
         data = {

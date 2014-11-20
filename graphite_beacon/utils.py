@@ -30,7 +30,7 @@ CONVERT = {
         ("%", 1),
     )
 }
-CONVERT_HASH = {name: value for _types in CONVERT.values() for (name, value) in _types}
+CONVERT_HASH = dict((name, value) for _types in CONVERT.values() for (name, value) in _types)
 CONVERT['ms'] = list((n, v * 1000) for n, v in CONVERT['s'])
 CONVERT_HASH['%'] = 1
 TIME_UNIT_SIZE = dict(CONVERT['ms'])

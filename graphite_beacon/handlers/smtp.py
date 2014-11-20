@@ -34,7 +34,7 @@ class SMTPHandler(AbstractHandler):
 
     @gen.coroutine
     def notify(self, level, *args, **kwargs):
-        LOGGER.info("Handler (%s) %s", self.name, level)
+        LOGGER.debug("Handler (%s) %s", self.name, level)
 
         msg = self.get_message(level, *args, **kwargs)
         msg['Subject'] = self.get_short(level, *args, **kwargs)

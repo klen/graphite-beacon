@@ -1,3 +1,7 @@
+## 0.18.0
+
+- Python 2.6 support
+
 ## 0.14.0
 
 - Add `smtp.graphite_url` option for set graphite_url in emails
