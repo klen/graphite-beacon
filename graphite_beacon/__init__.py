@@ -1,3 +1,3 @@
 
-__version__ = "0.17.4"
+__version__ = "0.18.0"
 __license__ = "MIT"
