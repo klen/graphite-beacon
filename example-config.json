@@ -17,7 +17,7 @@
   "debug": true,
 
   "alerts": [
-    // An graphite alert
+    // A graphite alert
     {
       "name": "Memory",
       "query": "aliasByNode(collectd.*.memory.memory-free, 1)",
@@ -25,7 +25,7 @@
       "format": "bytes",
       "rules": ["warning: < 300MB", "critical: > 200MB"]
     },
-    // An ping alert
+    // A ping alert
     {
       "name": "Site",
       // Source (graphite, url). By default: graphite
