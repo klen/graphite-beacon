@@ -1,26 +1,7 @@
-from tornado import log, template
-import os.path as op
+from tornado import log
 
 from .. import _compat as _
-
-LOADER = template.Loader(op.join(op.dirname(op.abspath(__file__)), 'templates'), autoescape=None)
-TEMPLATES = {
-    'graphite': {
-        'html': LOADER.load('graphite/message.html'),
-        'text': LOADER.load('graphite/message.txt'),
-        'short': LOADER.load('graphite/short.txt'),
-    },
-    'url': {
-        'html': LOADER.load('url/message.html'),
-        'text': LOADER.load('url/message.txt'),
-        'short': LOADER.load('url/short.txt'),
-    },
-    'common': {
-        'html': LOADER.load('common/message.html'),
-        'text': LOADER.load('common/message.txt'),
-        'short': LOADER.load('common/short.txt'),
-    },
-}
+from ..template import TEMPLATES
 
 LOGGER = log.gen_log
 
@@ -75,8 +56,8 @@ class AbstractHandler(_.with_metaclass(HandlerMeta)):
 
 registry = HandlerMeta
 
-from .log import LogHandler # noqa
-from .smtp import SMTPHandler # noqa
 from .hipchat import HipChatHandler # noqa
-from .http import HttpHandler # noqa
-from .slack import SlackHandler
+from .http import HttpHandler       # noqa
+from .log import LogHandler         # noqa
+from .slack import SlackHandler     # noqa
+from .smtp import SMTPHandler       # noqa

@@ -1,3 +1,8 @@
+## 0.20.0
+
+- Add Slack (https://slack.com) handler
+- Add `request_timeout` alerts' option
+
 ## 0.18.0
 
 - Python 2.6 support

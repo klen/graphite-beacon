@@ -63,6 +63,8 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         self.waiting = False
         self.state = {None: "normal", "waiting": "normal", "loading": "normal"}
         self.history_size = options.get('history_size', self.reactor.options['history_size'])
+        self.request_timeout = options.get(
+            'request_timeout', self.reactor.options['request_timeout'])
         self.history = defaultdict(lambda: sliceable_deque([], self.history_size))
 
         LOGGER.info("Alert '%s': has inited" % self)
@@ -168,6 +170,9 @@ class GraphiteAlert(BaseAlert):
         self.method = options.get('method', self.reactor.options['method'])
         assert self.method in METHODS, "Method is invalid"
 
+        self.auth_username = self.reactor.options.get('auth_username')
+        self.auth_password = self.reactor.options.get('auth_password')
+
         query = escape.url_escape(self.query)
         self.url = "%(base)s/render/?target=%(query)s&rawData=true&from=-%(interval)s" % {
             'base': self.reactor.options['graphite_url'], 'query': query,
@@ -181,11 +186,9 @@ class GraphiteAlert(BaseAlert):
         else:
             self.waiting = True
             try:
-                response = yield self.client.fetch(
-                    self.url,
-                    auth_username=self.reactor.options.get('auth_username'),
-                    auth_password=self.reactor.options.get('auth_password'),
-                )
+                response = yield self.client.fetch(self.url, auth_username=self.auth_username,
+                                                   auth_password=self.auth_password,
+                                                   request_timeout=self.request_timeout)
                 records = (GraphiteRecord(line) for line in response.buffer)
                 self.check([(getattr(record, self.method), record.target) for record in records])
                 self.notify('normal', 'Metrics are loaded', target='loading', ntype='common')
@@ -212,10 +215,13 @@ class URLAlert(BaseAlert):
         else:
             self.waiting = True
             try:
-                response = yield self.client.fetch(
-                    self.query, method=self.options.get('method', 'GET'))
+                response = yield self.client.fetch(self.query,
+                                                   method=self.options.get('method', 'GET'),
+                                                   request_timeout=self.request_timeout)
                 self.check([(response.code, self.query)])
-                self.notify('normal', 'Metrics are loaded', target='loading', ntype='common')
+                self.notify('normal', 'Metrics are loaded', target='loading')
+
             except Exception as e:
-                self.notify('critical', 'Loading error: %s' % e, target='loading', ntype='common')
+                self.notify('critical', str(e), target='loading')
+
             self.waiting = False

@@ -10,7 +10,7 @@ Features:
 - Simplest installation (one python package dependency);
 - No software dependencies (Databases, AMQP and etc);
 - Light and full asyncronous;
-- SMTP, Hipchat handlers (Please make a request for additional handlers);
+- SMTP, Hipchat, Slack, HTTP handlers (Please make a request for additional handlers);
 - Easy configurable and support "historical values"
 
 [![Build status](http://img.shields.io/travis/klen/graphite-beacon.svg?style=flat-square)](http://travis-ci.org/klen/graphite-beacon)

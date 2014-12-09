@@ -1,6 +1,6 @@
-VENV=$(shell echo "$${VDIR:-'.env'}")
+VIRTUALENV=$(shell echo "$${VDIR:-'.env'}")
 
-all: $(VENV)
+all: $(VIRTUALENV)
 
 .PHONY: help
 # target: help - Display callable targets
@@ -100,18 +100,22 @@ deb: clean
 #  Development
 # =============
 
-$(VENV): requirements.txt
-	@[ -d $(VENV) ]	|| virtualenv --no-site-packages $(VENV)
-	@$(VENV)/bin/pip install -r requirements.txt
+$(VIRTUALENV): requirements.txt
+	@[ -d $(VIRTUALENV) ]	|| virtualenv --no-site-packages $(VIRTUALENV)
+	@$(VIRTUALENV)/bin/pip install -r requirements.txt
+	@touch $(VIRTUALENV)
+
+$(VIRTUALENV)/bin/py.test: requirements-test.txt
+	@$(VIRTUALENV)/bin/pip install -r requirements-test.txt
+	@touch $(VIRTUALENV)/bin/py.test
 
 .PHONY: run
 # target: run - Run graphite-beacon
-run: $(VENV)
-	@$(VENV)/bin/pip install -r requirements-test.txt
-	$(VENV)/bin/python -m graphite_beacon.app --config=local.json
+run: $(VIRTUALENV)
+	@$(VIRTUALENV)/bin/pip install -r requirements-test.txt
+	$(VIRTUALENV)/bin/python -m graphite_beacon.app --config=local.json
 
 .PHONY: t
 # target: t - Runs tests
-t: $(VENV)
-	@$(VENV)/bin/pip install -r requirements-test.txt
+t: $(VIRTUALENV)/bin/py.test
 	py.test -xs tests.py
