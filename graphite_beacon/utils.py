@@ -77,6 +77,7 @@ def convert_from_format(value):
 
 
 def parse_interval(interval):
+    """ Convert 1.2day to 103680000.0 (ms)"""
     _, num, unit = NUMBER_RE.split(interval)
     num = float(num)
     return num * TIME_UNIT_SIZE.get(unit, TIME_UNIT_SIZE[TIME_UNIT_SYN.get(unit, 's')])

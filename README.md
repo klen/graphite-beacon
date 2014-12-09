@@ -236,7 +236,7 @@ Graphite-beacon keeps history of values for each target in metric. Historical va
 is average of values from history. "Historical" rule becames work when it has enough
 values (Read about history size bellow).
 
-History size is equal 60 by default. You can change it by using Reactor option
+History values are keeping 1 day by default. You can change it by using Reactor option
 'history_size'.
 
 By example, send warning when today' new user is less than 80% of average for last 10 days:
@@ -251,7 +251,7 @@ alerts: [
   "interval": "1day",
   "query": "Your graphite query here",
   // Get average for last 10 days
-  "history_size": 10,
+  "history_size": 10day,
   "rules": [
     // Warning if today's new user less than 80% of average for 10 days
     "warning: < historical * 0.8",

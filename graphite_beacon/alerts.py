@@ -2,7 +2,8 @@ from tornado import ioloop, httpclient as hc, gen, log, escape
 
 from . import _compat as _
 from .graphite import GraphiteRecord
-from .utils import convert_to_format, parse_interval, interval_to_graphite, parse_rule, HISTORICAL
+from .utils import convert_to_format, parse_interval, parse_rule, HISTORICAL, interval_to_graphite
+import math
 from collections import deque, defaultdict
 from itertools import islice
 
@@ -62,9 +63,6 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
 
         self.waiting = False
         self.state = {None: "normal", "waiting": "normal", "loading": "normal"}
-        self.history_size = options.get('history_size', self.reactor.options['history_size'])
-        self.request_timeout = options.get(
-            'request_timeout', self.reactor.options['request_timeout'])
         self.history = defaultdict(lambda: sliceable_deque([], self.history_size))
 
         LOGGER.info("Alert '%s': has inited" % self)
@@ -81,18 +79,30 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
     def configure(self, name=None, rules=None, query=None, **options):
         assert name, "Alert's name is invalid"
         self.name = name
+
         assert rules, "%s: Alert's rules is invalid" % name
         self.rules = [parse_rule(rule) for rule in rules]
         self.rules = list(sorted(self.rules, key=lambda r: LEVELS.get(r.get('level'), 99)))
+
         assert query, "%s: Alert's query is invalid" % self.name
         self.query = query
-        self.interval = interval_to_graphite(options.get('interval',
-                                                         self.reactor.options['interval']))
+
+        self.interval = interval_to_graphite(
+            options.get('interval', self.reactor.options['interval']))
+        interval = parse_interval(self.interval)
+
+        self._format = options.get('format', self.reactor.options['format'])
+        self.request_timeout = options.get(
+            'request_timeout', self.reactor.options['request_timeout'])
+
+        self.history_size = options.get('history_size', self.reactor.options['history_size'])
+        self.history_size = parse_interval(self.history_size)
+        self.history_size = int(math.ceil(self.history_size / interval))
+
         if self.reactor.options.get('debug'):
             self.callback = ioloop.PeriodicCallback(self.load, 5000)
         else:
-            self.callback = ioloop.PeriodicCallback(self.load, parse_interval(self.interval))
-        self._format = options.get('format', self.reactor.options['format'])
+            self.callback = ioloop.PeriodicCallback(self.load, interval)
 
     def convert(self, value):
         return convert_to_format(value, self._format)
@@ -134,7 +144,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         rvalue = rule['value']
         if rvalue == HISTORICAL:
             history = self.history[target]
-            if len(history) < self.reactor.options['history_size']:
+            if len(history) < self.history_size:
                 return None
             rvalue = sum(history) / len(history)
 

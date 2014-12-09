@@ -8,7 +8,7 @@ import mock
 def reactor():
     from graphite_beacon.core import Reactor
 
-    return Reactor(history_size=4)
+    return Reactor(history_size='40m')
 
 
 def test_reactor():

@@ -2,6 +2,7 @@
 
 - Add Slack (https://slack.com) handler
 - Add `request_timeout` alerts' option
+- Change history_size format: 144 -> 1day
 
 ## 0.18.0
 
