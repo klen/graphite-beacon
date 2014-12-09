@@ -8,7 +8,7 @@ help:
 	@egrep "^# target:" [Mm]akefile
 
 .PHONY: clean
-# target: clean - Clean repo
+# target: clean - Clean the repository
 clean:
 	@rm -rf build dist docs/_build *.deb
 	find $(CURDIR)/$(MODULE) -name "*.pyc" -delete

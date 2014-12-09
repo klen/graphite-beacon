@@ -156,7 +156,7 @@ Value units:
         // Default prefix (used for notifications)
         "prefix": "[BEACON]",
 
-        // Default handlers (log, smtp, hipchat, http)
+        // Default handlers (log, smtp, hipchat, http, slack)
         "critical_handlers": ["log", "smtp"],
         "warning_handlers": ["log", "smtp"],
         "normal_handlers": ["log", "smtp"],
@@ -344,6 +344,24 @@ Enable "http" handler and set the options in your beacon configuration.
 }
 ```
 
+### Setup SlackHandler
+
+Enable "slack" handler and set the options in your beacon configuration.
+
+```js
+{
+    ...
+    "slack": {
+        "webhook": "http://myhook.com",
+        // optional
+        "channel": "#general",
+        // optional
+        "username": "graphite-beacon",
+    }
+    ...
+}
+```
+
 ### Command line
 
 ```
@@ -386,7 +404,9 @@ Contributors
 
 * Kirill Klenov     (https://github.com/klen, horneds@gmail.com)
 
+* George Ionita (https://github.com/georgeionita)
 * Thomas Clavier (https://github.com/tclavier)
+* dugeem (https://github.com/dugeem)
 
 License
 --------
