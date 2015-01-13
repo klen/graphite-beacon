@@ -10,15 +10,17 @@ class CliHandler(AbstractHandler):
     # Default options
     defaults = {
         'command': None,
+        'alerts_whitelist': [],
     }
 
 
     def init_handler(self):
-        self.command = self.options.get('command')
-        assert self.command, 'Command line command is not defined.'
+        self.commandTemplate = self.options.get('command')
+        self.whitelist = self.options.get('alerts_whitelist')
+        assert self.commandTemplate, 'Command line command is not defined.'
 
 
-    def _substituteVariables(self, fragments, level, *args):
+    def _substituteVariables(self, command, level, *args, **kwargs):
         '''
         Substitute variables in command fragments by values e.g. ${level} => 'warning'
         '''
@@ -28,22 +30,26 @@ class CliHandler(AbstractHandler):
             '${level}': str(level),
             '${name}': '"' + str(name) + '"',
             '${value}': str(value),
+            '${limit_value}': str(kwargs['rule']['value']),
         }
 
-        for i, fragment in enumerate(fragments):
-            for pattern, value in substitutes.items():
-                if pattern in fragment:
-                    fragments[i] = fragment.replace(pattern, value)
+        result = command
+        for pattern, value in substitutes.items():
+            result = result.replace(pattern, value)
 
-        return fragments
+        return result
 
 
     def notify(self, level, *args, **kwargs):
         LOGGER.debug("Handler (%s) %s", self.name, level)
 
-        fragments = self._substituteVariables(self.command.split(' '), level, *args)
-        returncode = subprocess.call(fragments)
+        def getAlertName(*args):
+            name = str(args[0])
+            # remove time characteristics e.g. (1minute)
+            return name.rsplit(' ', 1)[0].strip()
 
-        if returncode:
-            LOGGER.error('CLI Command call returned non-zero code = %s. Command = %s', returncode, ' '.join(fragments))
+        # Run only for whitelisted names if specified
+        if not self.whitelist or getAlertName(*args) in self.whitelist:
+            command = self._substituteVariables(self.commandTemplate, level, *args, **kwargs)
+            subprocess.Popen(command, shell = True, stdin = None, stdout = None, stderr = None, close_fds = True)
 

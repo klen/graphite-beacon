@@ -374,8 +374,11 @@ Enable handler for running command line commands and set the options in your bea
         // ${level} -- alert level
         // ${name} -- alert name
         // ${value} -- current metrics value
+        // ${limit_value} -- metrics limit value
         // required
-        "command": "./myscript ${level} ${name} ${value}"
+        "command": "./myscript ${level} ${name} ${value} ...",
+        // optional -- if present only alerts with specified names will trigger this handler. If not present, all alerts will trigger handler
+        "alerts_whitelist": ["..."]
     }
     ...
 }
