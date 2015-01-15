@@ -58,9 +58,9 @@ Installation
 
 ### Debian package
 
-Using the command line, add the following to your /etc/apt/sources.list system config file: 
+Using the command line, add the following to your /etc/apt/sources.list system config file:
 
-    echo "deb http://dl.bintray.com/klen/deb /" | sudo tee -a /etc/apt/sources.list 
+    echo "deb http://dl.bintray.com/klen/deb /" | sudo tee -a /etc/apt/sources.list
     echo "deb-src http://dl.bintray.com/klen/deb /" | sudo tee -a /etc/apt/sources.list
 
 Install the package using apt-get:
@@ -357,6 +357,28 @@ Enable "slack" handler and set the options in your beacon configuration.
         "channel": "#general",
         // optional
         "username": "graphite-beacon",
+    }
+    ...
+}
+```
+
+### Setup CliHandler
+
+Enable handler for running command line commands and set the options in your beacon configuration.
+
+```js
+{
+    ...
+    "cli": {
+        // Several variables that will be substituted by values are allowed in configuration
+        // ${level} -- alert level
+        // ${name} -- alert name
+        // ${value} -- current metrics value
+        // ${limit_value} -- metrics limit value
+        // required
+        "command": "./myscript ${level} ${name} ${value} ...",
+        // optional -- if present only alerts with specified names will trigger this handler. If not present, all alerts will trigger handler
+        "alerts_whitelist": ["..."]
     }
     ...
 }
