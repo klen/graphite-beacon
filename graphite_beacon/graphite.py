@@ -8,7 +8,9 @@ class GraphiteRecord(object):
         self.step = int(step)
         self.values = list(self._values(data.rsplit(',')))
         if len(self.values) == 0:
-            raise ValueError('No data')
+            self.empty = True
+        else:
+            self.empty = False
 
     @staticmethod
     def _values(values):
