@@ -142,6 +142,10 @@ Value units:
         // Can be redfined for each alert.
         "interval": "10minute",
 
+        // Default time window for Graphite queries
+        // Defaults to query interval, can be redefined for each alert.
+        "time_window": "10minute",
+
         // Notification repeat interval
         // If an alert is failed, its notification will be repeated with the interval below
         "repeat_interval": "2hour",
