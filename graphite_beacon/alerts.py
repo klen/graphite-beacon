@@ -9,7 +9,7 @@ from itertools import islice
 
 
 LOGGER = log.gen_log
-METHODS = "average", "last_value"
+METHODS = "average", "last_value", "sum"
 LEVELS = {
     'critical': 0,
     'warning': 10,
