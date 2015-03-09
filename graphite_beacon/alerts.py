@@ -91,6 +91,9 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
             options.get('interval', self.reactor.options['interval']))
         interval = parse_interval(self.interval)
 
+        self.time_window = interval_to_graphite(
+            options.get('time_window', options.get('interval', self.reactor.options['interval'])))
+
         self._format = options.get('format', self.reactor.options['format'])
         self.request_timeout = options.get(
             'request_timeout', self.reactor.options['request_timeout'])
@@ -128,6 +131,9 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
     def check(self, records):
         for value, target in records:
             LOGGER.info("%s [%s]: %s", self.name, target, value)
+            if value is None:
+                self.notify('critical', value, target)
+                continue
             for rule in self.rules:
                 rvalue = self.get_value_for_rule(rule, target)
                 if rvalue is None:
@@ -184,9 +190,10 @@ class GraphiteAlert(BaseAlert):
         self.auth_password = self.reactor.options.get('auth_password')
 
         query = escape.url_escape(self.query)
-        self.url = "%(base)s/render/?target=%(query)s&rawData=true&from=-%(interval)s" % {
+        self.url = "%(base)s/render/?target=%(query)s&rawData=true&from=-%(time_window)s" % {
             'base': self.reactor.options['graphite_url'], 'query': query,
-            'interval': self.interval}
+            'time_window': self.time_window}
+        LOGGER.debug('%s: url = %s' % (self.name, self.url))
 
     @gen.coroutine
     def load(self):
@@ -200,7 +207,10 @@ class GraphiteAlert(BaseAlert):
                                                    auth_password=self.auth_password,
                                                    request_timeout=self.request_timeout)
                 records = (GraphiteRecord(line.decode('utf-8')) for line in response.buffer)
-                self.check([(getattr(record, self.method), record.target) for record in records])
+                data = [(None if record.empty else getattr(record, self.method), record.target) for record in records]
+                if len(data) == 0:
+                    raise ValueError('No data')
+                self.check(data)
                 self.notify('normal', 'Metrics are loaded', target='loading', ntype='common')
             except Exception as e:
                 self.notify('critical', 'Loading error: %s' % e, target='loading', ntype='common')
@@ -208,9 +218,9 @@ class GraphiteAlert(BaseAlert):
 
     def get_graph_url(self, target, graphite_url=None):
         query = escape.url_escape(target)
-        return "%(base)s/render/?target=%(query)s&from=-%(interval)s" % {
+        return "%(base)s/render/?target=%(query)s&from=-%(time_window)s" % {
             'base': graphite_url or self.reactor.options['graphite_url'], 'query': query,
-            'interval': self.interval}
+            'time_window': self.time_window}
 
 
 class URLAlert(BaseAlert):
