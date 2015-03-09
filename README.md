@@ -434,6 +434,7 @@ Contributors
 * Cody Soyland (https://github.com/codysoyland)
 * George Ionita (https://github.com/georgeionita)
 * Niku Toivola (https://github.com/nikut)
+* Raine Virta (https://github.com/raine)
 * Thomas Clavier (https://github.com/tclavier)
 * dugeem (https://github.com/dugeem)
 
