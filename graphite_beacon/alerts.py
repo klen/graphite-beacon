@@ -131,6 +131,9 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
     def check(self, records):
         for value, target in records:
             LOGGER.info("%s [%s]: %s", self.name, target, value)
+            if value is None:
+                self.notify('critical', value, target)
+                continue
             for rule in self.rules:
                 rvalue = self.get_value_for_rule(rule, target)
                 if rvalue is None:
@@ -204,7 +207,10 @@ class GraphiteAlert(BaseAlert):
                                                    auth_password=self.auth_password,
                                                    request_timeout=self.request_timeout)
                 records = (GraphiteRecord(line.decode('utf-8')) for line in response.buffer)
-                self.check([(getattr(record, self.method), record.target) for record in records])
+                data = [(None if record.empty else getattr(record, self.method), record.target) for record in records]
+                if len(data) == 0:
+                    raise ValueError('No data')
+                self.check(data)
                 self.notify('normal', 'Metrics are loaded', target='loading', ntype='common')
             except Exception as e:
                 self.notify('critical', 'Loading error: %s' % e, target='loading', ntype='common')
