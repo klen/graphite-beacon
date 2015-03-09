@@ -433,6 +433,7 @@ Contributors
 * Andrej Kuročenko (https://github.com/kurochenko)
 * Cody Soyland (https://github.com/codysoyland)
 * George Ionita (https://github.com/georgeionita)
+* Niku Toivola (https://github.com/nikut)
 * Thomas Clavier (https://github.com/tclavier)
 * dugeem (https://github.com/dugeem)
 
