@@ -16,7 +16,7 @@ class HipChatHandler(AbstractHandler):
 
     colors = {
         'critical': 'red',
-        'warning': 'magenta',
+        'warning': 'yellow',
         'normal': 'green',
     }
 
