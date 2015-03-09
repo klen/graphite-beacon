@@ -433,6 +433,7 @@ Contributors
 * Andrej Kuročenko (https://github.com/kurochenko)
 * Cody Soyland (https://github.com/codysoyland)
 * George Ionita (https://github.com/georgeionita)
+* James Yuzawa (https://github.com/yuzawa-san)
 * Niku Toivola (https://github.com/nikut)
 * Raine Virta (https://github.com/raine)
 * Thomas Clavier (https://github.com/tclavier)
