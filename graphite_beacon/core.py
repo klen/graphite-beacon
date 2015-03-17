@@ -82,9 +82,7 @@ class Reactor(object):
                 with open(config) as fconfig:
                     source = COMMENT_RE.sub("", fconfig.read())
                     config = json.loads(source)
-                    alerts = self.options.get('alerts', [])
                     self.options.update(config)
-                    self.options['alerts'] = alerts + self.options.get('alerts', [])
             except (IOError, ValueError):
                 LOGGER.error('Invalid config file: %s' % config)
 

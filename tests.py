@@ -21,7 +21,7 @@ def test_reactor():
     rr = Reactor(include=['example-config.json'], alerts=[
         {'name': 'test', 'query': '*', 'rules': ["normal: == 0"]}])
     assert rr.options['interval'] == '20minute'
-    assert len(rr.alerts) == 3
+    assert len(rr.alerts) == 2
 
 
 def test_alert(reactor):
