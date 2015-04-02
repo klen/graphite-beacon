@@ -320,6 +320,9 @@ Enable "hipchat" handler and set the options in your beacon configuration.
 {
     ...
     "hipchat": {
+        // (optional) Custom HipChat URL
+        "url": 'https://api.custom.hipchat.my',
+
         "room": "myroom",
         "key": "mykey"
     }
@@ -434,6 +437,7 @@ Contributors
 * Cody Soyland (https://github.com/codysoyland)
 * George Ionita (https://github.com/georgeionita)
 * James Yuzawa (https://github.com/yuzawa-san)
+* Nick Pillitteri (https://github.com/56quarters)
 * Niku Toivola (https://github.com/nikut)
 * Raine Virta (https://github.com/raine)
 * Thomas Clavier (https://github.com/tclavier)

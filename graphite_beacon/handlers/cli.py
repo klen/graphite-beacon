@@ -13,12 +13,10 @@ class CliHandler(AbstractHandler):
         'alerts_whitelist': [],
     }
 
-
     def init_handler(self):
         self.commandTemplate = self.options.get('command')
         self.whitelist = self.options.get('alerts_whitelist')
         assert self.commandTemplate, 'Command line command is not defined.'
-
 
     def _substituteVariables(self, command, level, *args, **kwargs):
         '''
@@ -30,7 +28,7 @@ class CliHandler(AbstractHandler):
             '${level}': str(level),
             '${name}': '"' + str(name) + '"',
             '${value}': str(value),
-            '${limit_value}': str(kwargs['rule']['value']),
+            '${limit_value}': str(kwargs.get('rule', {}).get('value', '')),
         }
 
         result = command
@@ -38,7 +36,6 @@ class CliHandler(AbstractHandler):
             result = result.replace(pattern, value)
 
         return result
-
 
     def notify(self, level, *args, **kwargs):
         LOGGER.debug("Handler (%s) %s", self.name, level)
@@ -51,5 +48,10 @@ class CliHandler(AbstractHandler):
         # Run only for whitelisted names if specified
         if not self.whitelist or getAlertName(*args) in self.whitelist:
             command = self._substituteVariables(self.commandTemplate, level, *args, **kwargs)
-            subprocess.Popen(command, shell = True, stdin = None, stdout = None, stderr = None, close_fds = True)
-
+            subprocess.Popen(
+                command,
+                shell=True,
+                stdin=None,
+                stdout=None,
+                stderr=None,
+                close_fds=True)

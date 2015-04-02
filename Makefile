@@ -64,7 +64,7 @@ upload: clean
 BUILD=$(CURDIR)/build
 TARGET=/opt/graphite/beacon
 PACKAGE_POSTFIX?=
-PACKAGE_VERSION?=$(shell git describe --tags `git rev-list master --tags --max-count=1`) 
+PACKAGE_VERSION?=$(shell git describe --tags --abbrev=0 `git rev-list master --tags --max-count=1`) 
 PACKAGE_NAME="graphite-beacon"
 PACKAGE_FULLNAME=$(PACKAGE_NAME)$(PACKAGE_POSTFIX)
 PACKAGE_MAINTAINER="Kirill Klenov <horneds@gmail.com>"
@@ -90,7 +90,8 @@ deb: clean
 	    --before-remove $(CURDIR)/debian/before_remove.sh \
 	    --after-install $(CURDIR)/debian/after_install.sh \
 	    -C $(CURDIR)/build \
-	    -d "python2.7" \
+	    -d "python" \
+	    -d "python-pip" \
 	    opt etc
 	for name in *.deb; do \
 	    [ -f bintray ] && curl -T "$$name" -uklen:`cat bintray` https://api.bintray.com/content/klen/deb/graphite-beacon/all/$$name ; \

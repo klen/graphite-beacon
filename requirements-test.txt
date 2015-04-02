@@ -1,6 +1,6 @@
 -r requirements.txt
-
 -e .
+
 ipdb
 mock
 pytest
