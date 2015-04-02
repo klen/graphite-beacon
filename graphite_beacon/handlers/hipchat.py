@@ -10,6 +10,7 @@ class HipChatHandler(AbstractHandler):
 
     # Default options
     defaults = {
+        'url': 'https://api.hipchat.com',
         'room': None,
         'key': None,
     }
@@ -38,5 +39,6 @@ class HipChatHandler(AbstractHandler):
             'message_format': 'text',
         }
 
-        yield self.client.fetch('https://api.hipchat.com/v2/room/{room}/notification?auth_token={token}'.format(room=self.room, token=self.key),
+        yield self.client.fetch('{url}/v2/room/{room}/notification?auth_token={token}'.format(
+            url=self.options.url, room=self.room, token=self.key),
             headers={'Content-Type': 'application/json'}, method='POST', body=json.dumps(data))
