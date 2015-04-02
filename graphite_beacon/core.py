@@ -126,6 +126,16 @@ class Reactor(object):
             handler.notify(level, alert, value, target=target, ntype=ntype, rule=rule)
 
 
+_LOG_LEVELS = {
+    'DEBUG': logging.DEBUG,
+    'INFO': logging.INFO,
+    'WARN': logging.WARN,
+    'WARNING': logging.WARNING,
+    'ERROR': logging.ERROR,
+    'CRITICAL': logging.CRITICAL
+}
+
+
 def _get_numeric_log_level(level):
     """Convert a textual log level to the numeric constants expected by the
     :meth:`logging.Logger.setLevel` method.
@@ -139,5 +149,8 @@ def _get_numeric_log_level(level):
     :rtype: int
     """
     if not isinstance(level, int):
-        return logging._levelNames[str(level).upper()]
+        try:
+            return _LOG_LEVELS[str(level).upper()]
+        except KeyError:
+            raise ValueError("Unknown log level: %s" % level)
     return level
