@@ -2,6 +2,7 @@ import os
 from re import compile as re, M
 
 import json
+import logging
 from tornado import ioloop, log
 
 from .alerts import BaseAlert
@@ -56,7 +57,7 @@ class Reactor(object):
         for config in self.options.pop('include', []):
             self.include_config(config)
 
-        LOGGER.setLevel(self.options.get('logging', 'info').upper())
+        LOGGER.setLevel(_get_numeric_log_level(self.options.get('logging', 'info')))
         registry.clean()
 
         self.handlers = {'warning': set(), 'critical': set(), 'normal': set()}
@@ -123,3 +124,33 @@ class Reactor(object):
 
         for handler in self.handlers.get(level, []):
             handler.notify(level, alert, value, target=target, ntype=ntype, rule=rule)
+
+
+_LOG_LEVELS = {
+    'DEBUG': logging.DEBUG,
+    'INFO': logging.INFO,
+    'WARN': logging.WARN,
+    'WARNING': logging.WARNING,
+    'ERROR': logging.ERROR,
+    'CRITICAL': logging.CRITICAL
+}
+
+
+def _get_numeric_log_level(name):
+    """Convert a textual log level to the numeric constants expected by the
+    :meth:`logging.Logger.setLevel` method.
+
+    This is required for compatibility with Python 2.6 where there is no conversion
+    performed by the ``setLevel`` method. In Python 2.7 textual names are converted
+    to numeric constants automatically.
+
+    :param basestring name: Textual log level name
+    :return: Numeric log level constant
+    :rtype: int
+    """
+    name = str(name).upper()
+
+    try:
+        return _LOG_LEVELS[name]
+    except KeyError:
+        raise ValueError("Unknown level: %s" % name)
