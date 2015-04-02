@@ -64,7 +64,7 @@ upload: clean
 BUILD=$(CURDIR)/build
 TARGET=/opt/graphite/beacon
 PACKAGE_POSTFIX?=
-PACKAGE_VERSION?=$(shell git describe --tags `git rev-list master --tags --max-count=1`) 
+PACKAGE_VERSION?=$(shell git describe --tags --abbrev=0 `git rev-list master --tags --max-count=1`) 
 PACKAGE_NAME="graphite-beacon"
 PACKAGE_FULLNAME=$(PACKAGE_NAME)$(PACKAGE_POSTFIX)
 PACKAGE_MAINTAINER="Kirill Klenov <horneds@gmail.com>"
