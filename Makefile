@@ -90,7 +90,8 @@ deb: clean
 	    --before-remove $(CURDIR)/debian/before_remove.sh \
 	    --after-install $(CURDIR)/debian/after_install.sh \
 	    -C $(CURDIR)/build \
-	    -d "python2.7" \
+	    -d "python" \
+	    -d "python-pip" \
 	    opt etc
 	for name in *.deb; do \
 	    [ -f bintray ] && curl -T "$$name" -uklen:`cat bintray` https://api.bintray.com/content/klen/deb/graphite-beacon/all/$$name ; \
