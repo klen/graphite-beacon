@@ -10,7 +10,7 @@ Features:
 - Simplest installation (one python package dependency);
 - No software dependencies (Databases, AMQP and etc);
 - Light and full asyncronous;
-- SMTP, Hipchat, Slack, HTTP handlers (Please make a request for additional handlers);
+- SMTP, Hipchat, Slack, Pagerduty, HTTP handlers (Please make a request for additional handlers);
 - Easy configurable and support "historical values"
 
 [![Build status](http://img.shields.io/travis/klen/graphite-beacon.svg?style=flat-square)](http://travis-ci.org/klen/graphite-beacon)
@@ -23,7 +23,7 @@ Features:
 Example:
 ```js
 {
-"graphite_url": "http://g.server.org"
+"graphite_url": "http://g.server.org",
 "smtp": {
     "from": "beacon@server.org",
     "to": ["me@gmail.com"]
@@ -45,6 +45,7 @@ Requirements
 
 - python (2.6, 2.7, 3.3, 3.4)
 - tornado
+- pygerduty
 
 
 Installation
@@ -160,7 +161,7 @@ Value units:
         // Default prefix (used for notifications)
         "prefix": "[BEACON]",
 
-        // Default handlers (log, smtp, hipchat, http, slack)
+        // Default handlers (log, smtp, hipchat, http, slack, pagerduty)
         "critical_handlers": ["log", "smtp"],
         "warning_handlers": ["log", "smtp"],
         "normal_handlers": ["log", "smtp"],
@@ -386,6 +387,22 @@ Enable handler for running command line commands and set the options in your bea
         "command": "./myscript ${level} ${name} ${value} ...",
         // optional -- if present only alerts with specified names will trigger this handler. If not present, all alerts will trigger handler
         "alerts_whitelist": ["..."]
+    }
+    ...
+}
+```
+
+### Setup PagerdutyHandler
+
+Enable "pagerduty" handler and set the options in your beacon configuration.
+
+```js
+{
+    ...
+    "pagerduty": {
+        "subdomain": "yoursubdomain",
+        "apitoken": "apitoken",
+        "service_key": "servicekey",
     }
     ...
 }
