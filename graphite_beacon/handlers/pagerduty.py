@@ -1,4 +1,4 @@
-import pygerduty
+import json
 from tornado import gen, httpclient as hc
 
 from . import AbstractHandler, LOGGER
@@ -29,20 +29,29 @@ class PagerdutyHandler(AbstractHandler):
         LOGGER.debug("Handler (%s) %s", self.name, level)
         message = self.get_short(level, alert, value, target=target, ntype=ntype, rule=rule)
 
-        pager = pygerduty.PagerDuty(self.subdomain, self.apitoken)
-        LOGGER.debug('message:{}'.format(message))
+        LOGGER.debug('message1:{}'.format(message))
         if level == 'normal':
-            pager.resolve_incident(
-                service_key=self.service_key,
-                incident_key=rule,
-                description=message,
-                details=message,
-            )
+            event_type = 'resolve'
         else:
-            pager.trigger_incident(
-                service_key=self.service_key,
-                incident_key=rule,
-                description=message,
-                details=message,
-                client_url='graphite-beacon'
-            )
+            event_type = 'trigger'
+
+        headers = {
+            "Content-type": "application/json",
+        }
+
+        data = {
+            "service_key": self.service_key,
+            "event_type": event_type,
+            "description": message,
+            "details": message,
+            "incident_key": rule,
+            "client": 'graphite-beacon',
+            "client_url": None
+        }
+
+        yield self.client.fetch(
+            "https://events.pagerduty.com/generic/2010-04-15/create_event.json",
+            data=json.dumps(data),
+            headers=headers,
+            method='POST'
+        )
