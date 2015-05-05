@@ -28,7 +28,6 @@ class PagerdutyHandler(AbstractHandler):
     def notify(self, level, alert, value, target=None, ntype=None, rule=None):
         LOGGER.debug("Handler (%s) %s", self.name, level)
         message = self.get_short(level, alert, value, target=target, ntype=ntype, rule=rule)
-
         LOGGER.debug('message1:{}'.format(message))
         if level == 'normal':
             event_type = 'resolve'
@@ -44,14 +43,14 @@ class PagerdutyHandler(AbstractHandler):
             "event_type": event_type,
             "description": message,
             "details": message,
-            "incident_key": rule,
+            "incident_key": rule['raw'],
             "client": 'graphite-beacon',
             "client_url": None
         }
 
         yield self.client.fetch(
             "https://events.pagerduty.com/generic/2010-04-15/create_event.json",
-            data=json.dumps(data),
+            body=json.dumps(data),
             headers=headers,
             method='POST'
         )
