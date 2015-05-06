@@ -43,11 +43,10 @@ class PagerdutyHandler(AbstractHandler):
             "event_type": event_type,
             "description": message,
             "details": message,
-            "incident_key": rule['raw'],
+            "incident_key":  rule['raw'] if rule is not None else 'graphite connect error',
             "client": 'graphite-beacon',
             "client_url": None
         }
-
         yield self.client.fetch(
             "https://events.pagerduty.com/generic/2010-04-15/create_event.json",
             body=json.dumps(data),
