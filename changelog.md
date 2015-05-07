@@ -1,3 +1,8 @@
+## 0.23.0
+- Support systemd
+- Update CLI handler
+- Add PagerDuty handler
+
 ## 0.20.0
 
 - Add Slack (https://slack.com) handler
