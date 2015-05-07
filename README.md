@@ -76,7 +76,7 @@ There is an ansible role to install the package: https://github.com/Stouts/Stout
 
 Build a config.json file and run :
 
-    docker run -v /path/to/config.json:/config.json deliverous/graphite-beacon
+    docker run -v /path/to/config.json:/srv/alerting/etc/config.json deliverous/graphite-beacon
 
 
 Usage
