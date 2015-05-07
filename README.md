@@ -10,7 +10,7 @@ Features:
 - Simplest installation (one python package dependency);
 - No software dependencies (Databases, AMQP and etc);
 - Light and full asyncronous;
-- SMTP, Hipchat, Slack, HTTP handlers (Please make a request for additional handlers);
+- SMTP, Hipchat, Slack, Pagerduty, HTTP handlers (Please make a request for additional handlers);
 - Easy configurable and support "historical values"
 
 [![Build status](http://img.shields.io/travis/klen/graphite-beacon.svg?style=flat-square)](http://travis-ci.org/klen/graphite-beacon)
@@ -23,7 +23,7 @@ Features:
 Example:
 ```js
 {
-"graphite_url": "http://g.server.org"
+"graphite_url": "http://g.server.org",
 "smtp": {
     "from": "beacon@server.org",
     "to": ["me@gmail.com"]
@@ -76,7 +76,7 @@ There is an ansible role to install the package: https://github.com/Stouts/Stout
 
 Build a config.json file and run :
 
-    docker run -v /path/to/config.json:/config.json deliverous/graphite-beacon
+    docker run -v /path/to/config.json:/srv/alerting/etc/config.json deliverous/graphite-beacon
 
 
 Usage
@@ -126,7 +126,7 @@ Value units:
         "graphite_url": "http://localhost",
 
         // HTTP AUTH username
-        "auth_usernamename": null,
+        "auth_username": null,
 
         // HTTP AUTH password
         "auth_password": null,
@@ -160,7 +160,7 @@ Value units:
         // Default prefix (used for notifications)
         "prefix": "[BEACON]",
 
-        // Default handlers (log, smtp, hipchat, http, slack)
+        // Default handlers (log, smtp, hipchat, http, slack, pagerduty)
         "critical_handlers": ["log", "smtp"],
         "warning_handlers": ["log", "smtp"],
         "normal_handlers": ["log", "smtp"],
@@ -391,6 +391,22 @@ Enable handler for running command line commands and set the options in your bea
 }
 ```
 
+### Setup PagerdutyHandler
+
+Enable "pagerduty" handler and set the options in your beacon configuration.
+
+```js
+{
+    ...
+    "pagerduty": {
+        "subdomain": "yoursubdomain",
+        "apitoken": "apitoken",
+        "service_key": "servicekey",
+    }
+    ...
+}
+```
+
 ### Command line
 
 ```
@@ -442,6 +458,7 @@ Contributors
 * Raine Virta (https://github.com/raine)
 * Thomas Clavier (https://github.com/tclavier)
 * dugeem (https://github.com/dugeem)
+* Olli-Pekka Puolitaival (https://github.com/OPpuolitaival)
 
 License
 --------

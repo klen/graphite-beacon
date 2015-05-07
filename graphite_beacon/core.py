@@ -125,7 +125,6 @@ class Reactor(object):
         for handler in self.handlers.get(level, []):
             handler.notify(level, alert, value, target=target, ntype=ntype, rule=rule)
 
-
 _LOG_LEVELS = {
     'DEBUG': logging.DEBUG,
     'INFO': logging.INFO,
