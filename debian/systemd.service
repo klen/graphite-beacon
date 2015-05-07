@@ -1,0 +1,10 @@
+[Unit]
+Description=graphite-beacon example
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+User=nobody
+Group=daemon
+ExecStart=/usr/bin/python -m graphite_beacon.app --config=/etc/graphite-beacon.json

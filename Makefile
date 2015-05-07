@@ -71,9 +71,10 @@ PACKAGE_MAINTAINER="Kirill Klenov <horneds@gmail.com>"
 PACKAGE_DESCRIPTION="Simple allerting system for Graphite metrics."
 PACKAGE_URL=https://github.com/klen/graphite-beacon.git
 deb: clean
-	@mkdir -p $(BUILD)/etc/init $(BUILD)/$(TARGET)
+	@mkdir -p $(BUILD)/etc/init $(BUILD)/etc/systemd/system $(BUILD)/$(TARGET)
 	@cp -r $(CURDIR)/graphite_beacon debian/config.json $(BUILD)/$(TARGET)/.
 	@cp $(CURDIR)/debian/upstart.conf $(BUILD)/etc/init/graphite-beacon.conf
+	@cp $(CURDIR)/debian/systemd.service $(BUILD)/etc/systemd/system/graphite-beacon.service
 	@fpm -s dir -t deb -a all \
 	    -n $(PACKAGE_FULLNAME) \
 	    -v $(PACKAGE_VERSION) \
@@ -85,6 +86,7 @@ deb: clean
 	    --deb-user root \
 	    --deb-group root \
 	    --config-files /etc/init/graphite-beacon.conf \
+	    --config-files /etc/systemd/system/graphite-beacon.service \
 	    --config-files /opt/graphite/beacon/config.json \
 	    --before-install $(CURDIR)/debian/before_install.sh \
 	    --before-remove $(CURDIR)/debian/before_remove.sh \

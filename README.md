@@ -458,6 +458,7 @@ Contributors
 * Raine Virta (https://github.com/raine)
 * Thomas Clavier (https://github.com/tclavier)
 * dugeem (https://github.com/dugeem)
+* Olli-Pekka Puolitaival (https://github.com/OPpuolitaival)
 
 License
 --------
