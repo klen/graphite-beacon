@@ -18,14 +18,13 @@ class CliHandler(AbstractHandler):
         self.whitelist = self.options.get('alerts_whitelist')
         assert self.commandTemplate, 'Command line command is not defined.'
 
-    def _substituteVariables(self, command, level, *args, **kwargs):
+    def _substituteVariables(self, command, level, name, value, target=None, **kwargs):
         '''
         Substitute variables in command fragments by values e.g. ${level} => 'warning'
         '''
-        name, value = args
-
         substitutes = {
             '${level}': str(level),
+            '${target}': str(target),
             '${name}': '"' + str(name) + '"',
             '${value}': str(value),
             '${limit_value}': str(kwargs.get('rule', {}).get('value', '')),
