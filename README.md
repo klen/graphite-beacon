@@ -126,7 +126,7 @@ Value units:
         "graphite_url": "http://localhost",
 
         // HTTP AUTH username
-        "auth_usernamename": null,
+        "auth_username": null,
 
         // HTTP AUTH password
         "auth_password": null,
