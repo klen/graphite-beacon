@@ -154,8 +154,12 @@ Value units:
         "logging": "info",
 
         // Default method (average, last_value, sum).
-        // Can be redfined for each alert.
+        // Can be redefined for each alert.
         "method": "average",
+
+        // Default alert to send when no data received (normal = no alert)
+        // Can be redefined for each alert
+        "no_data": "critical",
 
         // Default prefix (used for notifications)
         "prefix": "[BEACON]",
@@ -213,6 +217,9 @@ At the moment **Graphite-beacon** supports two type of alerts:
 
       // (optional) Alert interval [eg. 15second, 30minute, 2hour, 1day, 3month, 1year]
       "interval": "1minute",
+
+      // (optional) What kind of alert to send when no data received (normal = no alert)
+      "no_data": "warning",
 
       // (required) Alert rules
       // Rule format: "{level}: {operator} {value}"
