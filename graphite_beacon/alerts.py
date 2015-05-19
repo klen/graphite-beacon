@@ -94,6 +94,10 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         self.time_window = interval_to_graphite(
             options.get('time_window', options.get('interval', self.reactor.options['interval'])))
 
+        self.until = interval_to_graphite(
+            options.get('until', self.reactor.options['until'])
+        )
+
         self._format = options.get('format', self.reactor.options['format'])
         self.request_timeout = options.get(
             'request_timeout', self.reactor.options['request_timeout'])
@@ -189,10 +193,7 @@ class GraphiteAlert(BaseAlert):
         self.auth_username = self.reactor.options.get('auth_username')
         self.auth_password = self.reactor.options.get('auth_password')
 
-        query = escape.url_escape(self.query)
-        self.url = "%(base)s/render/?target=%(query)s&rawData=true&from=-%(time_window)s" % {
-            'base': self.reactor.options['graphite_url'], 'query': query,
-            'time_window': self.time_window}
+        self.url = self._graphite_url(self.query, raw_data=True)
         LOGGER.debug('%s: url = %s' % (self.name, self.url))
 
     @gen.coroutine
@@ -217,10 +218,16 @@ class GraphiteAlert(BaseAlert):
             self.waiting = False
 
     def get_graph_url(self, target, graphite_url=None):
-        query = escape.url_escape(target)
-        return "%(base)s/render/?target=%(query)s&from=-%(time_window)s" % {
-            'base': graphite_url or self.reactor.options['graphite_url'], 'query': query,
-            'time_window': self.time_window}
+        return self._graphite_url(target, graphite_url=graphite_url, raw_data=False)
+
+    def _graphite_url(self, query, raw_data=False, graphite_url=None):
+        query = escape.url_escape(query)
+        graphite_url = graphite_url or self.reactor.options['graphite_url']
+        url = "{base}/render/?target={query}&from=-{time_window}&until=-{until}".format(
+            base=graphite_url, query=query, time_window=self.time_window, until=self.until)
+        if raw_data:
+            url = "{0}&rawData=true".format(url)
+        return url
 
 
 class URLAlert(BaseAlert):

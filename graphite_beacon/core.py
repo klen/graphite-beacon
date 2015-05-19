@@ -29,6 +29,7 @@ class Reactor(object):
         'graphite_url': 'http://localhost',
         'history_size': '1day',
         'interval': '10minute',
+        'until': '0second',
         'logging': 'info',
         'method': 'average',
         'normal_handlers': ['log', 'smtp'],
