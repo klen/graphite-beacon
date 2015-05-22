@@ -40,5 +40,5 @@ class HipChatHandler(AbstractHandler):
         }
 
         yield self.client.fetch('{url}/v2/room/{room}/notification?auth_token={token}'.format(
-            url=self.options.url, room=self.room, token=self.key),
+            url=self.options.get('url'), room=self.room, token=self.key),
             headers={'Content-Type': 'application/json'}, method='POST', body=json.dumps(data))
