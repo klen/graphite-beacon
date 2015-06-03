@@ -2,6 +2,7 @@ import os
 from re import compile as re, M
 
 import json
+import yaml
 import logging
 from tornado import ioloop, log
 
@@ -82,7 +83,7 @@ class Reactor(object):
             try:
                 with open(config) as fconfig:
                     source = COMMENT_RE.sub("", fconfig.read())
-                    config = json.loads(source)
+                    config = yaml.load(source)
                     self.options.update(config)
             except (IOError, ValueError):
                 LOGGER.error('Invalid config file: %s' % config)
