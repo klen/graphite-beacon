@@ -1,4 +1,10 @@
+## 0.24.0
+
+- Support YAML in config files.
+  You should have install `yaml` and use `<filename>.yml` as config files.
+
 ## 0.23.0
+
 - Support systemd
 - Update CLI handler
 - Add PagerDuty handler

@@ -415,7 +415,7 @@ Enable "pagerduty" handler and set the options in your beacon configuration.
 
   Options:
 
-    --config                         Path to an configuration file (YAML)
+    --config                         Path to an configuration file (JSON/YAML)
                                     (default config.json)
     --graphite_url                   Graphite URL (default http://localhost)
     --help                           show this help information

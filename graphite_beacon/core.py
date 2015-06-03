@@ -2,13 +2,17 @@ import os
 from re import compile as re, M
 
 import json
-import yaml
 import logging
 from tornado import ioloop, log
 
 from .alerts import BaseAlert
 from .utils import parse_interval
 from .handlers import registry
+
+try:
+    import yaml
+except ImportError:
+    yaml = None
 
 
 LOGGER = log.gen_log
@@ -80,10 +84,11 @@ class Reactor(object):
     def include_config(self, config):
         LOGGER.info('Load configuration: %s' % config)
         if config:
+            loader = yaml.load if yaml and config.endswith('.yml') else json.loads
             try:
                 with open(config) as fconfig:
                     source = COMMENT_RE.sub("", fconfig.read())
-                    config = yaml.load(source)
+                    config = loader(source)
                     self.options.update(config)
             except (IOError, ValueError):
                 LOGGER.error('Invalid config file: %s' % config)
