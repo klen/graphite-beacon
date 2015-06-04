@@ -3,7 +3,7 @@ from re import compile as re, M
 
 import json
 import logging
-from tornado import ioloop, log
+from tornado import ioloop, log, web
 
 from .alerts import BaseAlert
 from .utils import parse_interval
@@ -15,8 +15,17 @@ LOGGER = log.gen_log
 COMMENT_RE = re('//\s+.*$', M)
 
 
-class Reactor(object):
 
+class Reactor(object):
+    class UpdateHandler(web.RequestHandler):
+        def __init__(self, react):
+            super(self)
+            self.reactor = react
+        def get(self):
+            self.write("you did it")
+        def post(self):
+            # Database Call
+            self.reactor.reinit()
     """ Class description. """
 
     defaults = {
@@ -50,9 +59,10 @@ class Reactor(object):
 
     def reinit(self, *args, **options):
         LOGGER.info('Read configuration')
-
+        
+        # Update this to make DB and config.json fusion more in the way that we want it
         self.options.update(options)
-
+        
         self.include_config(self.options.get('config'))
         for config in self.options.pop('include', []):
             self.include_config(config)
@@ -103,6 +113,12 @@ class Reactor(object):
         if self.options.get('pidfile'):
             with open(self.options.get('pidfile'), 'w') as fpid:
                 fpid.write(str(os.getpid()))
+        application = web.Application(
+            [
+                (r'/', self.UpdateHandler)
+            ]
+        )
+        application.listen(3030)
         self.callback.start()
         LOGGER.info('Reactor starts')
         self.loop.start()
