@@ -203,9 +203,11 @@ class GraphiteAlert(BaseAlert):
         else:
             self.waiting = True
             try:
-                response = yield self.client.fetch(self.url, auth_username=self.graphite_username,
-                                                   auth_password=self.graphite_password,
-                                                   request_timeout=self.request_timeout)
+                response = yield self.client.fetch(
+                    self.url,
+                    auth_username=self.graphite_username,
+                    auth_password=self.graphite_password,
+                    request_timeout=self.request_timeout)
                 records = (GraphiteRecord(line.decode('utf-8')) for line in response.buffer)
                 data = [(None if record.empty else getattr(record, self.method), record.target) for record in records]
                 if len(data) == 0:
@@ -235,9 +237,10 @@ class URLAlert(BaseAlert):
         else:
             self.waiting = True
             try:
-                response = yield self.client.fetch(self.query,
-                                                   method=self.options.get('method', 'GET'),
-                                                   request_timeout=self.request_timeout)
+                response = yield self.client.fetch(
+                    self.query,
+                    method=self.options.get('method', 'GET'),
+                    request_timeout=self.request_timeout)
                 self.check([(response.code, self.query)])
                 self.notify('normal', 'Metrics are loaded', target='loading')
 
