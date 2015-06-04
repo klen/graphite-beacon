@@ -18,8 +18,7 @@ COMMENT_RE = re('//\s+.*$', M)
 
 class Reactor(object):
     class UpdateHandler(web.RequestHandler):
-        def __init__(self, react):
-            super(self)
+        def initialize(self, react):
             self.reactor = react
         def get(self):
             self.write("you did it")
@@ -62,7 +61,7 @@ class Reactor(object):
         
         # Update this to make DB and config.json fusion more in the way that we want it
         self.options.update(options)
-        
+        print "reinit called"
         self.include_config(self.options.get('config'))
         for config in self.options.pop('include', []):
             self.include_config(config)
@@ -115,7 +114,7 @@ class Reactor(object):
                 fpid.write(str(os.getpid()))
         application = web.Application(
             [
-                (r'/', self.UpdateHandler)
+                (r'/', self.UpdateHandler, self)
             ]
         )
         application.listen(3030)
