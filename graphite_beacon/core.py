@@ -19,7 +19,7 @@ COMMENT_RE = re('//\s+.*$', M)
 class Reactor(object):
     class UpdateHandler(web.RequestHandler):
         def initialize(self, react):
-            self.reactor = react['react']
+            self.reactor = react
         def get(self):
             self.write("you did it")
         def post(self):
