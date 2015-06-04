@@ -18,11 +18,14 @@ COMMENT_RE = re('//\s+.*$', M)
 
 class Reactor(object):
     class UpdateHandler(web.RequestHandler):
+        def __init__(self, react):
+            super(self)
+            self.reactor = react
         def get(self):
             self.write("you did it")
         def post(self):
             # Database Call
-            reinit
+            self.reactor.reinit()
     """ Class description. """
 
     defaults = {
