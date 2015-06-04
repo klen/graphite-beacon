@@ -115,7 +115,7 @@ class Reactor(object):
                 fpid.write(str(os.getpid()))
         application = web.Application(
             [
-                (r'/', UpdateHandler)
+                (r'/', self.UpdateHandler)
             ]
         )
         application.listen(3030)
