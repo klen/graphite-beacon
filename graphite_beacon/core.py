@@ -19,7 +19,7 @@ COMMENT_RE = re('//\s+.*$', M)
 class Reactor(object):
     class UpdateHandler(web.RequestHandler):
         def initialize(self, react):
-            self.reactor = react
+            self.reactor = react['react']
         def get(self):
             self.write("you did it")
         def post(self):
@@ -114,7 +114,7 @@ class Reactor(object):
                 fpid.write(str(os.getpid()))
         application = web.Application(
             [
-                (r'/', self.UpdateHandler, self)
+                (r'/', self.UpdateHandler, dict('react'=self))
             ]
         )
         application.listen(3030)
