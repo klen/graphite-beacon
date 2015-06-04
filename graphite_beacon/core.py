@@ -114,7 +114,7 @@ class Reactor(object):
                 fpid.write(str(os.getpid()))
         application = web.Application(
             [
-                (r'/', self.UpdateHandler, dict('react'=self))
+                (r'/', self.UpdateHandler, dict(react=self))
             ]
         )
         application.listen(3030)
