@@ -48,6 +48,10 @@ class Reactor(object):
             self.reactor.reinit()
             conn = psycopg2.connect(self.reactor.options.get('database'))
             cur  = conn.cursor()
+            cur.execute("INSERT INTO alerts (name, query, source, format, interval, history_size, rules) VALUES (%s, %s, %s, %s, %s, %s, %s", (info['name'], info['query'], info['source'], info['format'], info['interval'], info['history_size'], ', '.join(info['rules'])))
+            conn.commit()
+            cur.close()
+            conn.close()
             
         def get(self):
             self.write("you did it")
