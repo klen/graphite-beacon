@@ -3,6 +3,7 @@ from re import compile as re, M
 
 import json
 import logging
+import psycopg2
 from tornado import ioloop, log, web
 
 from .alerts import BaseAlert
@@ -18,13 +19,38 @@ COMMENT_RE = re('//\s+.*$', M)
 
 class Reactor(object):
     class UpdateHandler(web.RequestHandler):
+        #modify self.options
+        #self.options.get('alerts')
         def initialize(self, react):
             self.reactor = react
+        #change
+        def put(self):
+            info = json.loads(self.request.body)
+            for i in range(len(self.reactor.options.get('alerts'))):
+                if self.reactor.options.get('alerts')[i].get('query') == info.get('query'):
+                    self.reactor.options.get('alerts')[i] = info
+                    break
+            self.reactor.reinit()
+            
+        #remove
+        def delete(self):
+            info = json.loads(self.request.body)
+            for i in range(len(self.reactor.options.get('alerts'))):
+                if self.reactor.options.get('alerts')[i].get('query') == info.get('query'):
+                    break
+            self.reactor.options.get('alerts').pop(i)
+            self.reactor.reinit()
+            
+        #add new
+        def post(self):
+            info = json.loads(self.request.body)
+            self.reactor.options.get('alerts').append(info)
+            self.reactor.reinit()
+            conn = psycopg2.connect(self.reactor.options.get('database'))
+            cur  = conn.cursor()
+            
         def get(self):
             self.write("you did it")
-        def post(self):
-            # Database Call
-            self.reactor.reinit()
     """ Class description. """
 
     defaults = {
