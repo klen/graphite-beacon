@@ -94,6 +94,12 @@ class Reactor(object):
         self.alerts = set()
         self.loop = ioloop.IOLoop.instance()
         self.options = dict(self.defaults)
+        conn = psycopg2.connect(self.reactor.options.get('database'))
+        cur  = conn.cursor()
+        cur.execute("CREATE TABLE IF NOT EXISTS alerts (query text, name text, source text, format text, interval text, history_size text, rules text);")
+        conn.commit()
+        cur.close()
+        conn.close()
         self.reinit(**options)
         self.callback = ioloop.PeriodicCallback(
             self.repeat, parse_interval(self.options['repeat_interval']))
