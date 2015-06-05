@@ -31,6 +31,12 @@ class Reactor(object):
                     self.reactor.options.get('alerts')[i] = info
                     break
             self.reactor.reinit()
+            conn = psycopg2.connect(self.reactor.options.get('database'))
+            cur  = conn.cursor()
+            cur.execute("UPDATE alerts SET name = %s, source = %s, format = %s, interval = %s, history_size = %s, rules = %s WHERE query = %s", (info['name'], info['source'], info['format'], info['interval'], info['history_size'], ', '.join(info['rules'], info['query'])))
+            conn.commit()
+            cur.close()
+            conn.close()
             
         #remove
         def delete(self):
@@ -40,6 +46,12 @@ class Reactor(object):
                     break
             self.reactor.options.get('alerts').pop(i)
             self.reactor.reinit()
+            conn = psycopg2.connect(self.reactor.options.get('database'))
+            cur  = conn.cursor()
+            cur.execute("DELETE FROM alerts WHERE name = %s, query = %s, source = %s, format = %s, interval = %s, history_size = %s, rules = %s", (info['name'], info['query'], info['source'], info['format'], info['interval'], info['history_size'], ', '.join(info['rules'])))
+            conn.commit()
+            cur.close()
+            conn.close()
             
         #add new
         def post(self):
