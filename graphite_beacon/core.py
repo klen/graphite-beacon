@@ -111,7 +111,6 @@ class Reactor(object):
         conn = psycopg2.connect(self.options.get('database'))
         cur  = conn.cursor()
         cur.execute("CREATE TABLE IF NOT EXISTS alerts (query text, name text, source text, format text, interval text, history_size text, rules text);")
-        """       
         cur.execute("SELECT * FROM TABLE;")
         alertList = cur.fetchall()
         for alert in alertList:
@@ -121,7 +120,7 @@ class Reactor(object):
                     self.options.append(alert)
                     break
             else:
-        """        
+                self.options.append(alert)
         conn.commit()
         cur.close()
         conn.close()
