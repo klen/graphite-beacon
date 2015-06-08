@@ -34,7 +34,7 @@ class Reactor(object):
             conn = psycopg2.connect(self.reactor.options.get('database'))
             cur  = conn.cursor()
            # try:
-            cur.execute("UPDATE alerts SET name = %s, source = %s, format = %s, interval = %s, history_size = %s, rules = %s WHERE query = %s;", (info['name'], info['source'], info['format'], info['interval'], info['history_size'], ', '.join(info['rules'], info['query'])))
+            cur.execute("UPDATE alerts SET name = %s, source = %s, format = %s, interval = %s, history_size = %s, rules = %s WHERE query = %s;", (info['name'], info['source'], info['format'], info['interval'], info['history_size'], ', '.join(info['rules']), info['query'])))
             #except Exception as e:
             #    print e
             #    self.write(e)
