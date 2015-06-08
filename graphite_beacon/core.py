@@ -36,6 +36,7 @@ class Reactor(object):
             try:
                 cur.execute("UPDATE alerts SET name = %s, source = %s, format = %s, interval = %s, history_size = %s, rules = %s WHERE query = %s;", (info['name'], info['source'], info['format'], info['interval'], info['history_size'], ', '.join(info['rules'], info['query'])))
             except Exception as e:
+                print e
                 self.write(e)
             conn.commit()
             cur.close()
