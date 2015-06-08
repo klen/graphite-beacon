@@ -37,7 +37,7 @@ class Reactor(object):
                 cur.execute("UPDATE alerts SET name = %s, source = %s, format = %s, interval = %s, history_size = %s, rules = %s WHERE query = %s;", (info['name'], info['source'], info['format'], info['interval'], info['history_size'], ', '.join(info['rules'], info['query'])))
             except Exception as e:
                 print e
-                self.write(e)
+            #    self.write(e)
             conn.commit()
             cur.close()
             conn.close()
@@ -56,7 +56,8 @@ class Reactor(object):
             try:
                 cur.execute("DELETE FROM alerts WHERE name = %s AND query = %s AND source = %s AND format = %s AND interval = %s AND history_size = %s AND rules = %s;", (info['name'], info['query'], info['source'], info['format'], info['interval'], info['history_size'], ', '.join(info['rules'])))
             except Exception as e:
-                self.write(e)
+                print e
+            #    self.write(e)
             conn.commit()
             cur.close()
             conn.close()
