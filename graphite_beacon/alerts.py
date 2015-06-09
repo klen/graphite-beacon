@@ -167,7 +167,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
             history = self.history[target]
             if len(history) < self.history_size:
                 return None
-            rvalue = sum(history) / len(history)
+            rvalue = sum(history) / float(len(history))
 
         rvalue = expr['mod'](rvalue)
         return rvalue

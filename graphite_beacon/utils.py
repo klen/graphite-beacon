@@ -52,7 +52,7 @@ RULE_TOKENIZER = make_tokenizer(
     [
         (u'Level', (r'(critical|warning|normal)',)),
         (u'Historical', (HISTORICAL,)),
-        (u'Comparator', (r'({0})'.format('|'.join(COMPARATORS.keys())),)),
+        (u'Comparator', (r'({0})'.format('|'.join(sorted(COMPARATORS.keys(), reverse=True))),)),
         (u'LogicalOperator', (r'({0})'.format('|'.join(LOGICAL_OPERATORS.keys())),)),
         (u'Sep', (r':',)),
         (u'Operator', (r'(?:\*|\+|-|\/)',)),

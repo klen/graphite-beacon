@@ -142,13 +142,11 @@ def test_multiexpressions(reactor):
     from graphite_beacon.alerts import BaseAlert
 
     alert = BaseAlert.get(
-        reactor, name="Test", query="*", rules=[
-            "warning: > historical * 1.05 AND > 70"])
+        reactor, name="Test", query="*", rules=["warning: > historical * 1.05 AND > 70"])
     reactor.alerts = set([alert])
 
     with mock.patch.object(reactor, 'notify'):
-        # historical value will be 69.3 for the 5th and 73.5 for the 6th metrics (when we have enough history)
-        alert.check([(50, 'metric1'), (65, 'metric1'), (85, 'metric1'), (65, 'metric1'), (68, 'metric1'), (74, 'metric1')])
+        alert.check([(50, 'metric1'), (65, 'metric1'), (85, 'metric1'), (65, 'metric1'), (68, 'metric1'), (75, 'metric1')])
 
         assert reactor.notify.call_count == 1
 
@@ -156,7 +154,7 @@ def test_multiexpressions(reactor):
         assert reactor.notify.call_args_list[0][0][0] == 'warning'
         assert reactor.notify.call_args_list[0][1]['target'] == 'metric1'
 
-    assert list(alert.history['metric1']) == [85, 65, 68, 74]
+    assert list(alert.history['metric1']) == [85, 65, 68, 75]
 
 
 def test_invalid_handler(reactor):
