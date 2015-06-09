@@ -138,7 +138,8 @@ def _parse_expr(expr):
     return {'op': cond, 'value': value, 'mod': mod or IDENTITY}
 
 def parse_rule(rule):
-    level, initial_expr, exprs = _parse_rule(_tokenize_rule(rule))
+    tokens = _tokenize_rule(rule)
+    level, initial_expr, exprs = _parse_rule(tokens)
 
     result = {'level': level, 'raw': rule, 'exprs': [_parse_expr(initial_expr)]}
 

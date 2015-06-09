@@ -45,9 +45,9 @@
             {% end %}
 
             {% if target and rule %}
-                {% for expr in rule['exprs'] %}
-                    <b>Tested value:</b> {{ alert.convert(alert.get_value_for_expr(expr, target)) }}</b> <br/>
-                {% end %}
+            {% for expr in filter(lambda x: isinstance(x, dict), rule['exprs']) %}
+                <b>Tested value:</b> {{ alert.convert(alert.get_value_for_expr(expr, target)) }}</b> <br/>
+            {% end %}
             {% end %}
 
         </td>

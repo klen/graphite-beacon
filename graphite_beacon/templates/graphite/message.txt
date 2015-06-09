@@ -14,12 +14,9 @@ Target: {{ target }}
 {% if alert.history[target] %}
 History: {{ [ alert.convert(v) for v in alert.history[target][:100] ] }} {% end %}
 {% end %}
-{% if target and rule %}
-{% for expr in rule['exprs'] %}
+{% if target and rule %}{% for expr in filter(lambda x: isinstance(x, dict), rule['exprs']) %}
 <b>Tested value:</b> {{ alert.convert(alert.get_value_for_expr(expr, target)) }}</b> <br/>
-{% end %}
-{% end %}
-
+{% end %}{% end %}
 
 View the graph: {{ alert.get_graph_url(alert.query) }}
 

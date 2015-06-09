@@ -277,3 +277,12 @@ def test_html_template(reactor):
     assert len(message._payload) == 2
     _, html = message._payload
     assert 'google.com' in html.as_string()
+
+    ealert = BaseAlert.get(reactor, name='Test', query='*', rules=["critical: > 5 AND < 10"])
+    message = smtp.get_message('critical', ealert, 8, target=target, ntype='graphite', rule=ealert.rules[0])
+    assert message
+
+    assert len(message._payload) == 2
+
+
+
