@@ -50,15 +50,15 @@ LOGICAL_OPERATORS = {'AND': op.and_, 'OR': op.or_}
 
 RULE_TOKENIZER = make_tokenizer(
     [
-        (u'Level', (ur'(critical|warning|normal)',)),
+        (u'Level', (r'(critical|warning|normal)',)),
         (u'Historical', (HISTORICAL,)),
-        (u'Comparator', (ur'({0})'.format('|'.join(COMPARATORS.keys())),)),
-        (u'LogicalOperator', (ur'({0})'.format('|'.join(LOGICAL_OPERATORS.keys())),)),
-        (u'Sep', (ur':',)),
-        (u'Operator', (ur'(?:\*|\+|-|\/)',)),
-        (u'Number', (ur'(\d+\.?\d*)',)),
-        (u'Unit', (ur'({0})'.format('|'.join(sorted(CONVERT_HASH.keys(), reverse=True))),)),
-        (u'Space', (ur'\s+',))
+        (u'Comparator', (r'({0})'.format('|'.join(COMPARATORS.keys())),)),
+        (u'LogicalOperator', (r'({0})'.format('|'.join(LOGICAL_OPERATORS.keys())),)),
+        (u'Sep', (r':',)),
+        (u'Operator', (r'(?:\*|\+|-|\/)',)),
+        (u'Number', (r'(\d+\.?\d*)',)),
+        (u'Unit', (r'({0})'.format('|'.join(sorted(CONVERT_HASH.keys(), reverse=True))),)),
+        (u'Space', (r'\s+',))
     ]
 )
 
