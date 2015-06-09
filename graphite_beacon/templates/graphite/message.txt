@@ -15,7 +15,9 @@ Target: {{ target }}
 History: {{ [ alert.convert(v) for v in alert.history[target][:100] ] }} {% end %}
 {% end %}
 {% if target and rule %}
-Tested value: {{ alert.convert(alert.get_value_for_rule(rule, target)) }}
+{% for expr in rule['exprs'] %}
+<b>Tested value:</b> {{ alert.convert(alert.get_value_for_expr(expr, target)) }}</b> <br/>
+{% end %}
 {% end %}
 
 
@@ -23,6 +25,6 @@ View the graph: {{ alert.get_graph_url(alert.query) }}
 
 --
 
-You can configure alerts for notifications in your congifuration file.
+You can configure alerts for notifications in your configuration file.
 See https://github.com/klen/graphite-beacon
 
