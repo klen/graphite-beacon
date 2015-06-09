@@ -45,7 +45,7 @@ IDENTITY = lambda x: x
 
 HISTORICAL = 'historical'
 COMPARATORS = {'>': op.gt, '>=': op.ge, '<': op.lt, '<=': op.le, '==': op.eq, '!=': op.ne}
-OPERATORS = {'*': op.mul, '/': op.div, '+': op.add, '-': op.sub}
+OPERATORS = {'*': op.mul, '/': op.truediv, '+': op.add, '-': op.sub}
 LOGICAL_OPERATORS = {'AND': op.and_, 'OR': op.or_}
 
 RULE_TOKENIZER = make_tokenizer(
