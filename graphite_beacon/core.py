@@ -112,14 +112,16 @@ class Reactor(object):
         cur.execute("CREATE TABLE IF NOT EXISTS alerts (query text, name text, source text, format text, interval text, history_size text, rules text);")
         cur.execute("SELECT * FROM alerts;")
         alertList = cur.fetchall()
+        if not 'alerts' in self.options.get('alerts'):
+            self.options['alerts'] = []
         for alert in alertList:
             for i in range(len(self.options.get('alerts'))):
                 if alert[0] == self.options.get('alerts')[i].get('query'):
                     self.options.get('alerts').pop(i)
-                    self.options.append(alert)
+                    self.options.get('alerts').append(alert)
                     break
             else:
-                self.options.append(dict(query=alert[0], name=alert[1], source=alert[2], format=alert[3], interval=alert[4], history_size=alert[5],rules=alert[6]))
+                self.options.get('alerts').append(dict(query=alert[0], name=alert[1], source=alert[2], format=alert[3], interval=alert[4], history_size=alert[5],rules=alert[6]))
         conn.commit()
         cur.close()
         conn.close()
