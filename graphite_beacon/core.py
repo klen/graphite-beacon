@@ -134,6 +134,7 @@ class Reactor(object):
         conn.commit()
         cur.close()
         conn.close()
+        self.options['config'] = 0
         self.callback = ioloop.PeriodicCallback(
             self.repeat, parse_interval(self.options['repeat_interval']))
 
