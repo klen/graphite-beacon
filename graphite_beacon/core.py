@@ -159,7 +159,9 @@ class Reactor(object):
         for alert in list(self.alerts):
             alert.stop()
             self.alerts.remove(alert)
-
+        for alert in self.options.get('alerts'):
+            if not isinstance(alert['rules'], list):
+                alert['rules'] = alert['rules'].split(',')
         self.alerts = set(
             BaseAlert.get(self, **opts).start() for opts in self.options.get('alerts', []))
 
