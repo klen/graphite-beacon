@@ -24,7 +24,7 @@ class Reactor(object):
         def initialize(self, react):
             self.reactor = react
         #change
-        def put(self):
+        def put(self, arg):
             info = json.loads(self.request.body)
             for i in range(len(self.reactor.options.get('alerts'))):
                 if self.reactor.options.get('alerts')[i].get('query') == info.get('query'):
@@ -44,17 +44,16 @@ class Reactor(object):
             self.write("All good")
             
         #remove
-        def delete(self):
-            info = json.loads(self.request.body)
+        def delete(self, arg):
             for i in range(len(self.reactor.options.get('alerts'))):
-                if self.reactor.options.get('alerts')[i].get('query') == info.get('query'):
+                if self.reactor.options.get('alerts')[i].get('query') == arg:
                     break
             self.reactor.options.get('alerts').pop(i)
             self.reactor.reinit()
             conn = psycopg2.connect(self.reactor.options.get('database'))
             cur  = conn.cursor()
             try:
-                cur.execute("DELETE FROM alerts WHERE name = %s AND query = %s AND source = %s AND format = %s AND interval = %s AND history_size = %s AND rules = %s;", (info['name'], info['query'], info['source'], info['format'], info['interval'], info['history_size'], ', '.join(info['rules'])))
+                cur.execute("DELETE FROM alerts WHERE query = %s", (arg,))
             except Exception as e:
                 print e
             #    self.write(e)
@@ -63,7 +62,7 @@ class Reactor(object):
             conn.close()
             self.write("All good")
         #add new
-        def post(self):
+        def post(self, arg):
             info = json.loads(self.request.body)
             self.reactor.options.get('alerts').append(info)
             self.reactor.reinit()
@@ -78,7 +77,7 @@ class Reactor(object):
             conn.close()
             self.write("All good")
             
-        def get(self):
+        def get(self, arg):
             self.write("you did it")
     """ Class description. """
 
@@ -185,7 +184,7 @@ class Reactor(object):
                 fpid.write(str(os.getpid()))
         application = web.Application(
             [
-                (r'/', self.UpdateHandler, dict(react=self))
+                (r'/.*', self.UpdateHandler, dict(react=self))
             ]
         )
         application.listen(3030)
