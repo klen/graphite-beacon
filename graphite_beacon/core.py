@@ -114,12 +114,12 @@ class Reactor(object):
         alertList = cur.fetchall()
         for alert in alertList:
             for i in range(len(self.options.get('alerts'))):
-                if alert.get('query') == self.options.get('alerts')[i].get('query'):
+                if alert[0] == self.options.get('alerts')[i].get('query'):
                     self.options.get('alerts').pop(i)
                     self.options.append(alert)
                     break
             else:
-                self.options.append(alert)
+                self.options.append(dict(query=alert[0], name=alert[1], source=alert[2], format=alert[3], interval=alert[4], history_size=alert[5],rules=alert[6]))
         conn.commit()
         cur.close()
         conn.close()
@@ -184,7 +184,7 @@ class Reactor(object):
                 fpid.write(str(os.getpid()))
         application = web.Application(
             [
-                (r'/.*', self.UpdateHandler, dict(react=self))
+                (r'/(.*)', self.UpdateHandler, dict(react=self))
             ]
         )
         application.listen(3030)
