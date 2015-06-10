@@ -82,8 +82,8 @@ class Reactor(object):
                 self.write(json.dumps(self.reactor.options))
             else:
                 for alert in self.reactor.options.get('alerts'):
-                    if alert[0] == arg:
-                        self.write(json.dumps(dict(query=alert[0], name=alert[1], source=alert[2], format=alert[3], interval=alert[4], history_size=alert[5],rules=alert[6])))
+                    if alert['query'] == arg:
+                        self.write(json.dumps(alert))
                         break
                 else:
                     self.write("Query not found")
