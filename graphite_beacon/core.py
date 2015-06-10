@@ -35,6 +35,7 @@ class Reactor(object):
             cur  = conn.cursor()
            # try:
             cur.execute("UPDATE alerts SET name = %s, source = %s, format = %s, interval = %s, history_size = %s, rules = %s WHERE query = %s;", (info['name'], info['source'], info['format'], info['interval'], info['history_size'], ', '.join(info['rules']), info['query']))
+            cur.execute("INSERT INTO alerts (query, name, source, format, interval, history_size, rules) SELECT %s, %s, %s, %s, %s, %s, %s WHERE NOT EXISTS (SELECT 1 FROM alerts WHERE id = %s);", (info['query'], info['name'], info['source'], info['format'], info['interval'], info['history_size'], ', '.join(info['rules']), info['query']))
             #except Exception as e:
             #    print e
             #    self.write(e)
