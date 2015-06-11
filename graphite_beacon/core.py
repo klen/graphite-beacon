@@ -27,7 +27,7 @@ class Reactor(object):
         def put(self, arg):
             info = json.loads(self.request.body)
             for i in range(len(self.reactor.options.get('alerts'))):
-                if self.reactor.options.get('alerts')[i].get('query') == info.get('query'):
+                if self.reactor.options.get('alerts')[i].get('query').strip() == info.get('query').strip():
                     self.reactor.options.get('alerts')[i] = info
                     break
             self.reactor.reinit()
