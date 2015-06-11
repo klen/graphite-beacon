@@ -29,7 +29,10 @@ class Reactor(object):
             for i in range(len(self.reactor.options.get('alerts'))):
                 if self.reactor.options.get('alerts')[i].get('query').strip() == info.get('query').strip():
                     self.reactor.options.get('alerts')[i] = info
+                    print "replaced"
                     break
+            else:
+                print "nothing happened"
             self.reactor.reinit()
             conn = psycopg2.connect(self.reactor.options.get('database'))
             cur  = conn.cursor()
