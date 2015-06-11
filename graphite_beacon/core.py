@@ -54,7 +54,7 @@ class Reactor(object):
             conn = psycopg2.connect(self.reactor.options.get('database'))
             cur  = conn.cursor()
             try:
-                cur.execute("DELETE FROM alerts WHERE query = %s", (arg,))
+                cur.execute("DELETE FROM alerts WHERE query = %s;", (arg,))
             except Exception as e:
                 print e
             #    self.write(e)
