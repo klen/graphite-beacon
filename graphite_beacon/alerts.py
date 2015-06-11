@@ -211,7 +211,7 @@ class GraphiteAlert(BaseAlert):
                 if len(data) == 0:
                     raise ValueError('No data')
                 self.check(data)
-                self.notify('normal', 'Metrics are loaded', target='loading', ntype='graphite')
+                self.notify('normal', 'Metrics are loaded', target='loading', ntype='common')
             except Exception as e:
                 self.notify('critical', 'Loading error: %s' % e, target='loading', ntype='common')
             self.waiting = False
