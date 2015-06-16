@@ -19,11 +19,11 @@ COMMENT_RE = re('//\s+.*$', M)
 
 class Reactor(object):
     class UpdateHandler(web.RequestHandler):
-        #modify self.options
-        #self.options.get('alerts')
+        # react is the overall reactor object such that options can be changed
         def initialize(self, react):
             self.reactor = react
-        #change
+        
+        # Supports upsert. Adds new alerts or updates existing alerts with data
         def put(self, arg):
             info = json.loads(self.request.body)
             for i in range(len(self.reactor.options.get('alerts'))):
@@ -36,18 +36,15 @@ class Reactor(object):
             self.reactor.reinit()
             conn = psycopg2.connect(self.reactor.options.get('database'))
             cur  = conn.cursor()
-           # try:
+            #Upsert
             cur.execute("UPDATE alerts SET name = %s, source = %s, format = %s, interval = %s, history_size = %s, rules = %s WHERE query = %s;", (info['name'], info['source'], info['format'], info['interval'], info['history_size'], ', '.join(info['rules']), info['query']))
             cur.execute("INSERT INTO alerts (query, name, source, format, interval, history_size, rules) SELECT %s, %s, %s, %s, %s, %s, %s WHERE NOT EXISTS (SELECT 1 FROM alerts WHERE query = %s);", (info['query'], info['name'], info['source'], info['format'], info['interval'], info['history_size'], ', '.join(info['rules']), info['query']))
-            #except Exception as e:
-            #    print e
-            #    self.write(e)
             conn.commit()
             cur.close()
             conn.close()
             self.write("All good")
             
-        #remove
+        # Deletes alert with arg-specified query 
         def delete(self, arg):
             for i in range(len(self.reactor.options.get('alerts'))):
                 if self.reactor.options.get('alerts')[i].get('query') == arg:
@@ -65,7 +62,8 @@ class Reactor(object):
             cur.close()
             conn.close()
             self.write("All good")
-        #add new
+            
+        # Adds new alert. Unnecessary, use PUT    
         def post(self, arg):
             info = json.loads(self.request.body)
             self.reactor.options.get('alerts').append(info)
@@ -81,6 +79,8 @@ class Reactor(object):
             conn.close()
             self.write("All good")
             
+        # No arguments: Return current options (including setup of alerts)
+        # Query Specified: Returns the alert settings of the given query
         def get(self, arg):
             if arg == "":
                 tempDict = dict(self.reactor.options)
@@ -128,6 +128,8 @@ class Reactor(object):
         'warning_handlers': ['log', 'smtp'],
     }
 
+    # Handles database table initialization along with pulling old alerts from DB
+    # Database overrides config.json
     def __init__(self, **options):
         self.alerts = set()
         self.loop = ioloop.IOLoop.instance()
@@ -159,7 +161,6 @@ class Reactor(object):
     def reinit(self, *args, **options):
         LOGGER.info('Read configuration')
         
-        # Update this to make DB and config.json fusion more in the way that we want it
         self.options.update(options)
         print "reinit called"
         self.include_config(self.options.get('config'))
@@ -231,6 +232,7 @@ class Reactor(object):
             os.unlink(self.options.get('pidfile'))
         LOGGER.info('Reactor has stopped')
 
+    # Notifies via handlers but also caches last alert status for loading on clients
     def notify(self, level, alert, value, target=None, ntype=None, rule=None):
         """ Provide the event to the handlers. """
 
