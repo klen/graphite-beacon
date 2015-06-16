@@ -148,10 +148,10 @@ class Reactor(object):
             for i in range(len(self.options.get('alerts'))):
                 if alert[0] == self.options.get('alerts')[i].get('query'):
                     self.options.get('alerts').pop(i)
-                    self.options.get('alerts').append(dict(query=alert[0], name=alert[1], source=alert[2], format=alert[3], interval=alert[4], history_size=alert[5],rules=alert[6]))
+                    self.options.get('alerts').append(dict(query=alert[0], name=alert[1], source=alert[2], format=alert[3], interval=alert[4], history_size=alert[5],rules=alert[6].split(',')))
                     break
             else:
-                self.options.get('alerts').append(dict(query=alert[0], name=alert[1], source=alert[2], format=alert[3], interval=alert[4], history_size=alert[5],rules=alert[6]))
+                self.options.get('alerts').append(dict(query=alert[0], name=alert[1], source=alert[2], format=alert[3], interval=alert[4], history_size=alert[5],rules=alert[6].split(',')))
         conn.commit()
         cur.close()
         conn.close()
