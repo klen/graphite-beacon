@@ -90,7 +90,11 @@ class Reactor(object):
                 cur  = conn.cursor()
                 for alert in tempDict['alerts']:
                     cur.execute("SELECT * FROM cache WHERE original_query=%s", (alert['query'],))
-                    alert['events'] = cur.fetchall()
+                    alert['events'] = {}
+                    for item in cur.fetchall():
+                        alert['events']['resolved_query'] = item[1]
+                        alert['events']['description'] = item[3]
+                        alert['events']['level'] = item[2]
                 self.write(json.dumps(tempDict))
             else:
                 for alert in self.reactor.options.get('alerts'):
