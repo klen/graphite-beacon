@@ -223,7 +223,16 @@ class Reactor(object):
 
         if ntype is None:
             ntype = alert.source
-
+            
+        conn = psycopg2.connect(self.options.get('database'))
+        cur  = conn.cursor()
+        cur.execute("CREATE TABLE IF NOT EXISTS cache (original_query text, resolved_query text, level text, desc text);")
+        cur.execute("UPDATE cache SET level=%s, desc=%s WHERE resolved_query = %s AND original_query = %s;", (level, desc, target, alert.query))
+        cur.execute("INSERT INTO cache (resolved_query, original_query, level, desc) SELECT %s, %s, %s, %s WHERE NOT EXISTS (SELECT 1 FROM cache WHERE resolved_query = %s AND original_query = %s);", (target, alert.query, level, desc, target, alert.query))
+        conn.commit();
+        cur.close();
+        conn.close();
+        
         for handler in self.handlers.get(level, []):
             handler.notify(level, alert, value, target=target, ntype=ntype, rule=rule)
 
