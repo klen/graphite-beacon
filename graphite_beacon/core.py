@@ -83,7 +83,15 @@ class Reactor(object):
             
         def get(self, arg):
             if arg == "":
-                self.write(json.dumps(self.reactor.options))
+                tempDict = dict(self.reactor.options)
+                if not 'alerts' in tempDict:
+                    tempDict['alerts'] = []
+                conn = psycopg2.connect(self.options.get('database'))
+                cur  = conn.cursor()
+                for alert in tempDict['alerts']:
+                    cur.execute("SELECT * FROM cache WHERE original_query=%s", (alert['query'],))
+                    alert['events'] = cur.fetchall()
+                self.write(json.dumps(tempDict))
             else:
                 for alert in self.reactor.options.get('alerts'):
                     if alert['query'] == arg:
@@ -122,6 +130,7 @@ class Reactor(object):
         conn = psycopg2.connect(self.options.get('database'))
         cur  = conn.cursor()
         cur.execute("CREATE TABLE IF NOT EXISTS alerts (query text, name text, source text, format text, interval text, history_size text, rules text);")
+        cur.execute("CREATE TABLE IF NOT EXISTS cache (original_query text, resolved_query text, level text, desc text);")
         cur.execute("SELECT * FROM alerts;")
         alertList = cur.fetchall()
         if not 'alerts' in self.options:
@@ -224,14 +233,14 @@ class Reactor(object):
         if ntype is None:
             ntype = alert.source
             
-        conn = psycopg2.connect(self.options.get('database'))
-        cur  = conn.cursor()
-        cur.execute("CREATE TABLE IF NOT EXISTS cache (original_query text, resolved_query text, level text, desc text);")
-        cur.execute("UPDATE cache SET level=%s, desc=%s WHERE resolved_query = %s AND original_query = %s;", (level, desc, target, alert.query))
-        cur.execute("INSERT INTO cache (resolved_query, original_query, level, desc) SELECT %s, %s, %s, %s WHERE NOT EXISTS (SELECT 1 FROM cache WHERE resolved_query = %s AND original_query = %s);", (target, alert.query, level, desc, target, alert.query))
-        conn.commit();
-        cur.close();
-        conn.close();
+        if not target == 'loading': 
+            conn = psycopg2.connect(self.options.get('database'))
+            cur  = conn.cursor()
+            cur.execute("UPDATE cache SET level=%s, desc=%s WHERE resolved_query = %s AND original_query = %s;", (level, desc, target, alert.query))
+            cur.execute("INSERT INTO cache (resolved_query, original_query, level, desc) SELECT %s, %s, %s, %s WHERE NOT EXISTS (SELECT 1 FROM cache WHERE resolved_query = %s AND original_query = %s);", (target, alert.query, level, desc, target, alert.query))
+            conn.commit();
+            cur.close();
+            conn.close();
         
         for handler in self.handlers.get(level, []):
             handler.notify(level, alert, value, target=target, ntype=ntype, rule=rule)
