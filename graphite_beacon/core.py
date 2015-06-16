@@ -86,7 +86,7 @@ class Reactor(object):
                 tempDict = dict(self.reactor.options)
                 if not 'alerts' in tempDict:
                     tempDict['alerts'] = []
-                conn = psycopg2.connect(self.options.get('database'))
+                conn = psycopg2.connect(self.reactor.options.get('database'))
                 cur  = conn.cursor()
                 for alert in tempDict['alerts']:
                     cur.execute("SELECT * FROM cache WHERE original_query=%s", (alert['query'],))
