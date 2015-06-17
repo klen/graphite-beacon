@@ -101,9 +101,13 @@ class Reactor(object):
                 self.write(json.dumps(tempDict))
             else:
                 for alert in self.reactor.options.get('alerts'):
-                    if alert['query'] == arg:
-                        self.write(json.dumps(alert))
-                        break
+                    for event in alert['events']:
+                        if event['resolved_query'] == arg:
+                            self.write(json.dumps(alert))
+                            break
+                    else:
+                        continue
+                    break
                 else:
                     self.write("Query not found")
     """ Class description. """
