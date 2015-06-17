@@ -98,8 +98,25 @@ class Reactor(object):
                         a['description'] = item[3]
                         a['level'] = item[2]
                         alert['events'].append(a)
+                conn.commit();
+                cur.close();
+                conn.close();
                 self.write(json.dumps(tempDict))
             else:
+                conn = psycopg2.connect(self.reactor.options.get('database'))
+                cur  = conn.cursor()
+                for alert in tempDict['alerts']:
+                    cur.execute("SELECT * FROM cache WHERE original_query=%s", (alert['query'],))
+                    alert['events'] = []
+                    for item in cur.fetchall():
+                        a = {}
+                        a['resolved_query'] = item[1]
+                        a['description'] = item[3]
+                        a['level'] = item[2]
+                        alert['events'].append(a)
+                conn.commit();
+                cur.close();
+                conn.close();
                 for alert in self.reactor.options.get('alerts'):
                     for event in alert['events']:
                         if event['resolved_query'] == arg:
