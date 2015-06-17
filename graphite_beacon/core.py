@@ -103,6 +103,9 @@ class Reactor(object):
                 conn.close();
                 self.write(json.dumps(tempDict))
             else:
+                tempDict = dict(self.reactor.options)
+                if not 'alerts' in tempDict:
+                    tempDict['alerts'] = []
                 conn = psycopg2.connect(self.reactor.options.get('database'))
                 cur  = conn.cursor()
                 for alert in tempDict['alerts']:
