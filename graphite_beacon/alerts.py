@@ -199,7 +199,8 @@ class GraphiteAlert(BaseAlert):
     def load(self):
         LOGGER.debug('%s: start checking: %s' % (self.name, self.query))
         if self.waiting:
-            self.notify('warning', 'Process takes too much time', target='waiting', ntype='common')
+            LOGGER.debug('process takes too much time')
+        #    self.notify('warning', 'Process takes too much time', target='waiting', ntype='common')
         else:
             self.waiting = True
             try:
