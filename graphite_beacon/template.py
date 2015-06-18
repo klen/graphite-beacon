@@ -9,6 +9,7 @@ TEMPLATES = {
         'html': LOADER.load('graphite/message.html'),
         'text': LOADER.load('graphite/message.txt'),
         'short': LOADER.load('graphite/short.txt'),
+        'slack': LOADER.load('graphite/slack.txt')
     },
     'url': {
         'html': LOADER.load('url/message.html'),

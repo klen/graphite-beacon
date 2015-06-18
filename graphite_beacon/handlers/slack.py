@@ -2,6 +2,7 @@ import json
 from tornado import gen, httpclient as hc
 
 from . import AbstractHandler, LOGGER
+from ..template import TEMPLATES
 
 
 class SlackHandler(AbstractHandler):
@@ -31,11 +32,17 @@ class SlackHandler(AbstractHandler):
         self.username = self.options.get('username')
         self.client = hc.AsyncHTTPClient()
 
+    def get_message(self, level, alert, value, target=None, ntype=None, rule=None):
+        msg_type = 'slack' if ntype == 'graphite' else 'short'
+        tmpl = TEMPLATES[ntype][msg_type]
+        return tmpl.generate(
+            level=level, reactor=self.reactor, alert=alert, value=value, target=target).strip()
+
     @gen.coroutine
     def notify(self, level, *args, **kwargs):
         LOGGER.debug("Handler (%s) %s", self.name, level)
 
-        message = self.get_short(level, *args, **kwargs)
+        message = self.get_message(level, *args, **kwargs)
         data = dict()
         data['username'] = self.username
         data['text'] = message
