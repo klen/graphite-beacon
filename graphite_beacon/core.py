@@ -53,35 +53,41 @@ class Reactor(object):
         self.callback = ioloop.PeriodicCallback(
             self.repeat, parse_interval(self.options['repeat_interval']))
 
-    def reinit(self, *args, **options):
+    def reinit(self, *args, **extra_options):
         LOGGER.info('Read configuration')
 
-        self.options.update(options)
+        options = dict(self.defaults)
+        options.update(extra_options)
 
-        self.include_config(self.options.get('config'))
-        for config in self.options.pop('include', []):
-            self.include_config(config)
+        self.include_config(options.get('config'))
+        for config in options.pop('include', []):
+            self.include_config(options, config)
 
-        LOGGER.setLevel(_get_numeric_log_level(self.options.get('logging', 'info')))
+        LOGGER.setLevel(_get_numeric_log_level(options.get('logging', 'info')))
+
         registry.clean()
-
         self.handlers = {'warning': set(), 'critical': set(), 'normal': set()}
-        self.reinit_handlers('warning')
-        self.reinit_handlers('critical')
-        self.reinit_handlers('normal')
+        self.reinit_handlers(options, 'warning')
+        self.reinit_handlers(options, 'critical')
+        self.reinit_handlers(options, 'normal')
 
         for alert in list(self.alerts):
             alert.stop()
             self.alerts.remove(alert)
 
-        self.alerts = set(
-            BaseAlert.get(self, **opts).start() for opts in self.options.get('alerts', []))
+        self.options = options
+        self.alerts = set(BaseAlert.get(self, **opts)
+                          for opts in options.get('alerts', []))
+        for alert in self.alerts:
+            LOGGER.debug('Starting alert %s', alert)
+            alert.start()
 
         LOGGER.debug('Loaded with options:')
         LOGGER.debug(json.dumps(self.options, indent=2))
+
         return self
 
-    def include_config(self, config):
+    def include_config(self, options, config):
         LOGGER.info('Load configuration: %s' % config)
         if config:
             loader = yaml.load if yaml and config.endswith('.yml') else json.loads
@@ -93,8 +99,8 @@ class Reactor(object):
             except (IOError, ValueError):
                 LOGGER.error('Invalid config file: %s' % config)
 
-    def reinit_handlers(self, level='warning'):
-        for name in self.options['%s_handlers' % level]:
+    def reinit_handlers(self, options, level='warning'):
+        for name in options['%s_handlers' % level]:
             try:
                 self.handlers[level].add(registry.get(self, name))
             except Exception as e:
