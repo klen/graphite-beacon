@@ -1,4 +1,5 @@
 from tornado import ioloop, httpclient as hc, gen, log, escape
+from tornado.httputil import url_concat
 
 from . import _compat as _
 from .graphite import GraphiteRecord
@@ -186,14 +187,29 @@ class GraphiteAlert(BaseAlert):
         self.method = options.get('method', self.reactor.options['method'])
         assert self.method in METHODS, "Method is invalid"
 
-        self.graphite_username = self.reactor.options.get('graphite_username')
-        self.graphite_password = self.reactor.options.get('graphite_password')
+        graphite_name = options.get('graphite', 'default')
+        self.graphite = self.reactor.options['graphites'][graphite_name]
 
-        query = escape.url_escape(self.query)
-        self.url = "%(base)s/render/?target=%(query)s&rawData=true&from=-%(time_window)s" % {
-            'base': self.reactor.options['graphite_url'], 'query': query,
-            'time_window': self.time_window}
+        url = '%s/render/' % self.graphite['url']
+        params = {
+            'target': self.query,
+            'from': '-' + self.time_window,
+            'rawData': True
+        }
+        self.url = url_concat(url, params)
         LOGGER.debug('%s: url = %s' % (self.name, self.url))
+
+    @property
+    def graphite_url(self):
+        return self.graphite['url']
+
+    @property
+    def graphite_username(self):
+        return self.graphite['username']
+
+    @property
+    def graphite_password(self):
+        return self.graphite['password']
 
     @gen.coroutine
     def load(self):
@@ -221,7 +237,7 @@ class GraphiteAlert(BaseAlert):
     def get_graph_url(self, target, graphite_url=None):
         query = escape.url_escape(target)
         return "%(base)s/render/?target=%(query)s&from=-%(time_window)s" % {
-            'base': graphite_url or self.reactor.options['graphite_url'], 'query': query,
+            'base': graphite_url or self.graphite_url, 'query': query,
             'time_window': self.time_window}
 
 
