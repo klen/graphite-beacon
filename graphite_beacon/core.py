@@ -25,8 +25,8 @@ class Reactor(object):
     """ Class description. """
 
     defaults = {
-        'auth_password': None,
-        'auth_username': None,
+        'graphite_username': None,
+        'graphite_password': None,
         'config': 'config.json',
         'critical_handlers': ['log', 'smtp'],
         'debug': False,

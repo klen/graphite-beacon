@@ -126,10 +126,10 @@ Value units:
         "graphite_url": "http://localhost",
 
         // HTTP AUTH username
-        "auth_username": null,
+        "graphite_username": null,
 
         // HTTP AUTH password
-        "auth_password": null,
+        "graphite_password": null,
 
         // Path to a pidfile
         "pidfile": null,

@@ -186,8 +186,8 @@ class GraphiteAlert(BaseAlert):
         self.method = options.get('method', self.reactor.options['method'])
         assert self.method in METHODS, "Method is invalid"
 
-        self.auth_username = self.reactor.options.get('auth_username')
-        self.auth_password = self.reactor.options.get('auth_password')
+        self.graphite_username = self.reactor.options.get('graphite_username')
+        self.graphite_password = self.reactor.options.get('graphite_password')
 
         query = escape.url_escape(self.query)
         self.url = "%(base)s/render/?target=%(query)s&rawData=true&from=-%(time_window)s" % {
@@ -203,8 +203,8 @@ class GraphiteAlert(BaseAlert):
         else:
             self.waiting = True
             try:
-                response = yield self.client.fetch(self.url, auth_username=self.auth_username,
-                                                   auth_password=self.auth_password,
+                response = yield self.client.fetch(self.url, auth_username=self.graphite_username,
+                                                   auth_password=self.graphite_password,
                                                    request_timeout=self.request_timeout)
                 records = (GraphiteRecord(line.decode('utf-8')) for line in response.buffer)
                 data = [(None if record.empty else getattr(record, self.method), record.target) for record in records]
