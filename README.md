@@ -174,7 +174,7 @@ Value units:
 ```
 
 You can setup options with a configuration file. See
-`example-config.json`.
+`example-config.json` or `example-config.yaml`.
 
 #### Include
 
