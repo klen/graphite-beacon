@@ -1,30 +1,63 @@
-// Comments is allowed here
+// Comments are allowed here
 {
+  "debug": true,
+
   "interval": "20minute",
   "logging": "debug",
 
+  // For one graphite
+  "graphite_url": "http://localhost",
+  "graphite_username": "usernames",
+  "graphite_password": "password",
+
+  // For multiple graphites
+  // "graphites": [
+  //   {
+  //      "name": "default",
+  //      "url": "http://localhost",
+  //      "username": "username",
+  //      "password": "password"
+  //   },
+  //   {
+  //     "name": "second",
+  //     "url": "http://second.graphite"
+  //   }
+  // ],
+
   // Gmail example
   // "smtp": {
-    // "username": "example@gmail.com",
-    // "password": "password",
-    // "use_tls": true,
-    // "host": "smtp.gmail.com",
-    // "port": 587,
-    // "from": "myemail@gmail.com",
-    // "to": ["myemail@gmail.com"]
+  //   "username": "example@gmail.com",
+  //   "password": "password",
+  //   "use_tls": true,
+  //   "host": "smtp.gmail.com",
+  //   "port": 587,
+  //   "from": "myemail@gmail.com",
+  //   "to": ["myemail@gmail.com"]
   // },
-
-  "debug": true,
 
   "alerts": [
     // A graphite alert
     {
+      // Param "graphite" could be skipped when use only one graphite
+      // "graphite": "default".
       "name": "Memory",
       "query": "aliasByNode(collectd.*.memory.memory-free, 1)",
       "interval": "10minute",
       "format": "bytes",
       "rules": ["warning: < 300MB", "critical: > 200MB"]
     },
+
+    // Alert for another graphite
+    // {
+    //   "source": "graphite",
+    //   "graphite": "second",
+    //   "name": "Memory",
+    //   "query": "aliasByNode(collectd.*.memory.memory-free, 1)",
+    //   "interval": "10minute",
+    //   "format": "bytes",
+    //   "rules": ["warning: < 300MB", "critical: > 200MB"]
+    // },
+
     // A ping alert
     {
       "name": "Site",

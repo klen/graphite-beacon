@@ -126,10 +126,10 @@ Value units:
         "graphite_url": "http://localhost",
 
         // HTTP AUTH username
-        "auth_username": null,
+        "graphite_username": null,
 
         // HTTP AUTH password
-        "auth_password": null,
+        "graphite_password": null,
 
         // Path to a pidfile
         "pidfile": null,
@@ -266,6 +266,64 @@ alerts: [
 ...
 ],
 ...
+```
+
+### Multiple Graphites
+
+To check different Graphites describe them in config like:
+
+```js
+{
+    ...
+    // Drop params for single graphite:
+    // "graphite_url": "",
+    // "graphite_username": null,
+    // "graphite_password": null,
+
+    // Then set the list:
+    "graphites": [
+      {
+         "name": "default",
+         "url": "http://localhost",
+         "username": "username",
+         "password": "password"
+      },
+      {
+        "name": "second",
+        "url": "http://second.graphite",
+      }
+    ],
+    ...
+}
+```
+
+And set alets for each Graphite by it's name:
+
+```js
+{
+  ...
+  "alerts": [
+    {
+      // If param "graphite" is skipped alert will check the "default"
+      // "graphite": "default".
+      "name": "Memory",
+      "query": "aliasByNode(collectd.*.memory.memory-free, 1)",
+      "interval": "10minute",
+      "format": "bytes",
+      "rules": ["warning: < 300MB", "critical: > 200MB"]
+    },
+    {
+      // Alert for another graphite
+      "graphite": "second",
+      "name": "Memory",
+      "query": "aliasByNode(collectd.*.memory.memory-free, 1)",
+      "interval": "10minute",
+      "format": "bytes",
+      "rules": ["warning: < 300MB", "critical: > 200MB"]
+    },
+  ]
+  ...
+}
 ```
 
 ### Setup SMTP
