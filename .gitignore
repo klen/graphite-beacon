@@ -61,3 +61,5 @@ target/
 
 # Vim backup files
 *~
+
+/.tox
