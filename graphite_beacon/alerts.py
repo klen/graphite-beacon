@@ -102,6 +102,8 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         self.history_size = parse_interval(self.history_size)
         self.history_size = int(math.ceil(self.history_size / interval))
 
+        self.no_data = options.get('no_data', self.reactor.options['no_data'])
+
         if self.reactor.options.get('debug'):
             self.callback = ioloop.PeriodicCallback(self.load, 5000)
         else:
@@ -132,7 +134,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         for value, target in records:
             LOGGER.info("%s [%s]: %s", self.name, target, value)
             if value is None:
-                self.notify('critical', value, target)
+                self.notify(self.no_data, value, target)
                 continue
             for rule in self.rules:
                 rvalue = self.get_value_for_rule(rule, target)
