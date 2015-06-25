@@ -468,6 +468,7 @@ Contributors
 * Garrett Heel (https://github.com/GarrettHeel)
 * George Ionita (https://github.com/georgeionita)
 * James Yuzawa (https://github.com/yuzawa-san)
+* Konstantin Bakulin (https://github.com/kbakulin)
 * Nick Pillitteri (https://github.com/56quarters)
 * Niku Toivola (https://github.com/nikut)
 * Olli-Pekka Puolitaival (https://github.com/OPpuolitaival)
