@@ -210,7 +210,9 @@ class GraphiteAlert(BaseAlert):
                                                    auth_password=self.auth_password,
                                                    request_timeout=self.request_timeout)
                 records = (GraphiteRecord(line.decode('utf-8')) for line in response.buffer)
-                data = [(None if record.empty else getattr(record, self.method), record.target) for record in records]
+                data = [
+                    (None if record.empty else getattr(record, self.method), record.target)
+                    for record in records]
                 if len(data) == 0:
                     raise ValueError('No data')
                 self.check(data)
@@ -223,6 +225,7 @@ class GraphiteAlert(BaseAlert):
         return self._graphite_url(target, graphite_url=graphite_url, raw_data=False)
 
     def _graphite_url(self, query, raw_data=False, graphite_url=None):
+        """ Build Graphite URL. """
         query = escape.url_escape(query)
         graphite_url = graphite_url or self.reactor.options['graphite_url']
         url = "{base}/render/?target={query}&from=-{time_window}&until=-{until}".format(
