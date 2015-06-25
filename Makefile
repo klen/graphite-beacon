@@ -1,4 +1,6 @@
 VIRTUALENV=$(shell echo "$${VDIR:-'.env'}")
+space:= 
+space+= 
 
 all: $(VIRTUALENV)
 
@@ -95,8 +97,9 @@ deb: clean
 	    -d "python" \
 	    -d "python-pip" \
 	    opt etc
+	echo "%$(subst $(space),,$(PACKAGE_VERSION))%"
 	for name in *.deb; do \
-	    [ -f bintray ] && curl -T "$$name" -uklen:`cat bintray` https://api.bintray.com/content/klen/deb/graphite-beacon/all/$$name ; \
+	    [ -f bintray ] && curl -T "$$name" -uklen:`cat bintray` https://api.bintray.com/content/klen/deb/graphite-beacon/$(subst  $(space),,$(PACKAGE_VERSION))/$$name ; \
 	done
 
 # =============

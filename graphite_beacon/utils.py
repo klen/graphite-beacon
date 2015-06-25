@@ -1,6 +1,9 @@
 from re import compile as re
 import operator as op
 
+from funcparserlib.lexer import make_tokenizer, Token
+from funcparserlib.parser import (some, a, maybe, finished, skip, many)
+
 
 NUMBER_RE = re('(\d*\.?\d*)')
 CONVERT = {
@@ -37,18 +40,27 @@ TIME_UNIT_SIZE = dict(CONVERT['ms'])
 TIME_UNIT_SYN = {"microsecond": "ms", "second": "s", "minute": "m", "hour": "h", "day": "d",
                  "week": "w", "month": "M", "year": "y"}
 TIME_UNIT_SYN2 = dict([(v, n) for (n, v) in TIME_UNIT_SYN.items()])
-DEFAULT_MOD = lambda x: x
+IDENTITY = lambda x: x
 
 
 HISTORICAL = 'historical'
-OPERATORS = {'>': op.gt, '>=': op.ge, '<': op.lt, '<=': op.le, '==': op.eq, '!=': op.ne}
-RULE_RE = re(
-    '(critical|warning|normal):\s+(%s)\s+(\d+\.?\d*(?:%s)?|%s)\s*((?:\*|\+|-|\/)\s*\d+\.?\d*)?' %
-    (
-        "|".join(OPERATORS.keys()),
-        "|".join(sorted(CONVERT_HASH.keys(), reverse=True)),
-        HISTORICAL,
-    ))
+COMPARATORS = {'>': op.gt, '>=': op.ge, '<': op.lt, '<=': op.le, '==': op.eq, '!=': op.ne}
+OPERATORS = {'*': op.mul, '/': op.truediv, '+': op.add, '-': op.sub}
+LOGICAL_OPERATORS = {'AND': op.and_, 'OR': op.or_}
+
+RULE_TOKENIZER = make_tokenizer(
+    [
+        (u'Level', (r'(critical|warning|normal)',)),
+        (u'Historical', (HISTORICAL,)),
+        (u'Comparator', (r'({0})'.format('|'.join(sorted(COMPARATORS.keys(), reverse=True))),)),
+        (u'LogicalOperator', (r'({0})'.format('|'.join(LOGICAL_OPERATORS.keys())),)),
+        (u'Sep', (r':',)),
+        (u'Operator', (r'(?:\*|\+|-|\/)',)),
+        (u'Number', (r'(\d+\.?\d*)',)),
+        (u'Unit', (r'({0})'.format('|'.join(sorted(CONVERT_HASH.keys(), reverse=True))),)),
+        (u'Space', (r'\s+',))
+    ]
+)
 
 
 def convert_to_format(value, frmt=None):
@@ -69,10 +81,9 @@ def convert_to_format(value, frmt=None):
     return "%s%s" % (value, name)
 
 
-def convert_from_format(value):
-    _, num, unit = NUMBER_RE.split(str(value))
+def convert_from_format(num, unit=None):
     if not unit:
-        return float(value)
+        return float(num)
     return float(num) * CONVERT_HASH.get(unit, 1)
 
 
@@ -89,19 +100,53 @@ def interval_to_graphite(interval):
     return num + unit
 
 
-def parse_rule(rule):
-    match = RULE_RE.match(rule)
-    if not match:
-        raise ValueError('Invalid rule: %s' % rule)
-    level, cond, value, mod = match.groups()
+def _tokenize_rule(_str):
+    return [x for x in RULE_TOKENIZER(_str) if x.type not in ['Space']]
+
+
+def _parse_rule(seq):
+    tokval = lambda x: x.value
+    toktype = lambda t: some(lambda x: x.type == t) >> tokval
+    sep = lambda s: a(Token(u'Sep', s)) >> tokval
+    s_sep = lambda s: skip(sep(s))
+
+    level = toktype(u'Level')
+    comparator = toktype(u'Comparator') >> COMPARATORS.get
+    number = toktype(u'Number') >> float
+    historical = toktype(u'Historical')
+    unit = toktype(u'Unit')
+    operator = toktype(u'Operator')
+    logical_operator = toktype(u'LogicalOperator') >> LOGICAL_OPERATORS.get
+
+    exp = comparator + ((number + maybe(unit)) | historical) + maybe(operator + number)
+    rule = (
+        level + s_sep(':') + exp + many(logical_operator + exp)
+    )
+
+    overall = rule + skip(finished)
+    return overall.parse(seq)
+
+
+def _parse_expr(expr):
+    cond, value, mod = expr
+
     if value != HISTORICAL:
-        value = convert_from_format(value)
+        value = convert_from_format(*value)
 
     if mod:
-        mod = 'lambda x: x ' + mod
-        mod = eval(mod, {}, {})
+        _op, num = mod
+        mod = lambda x: OPERATORS[_op](x, num)
 
-    if cond not in OPERATORS:
-        raise ValueError('Invalid operator: %s for rule %s' % (cond, rule))
-    op = OPERATORS[cond]
-    return {'level': level, 'op': op, 'value': value, 'mod': mod or DEFAULT_MOD, 'raw': rule}
+    return {'op': cond, 'value': value, 'mod': mod or IDENTITY}
+
+
+def parse_rule(rule):
+    tokens = _tokenize_rule(rule)
+    level, initial_expr, exprs = _parse_rule(tokens)
+
+    result = {'level': level, 'raw': rule, 'exprs': [_parse_expr(initial_expr)]}
+
+    for logical_operator, expr in exprs:
+        result['exprs'].extend([logical_operator, _parse_expr(expr)])
+
+    return result

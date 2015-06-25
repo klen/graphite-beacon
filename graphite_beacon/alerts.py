@@ -2,7 +2,7 @@ from tornado import ioloop, httpclient as hc, gen, log, escape
 
 from . import _compat as _
 from .graphite import GraphiteRecord
-from .utils import convert_to_format, parse_interval, parse_rule, HISTORICAL, interval_to_graphite
+from .utils import convert_to_format, parse_interval, parse_rule, HISTORICAL, LOGICAL_OPERATORS, interval_to_graphite
 import math
 from collections import deque, defaultdict
 from itertools import islice
@@ -94,6 +94,10 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         self.time_window = interval_to_graphite(
             options.get('time_window', options.get('interval', self.reactor.options['interval'])))
 
+        self.until = interval_to_graphite(
+            options.get('until', self.reactor.options['until'])
+        )
+
         self._format = options.get('format', self.reactor.options['format'])
         self.request_timeout = options.get(
             'request_timeout', self.reactor.options['request_timeout'])
@@ -101,6 +105,8 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         self.history_size = options.get('history_size', self.reactor.options['history_size'])
         self.history_size = parse_interval(self.history_size)
         self.history_size = int(math.ceil(self.history_size / interval))
+
+        self.no_data = options.get('no_data', self.reactor.options['no_data'])
 
         if self.reactor.options.get('debug'):
             self.callback = ioloop.PeriodicCallback(self.load, 5000)
@@ -132,13 +138,10 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         for value, target in records:
             LOGGER.info("%s [%s]: %s", self.name, target, value)
             if value is None:
-                self.notify('critical', value, target)
+                self.notify(self.no_data, value, target)
                 continue
             for rule in self.rules:
-                rvalue = self.get_value_for_rule(rule, target)
-                if rvalue is None:
-                    continue
-                if rule['op'](value, rvalue):
+                if self.evaluate_rule(rule, value, target):
                     self.notify(rule['level'], value, target, rule=rule)
                     break
             else:
@@ -146,15 +149,33 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
 
             self.history[target].append(value)
 
-    def get_value_for_rule(self, rule, target):
-        rvalue = rule['value']
+    def evaluate_rule(self, rule, value, target):
+        def evaluate(expr):
+            if expr in LOGICAL_OPERATORS.values():
+                return expr
+            rvalue = self.get_value_for_expr(expr, target)
+            if rvalue is None:
+                return False  # ignore this result
+            return expr['op'](value, rvalue)
+
+        evaluated = [evaluate(expr) for expr in rule['exprs']]
+        while len(evaluated) > 1:
+            lhs, logical_op, rhs = (evaluated.pop(0) for _ in range(3))
+            evaluated.insert(0, logical_op(lhs, rhs))
+
+        return evaluated[0]
+
+    def get_value_for_expr(self, expr, target):
+        if expr in LOGICAL_OPERATORS.values():
+            return None
+        rvalue = expr['value']
         if rvalue == HISTORICAL:
             history = self.history[target]
             if len(history) < self.history_size:
                 return None
-            rvalue = sum(history) / len(history)
+            rvalue = sum(history) / float(len(history))
 
-        rvalue = rule['mod'](rvalue)
+        rvalue = expr['mod'](rvalue)
         return rvalue
 
     def notify(self, level, value, target=None, ntype=None, rule=None):
@@ -189,10 +210,7 @@ class GraphiteAlert(BaseAlert):
         self.auth_username = self.reactor.options.get('auth_username')
         self.auth_password = self.reactor.options.get('auth_password')
 
-        query = escape.url_escape(self.query)
-        self.url = "%(base)s/render/?target=%(query)s&rawData=true&from=-%(time_window)s" % {
-            'base': self.reactor.options['graphite_url'], 'query': query,
-            'time_window': self.time_window}
+        self.url = self._graphite_url(self.query, raw_data=True)
         LOGGER.debug('%s: url = %s' % (self.name, self.url))
 
     @gen.coroutine
@@ -207,7 +225,9 @@ class GraphiteAlert(BaseAlert):
                                                    auth_password=self.auth_password,
                                                    request_timeout=self.request_timeout)
                 records = (GraphiteRecord(line.decode('utf-8')) for line in response.buffer)
-                data = [(None if record.empty else getattr(record, self.method), record.target) for record in records]
+                data = [
+                    (None if record.empty else getattr(record, self.method), record.target)
+                    for record in records]
                 if len(data) == 0:
                     raise ValueError('No data')
                 self.check(data)
@@ -217,10 +237,17 @@ class GraphiteAlert(BaseAlert):
             self.waiting = False
 
     def get_graph_url(self, target, graphite_url=None):
-        query = escape.url_escape(target)
-        return "%(base)s/render/?target=%(query)s&from=-%(time_window)s" % {
-            'base': graphite_url or self.reactor.options['graphite_url'], 'query': query,
-            'time_window': self.time_window}
+        return self._graphite_url(target, graphite_url=graphite_url, raw_data=False)
+
+    def _graphite_url(self, query, raw_data=False, graphite_url=None):
+        """ Build Graphite URL. """
+        query = escape.url_escape(query)
+        graphite_url = graphite_url or self.reactor.options['graphite_url']
+        url = "{base}/render/?target={query}&from=-{time_window}&until=-{until}".format(
+            base=graphite_url, query=query, time_window=self.time_window, until=self.until)
+        if raw_data:
+            url = "{0}&rawData=true".format(url)
+        return url
 
 
 class URLAlert(BaseAlert):

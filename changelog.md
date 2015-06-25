@@ -1,4 +1,18 @@
+## 0.25.0
+
+- Fix issue #46
+- Support `until` option for Graphite queries
+- Customize alert behaviour with no data
+- Enhance expressions (support AND/OR)
+- Added VictorOps handler
+
+## 0.24.0
+
+- Support YAML in config files.
+  You should have install `yaml` and use `<filename>.yml` as config files.
+
 ## 0.23.0
+
 - Support systemd
 - Update CLI handler
 - Add PagerDuty handler

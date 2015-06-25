@@ -66,7 +66,7 @@ def test_alert(reactor):
     assert set([alert1, alert3]) == set([alert1])
 
     alert = BaseAlert.get(reactor, name='Test', query='*', rules=["warning: >= 3MB"])
-    assert alert.rules[0]['value'] == 3145728
+    assert alert.rules[0]['exprs'][0]['value'] == 3145728
 
 
 def test_multimetrics(reactor):
@@ -138,6 +138,27 @@ def test_multimetrics(reactor):
         'waiting': 'normal', 'loading': 'normal'}
 
 
+def test_multiexpressions(reactor):
+    from graphite_beacon.alerts import BaseAlert
+
+    alert = BaseAlert.get(
+        reactor, name="Test", query="*", rules=["warning: > historical * 1.05 AND > 70"])
+    reactor.alerts = set([alert])
+
+    with mock.patch.object(reactor, 'notify'):
+        alert.check([
+            (50, 'metric1'), (65, 'metric1'), (85, 'metric1'), (65, 'metric1'),
+            (68, 'metric1'), (75, 'metric1')])
+
+        assert reactor.notify.call_count == 1
+
+        # metric2 - warning
+        assert reactor.notify.call_args_list[0][0][0] == 'warning'
+        assert reactor.notify.call_args_list[0][1]['target'] == 'metric1'
+
+    assert list(alert.history['metric1']) == [85, 65, 68, 75]
+
+
 def test_invalid_handler(reactor):
     reactor.reinit(critical_handlers=['log', 'unknown'])
     assert len(reactor.handlers['critical']) == 1
@@ -149,31 +170,31 @@ def test_convert():
     assert convert_to_format(789874) == 789874
     assert convert_from_format(789874)
     assert convert_to_format(45, 'percent') == "45%"
-    assert convert_from_format('45%') == 45
+    assert convert_from_format('45', '%') == 45
 
     assert convert_to_format(789, 'bytes') == 789
     assert convert_to_format(456789, 'bytes') == '446.1KB'
-    assert convert_from_format('456.8KB') == 467763.2
+    assert convert_from_format('456.8', 'KB') == 467763.2
     assert convert_to_format(45678912, 'bytes') == '43.6MB'
-    assert convert_from_format('45.7MB') == 47919923.2
+    assert convert_from_format('45.7', 'MB') == 47919923.2
     assert convert_to_format(4567891245, 'bytes') == '4.3GB'
-    assert convert_from_format('4.6GB') == 4939212390.4
+    assert convert_from_format('4.6', 'GB') == 4939212390.4
 
-    assert convert_from_format('456.8Kb') == 467763.2
-    assert convert_from_format('456.8Kbps') == 456800
+    assert convert_from_format('456.8', 'Kb') == 467763.2
+    assert convert_from_format('456.8', 'Kbps') == 456800
 
     assert convert_to_format(789, 'short') == 789
     assert convert_to_format(456789, 'short') == '456.8K'
-    assert convert_from_format('456.8K') == 456800
+    assert convert_from_format('456.8', 'K') == 456800
     assert convert_to_format(45678912, 'short') == '45.7Mil'
-    assert convert_from_format('45.7Mil') == 45700000
+    assert convert_from_format('45.7', 'Mil') == 45700000
     assert convert_to_format(4567891245, 'short') == '4.6Bil'
-    assert convert_from_format('4.6Bil') == 4600000000
+    assert convert_from_format('4.6', 'Bil') == 4600000000
 
     assert convert_to_format(789, 's') == "13.2m"
-    assert convert_from_format('13.2m') == 792
+    assert convert_from_format('13.2', 'm') == 792
     assert convert_to_format(789456, 's') == "1.3w"
-    assert convert_from_format('1.3w') == 786240
+    assert convert_from_format('1.3', 'w') == 786240
     assert convert_to_format(789456234, 's') == "25y"
 
     assert convert_to_format(79456234, 'ms') == "22.1h"
@@ -201,26 +222,38 @@ def test_interval_to_graphite():
 
 
 def test_parse_rule():
-    from graphite_beacon.utils import parse_rule, DEFAULT_MOD
+    from graphite_beacon.utils import parse_rule as parse_rule, IDENTITY
+    from funcparserlib.lexer import LexerError
     import operator as op
 
-    with pytest.raises(ValueError):
+    with pytest.raises(LexerError):
         assert parse_rule('invalid')
 
     assert parse_rule('normal: == 0') == {
-        'level': 'normal', 'op': op.eq, 'value': 0, 'mod': DEFAULT_MOD, 'raw': 'normal: == 0'}
+        'level': 'normal', 'raw': 'normal: == 0',
+        'exprs': [{'op': op.eq, 'value': 0, 'mod': IDENTITY}]}
+
     assert parse_rule('critical: < 30MB') == {
-        'level': 'critical', 'op': op.lt, 'value': 31457280, 'mod': DEFAULT_MOD,
-        'raw': 'critical: < 30MB'}
+        'level': 'critical', 'raw': 'critical: < 30MB',
+        'exprs': [{'op': op.lt, 'value': 31457280, 'mod': IDENTITY}]}
+
     assert parse_rule('warning: >= 30MB') == {
-        'level': 'warning', 'op': op.ge, 'value': 31457280, 'mod': DEFAULT_MOD,
-        'raw': 'warning: >= 30MB'}
+        'level': 'warning', 'raw': 'warning: >= 30MB',
+        'exprs': [{'op': op.ge, 'value': 31457280, 'mod': IDENTITY}]}
+
     assert parse_rule('warning: >= historical') == {
-        'level': 'warning', 'op': op.ge, 'value': 'historical', 'mod': DEFAULT_MOD,
-        'raw': 'warning: >= historical'}
+        'level': 'warning', 'raw': 'warning: >= historical',
+        'exprs': [{'op': op.ge, 'value': 'historical', 'mod': IDENTITY}]}
+
+    assert parse_rule('warning: >= historical AND > 25') == {
+        'level': 'warning', 'raw': 'warning: >= historical AND > 25',
+        'exprs': [{'op': op.ge, 'value': 'historical', 'mod': IDENTITY},
+                  op.and_,
+                  {'op': op.gt, 'value': 25, 'mod': IDENTITY}]}
+
     rule = parse_rule('warning: >= historical * 1.2')
-    assert rule['mod']
-    assert rule['mod'](5) == 6
+    assert rule['exprs'][0]['mod']
+    assert rule['exprs'][0]['mod'](5) == 6
 
 
 def test_html_template(reactor):
@@ -251,3 +284,10 @@ def test_html_template(reactor):
     assert len(message._payload) == 2
     _, html = message._payload
     assert 'google.com' in html.as_string()
+
+    ealert = BaseAlert.get(reactor, name='Test', query='*', rules=["critical: > 5 AND < 10"])
+    message = smtp.get_message(
+        'critical', ealert, 8, target=target, ntype='graphite', rule=ealert.rules[0])
+    assert message
+
+    assert len(message._payload) == 2
