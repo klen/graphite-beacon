@@ -1,3 +1,9 @@
+
+- Fix issue #46
+- Support `until` option for Graphite queries
+- Customize alert behaviour with no data
+- Enhance expressions (support AND/OR)
+
 ## 0.24.0
 
 - Support YAML in config files.
