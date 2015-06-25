@@ -465,6 +465,7 @@ Contributors
 
 * Andrej Kuročenko (https://github.com/kurochenko)
 * Cody Soyland (https://github.com/codysoyland)
+* Garrett Heel (https://github.com/GarrettHeel)
 * George Ionita (https://github.com/georgeionita)
 * James Yuzawa (https://github.com/yuzawa-san)
 * Nick Pillitteri (https://github.com/56quarters)
