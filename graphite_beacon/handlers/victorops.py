@@ -1,5 +1,9 @@
 import json
-from urlparse import urljoin
+try:
+    from urlparse import urljoin
+except ImportError:
+    from urllib.parse import urljoin
+
 from tornado import gen, httpclient as hc
 
 from . import AbstractHandler, LOGGER
@@ -12,7 +16,7 @@ class VictorOpsHandler(AbstractHandler):
     def init_handler(self):
         self.url = self.options.get('endpoint')
         assert self.url, 'REST Endpoint is not defined'
-        
+
         self.routing_key = self.options.get('routing_key', 'everyone')
         self.url = urljoin(self.url, self.routing_key)
 
