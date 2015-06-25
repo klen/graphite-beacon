@@ -146,7 +146,9 @@ def test_multiexpressions(reactor):
     reactor.alerts = set([alert])
 
     with mock.patch.object(reactor, 'notify'):
-        alert.check([(50, 'metric1'), (65, 'metric1'), (85, 'metric1'), (65, 'metric1'), (68, 'metric1'), (75, 'metric1')])
+        alert.check([
+            (50, 'metric1'), (65, 'metric1'), (85, 'metric1'), (65, 'metric1'),
+            (68, 'metric1'), (75, 'metric1')])
 
         assert reactor.notify.call_count == 1
 
@@ -228,14 +230,21 @@ def test_parse_rule():
         assert parse_rule('invalid')
 
     assert parse_rule('normal: == 0') == {
-        'level': 'normal', 'raw': 'normal: == 0', 'exprs': [{'op': op.eq, 'value': 0, 'mod': IDENTITY}]}
+        'level': 'normal', 'raw': 'normal: == 0',
+        'exprs': [{'op': op.eq, 'value': 0, 'mod': IDENTITY}]}
+
     assert parse_rule('critical: < 30MB') == {
-        'level': 'critical', 'raw': 'critical: < 30MB', 'exprs': [{'op': op.lt, 'value': 31457280, 'mod': IDENTITY}]}
+        'level': 'critical', 'raw': 'critical: < 30MB',
+        'exprs': [{'op': op.lt, 'value': 31457280, 'mod': IDENTITY}]}
+
     assert parse_rule('warning: >= 30MB') == {
-        'level': 'warning', 'raw': 'warning: >= 30MB', 'exprs': [{'op': op.ge, 'value': 31457280, 'mod': IDENTITY}]}
+        'level': 'warning', 'raw': 'warning: >= 30MB',
+        'exprs': [{'op': op.ge, 'value': 31457280, 'mod': IDENTITY}]}
+
     assert parse_rule('warning: >= historical') == {
         'level': 'warning', 'raw': 'warning: >= historical',
         'exprs': [{'op': op.ge, 'value': 'historical', 'mod': IDENTITY}]}
+
     assert parse_rule('warning: >= historical AND > 25') == {
         'level': 'warning', 'raw': 'warning: >= historical AND > 25',
         'exprs': [{'op': op.ge, 'value': 'historical', 'mod': IDENTITY},
@@ -277,10 +286,8 @@ def test_html_template(reactor):
     assert 'google.com' in html.as_string()
 
     ealert = BaseAlert.get(reactor, name='Test', query='*', rules=["critical: > 5 AND < 10"])
-    message = smtp.get_message('critical', ealert, 8, target=target, ntype='graphite', rule=ealert.rules[0])
+    message = smtp.get_message(
+        'critical', ealert, 8, target=target, ntype='graphite', rule=ealert.rules[0])
     assert message
 
     assert len(message._payload) == 2
-
-
-

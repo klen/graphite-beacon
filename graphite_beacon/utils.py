@@ -80,6 +80,7 @@ def convert_to_format(value, frmt=None):
     value = ("%.1f" % value).rstrip('0').rstrip('.')
     return "%s%s" % (value, name)
 
+
 def convert_from_format(num, unit=None):
     if not unit:
         return float(num)
@@ -101,6 +102,7 @@ def interval_to_graphite(interval):
 
 def _tokenize_rule(_str):
     return [x for x in RULE_TOKENIZER(_str) if x.type not in ['Space']]
+
 
 def _parse_rule(seq):
     tokval = lambda x: x.value
@@ -136,6 +138,7 @@ def _parse_expr(expr):
         mod = lambda x: OPERATORS[_op](x, num)
 
     return {'op': cond, 'value': value, 'mod': mod or IDENTITY}
+
 
 def parse_rule(rule):
     tokens = _tokenize_rule(rule)
