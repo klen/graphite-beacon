@@ -3,6 +3,7 @@
 - Support `until` option for Graphite queries
 - Customize alert behaviour with no data
 - Enhance expressions (support AND/OR)
+- Added VictorOps handler
 
 ## 0.24.0
 
