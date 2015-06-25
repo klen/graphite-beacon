@@ -462,10 +462,11 @@ Contributors
 * James Yuzawa (https://github.com/yuzawa-san)
 * Nick Pillitteri (https://github.com/56quarters)
 * Niku Toivola (https://github.com/nikut)
+* Olli-Pekka Puolitaival (https://github.com/OPpuolitaival)
 * Raine Virta (https://github.com/raine)
+* Scott Nonnenberg (https://github.com/scottnonnenberg)
 * Thomas Clavier (https://github.com/tclavier)
 * dugeem (https://github.com/dugeem)
-* Olli-Pekka Puolitaival (https://github.com/OPpuolitaival)
 
 License
 --------
