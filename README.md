@@ -150,6 +150,10 @@ Value units:
         // If an alert is failed, its notification will be repeated with the interval below
         "repeat_interval": "2hour",
 
+        // Default end time for Graphite queries
+        // Defaults to the current time, can be redefined for each alert.
+        "until": "0second",
+
         // Default loglevel
         "logging": "info",
 
@@ -206,10 +210,10 @@ At the moment **Graphite-beacon** supports two type of alerts:
       // (required) Alert query
       "query": "*.memory.memory-free",
 
-      //(optional) Alert type (graphite, url)
+      // (optional) Alert type (graphite, url)
       "source": "graphite",
 
-      //(optional)  Default values format (none, bytes, s, ms, short)
+      // (optional) Default values format (none, bytes, s, ms, short)
       "format": "bytes",
 
       // (optional) Alert method (average, last_value, sum)
@@ -220,6 +224,9 @@ At the moment **Graphite-beacon** supports two type of alerts:
 
       // (optional) What kind of alert to send when no data received (normal = no alert)
       "no_data": "warning",
+
+      // (optional) Alert interval end time (see "Alert interval" for examples)
+      "until": "5second",
 
       // (required) Alert rules
       // Rule format: "{level}: {operator} {value}"
