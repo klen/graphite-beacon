@@ -1,3 +1,4 @@
+## 0.25.0
 
 - Fix issue #46
 - Support `until` option for Graphite queries
