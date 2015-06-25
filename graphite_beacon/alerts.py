@@ -2,7 +2,7 @@ from tornado import ioloop, httpclient as hc, gen, log, escape
 
 from . import _compat as _
 from .graphite import GraphiteRecord
-from .utils import convert_to_format, parse_interval, parse_rule, HISTORICAL, interval_to_graphite
+from .utils import convert_to_format, parse_interval, parse_rule, HISTORICAL, LOGICAL_OPERATORS, interval_to_graphite
 import math
 from collections import deque, defaultdict
 from itertools import islice
@@ -141,10 +141,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
                 self.notify(self.no_data, value, target)
                 continue
             for rule in self.rules:
-                rvalue = self.get_value_for_rule(rule, target)
-                if rvalue is None:
-                    continue
-                if rule['op'](value, rvalue):
+                if self.evaluate_rule(rule, value, target):
                     self.notify(rule['level'], value, target, rule=rule)
                     break
             else:
@@ -152,15 +149,33 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
 
             self.history[target].append(value)
 
-    def get_value_for_rule(self, rule, target):
-        rvalue = rule['value']
+    def evaluate_rule(self, rule, value, target):
+        def evaluate(expr):
+            if expr in LOGICAL_OPERATORS.values():
+                return expr
+            rvalue = self.get_value_for_expr(expr, target)
+            if rvalue is None:
+                return False  # ignore this result
+            return expr['op'](value, rvalue)
+
+        evaluated = [evaluate(expr) for expr in rule['exprs']]
+        while len(evaluated) > 1:
+            lhs, logical_op, rhs = (evaluated.pop(0) for _ in range(3))
+            evaluated.insert(0, logical_op(lhs, rhs))
+
+        return evaluated[0]
+
+    def get_value_for_expr(self, expr, target):
+        if expr in LOGICAL_OPERATORS.values():
+            return None
+        rvalue = expr['value']
         if rvalue == HISTORICAL:
             history = self.history[target]
             if len(history) < self.history_size:
                 return None
-            rvalue = sum(history) / len(history)
+            rvalue = sum(history) / float(len(history))
 
-        rvalue = rule['mod'](rvalue)
+        rvalue = expr['mod'](rvalue)
         return rvalue
 
     def notify(self, level, value, target=None, ntype=None, rule=None):
