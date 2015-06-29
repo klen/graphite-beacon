@@ -22,12 +22,14 @@ class CliHandler(AbstractHandler):
         '''
         Substitute variables in command fragments by values e.g. ${level} => 'warning'
         '''
+        rule = kwargs.get('rule', {})
+        rule_value = rule.get('value', '') if rule else ''
         substitutes = {
             '${level}': str(level),
             '${target}': str(target),
             '${name}': '"' + str(name) + '"',
             '${value}': str(value),
-            '${limit_value}': str(kwargs.get('rule', {}).get('value', '')),
+            '${limit_value}': str(rule_value),
         }
 
         result = command

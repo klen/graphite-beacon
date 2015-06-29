@@ -158,8 +158,12 @@ Value units:
         "logging": "info",
 
         // Default method (average, last_value, sum).
-        // Can be redfined for each alert.
+        // Can be redefined for each alert.
         "method": "average",
+
+        // Default alert to send when no data received (normal = no alert)
+        // Can be redefined for each alert
+        "no_data": "critical",
 
         // Default prefix (used for notifications)
         "prefix": "[BEACON]",
@@ -178,7 +182,7 @@ Value units:
 ```
 
 You can setup options with a configuration file. See
-`example-config.json`.
+`example-config.json` or `example-config.yaml`.
 
 #### Include
 
@@ -217,6 +221,9 @@ At the moment **Graphite-beacon** supports two type of alerts:
 
       // (optional) Alert interval [eg. 15second, 30minute, 2hour, 1day, 3month, 1year]
       "interval": "1minute",
+
+      // (optional) What kind of alert to send when no data received (normal = no alert)
+      "no_data": "warning",
 
       // (optional) Alert interval end time (see "Alert interval" for examples)
       "until": "5second",
@@ -423,26 +430,26 @@ Enable "pagerduty" handler and set the options in your beacon configuration.
   Options:
 
     --config                         Path to an configuration file (JSON/YAML)
-                                    (default config.json)
+                                     (default config.json)
     --graphite_url                   Graphite URL (default http://localhost)
     --help                           show this help information
     --pidfile                        Set pid file
 
     --log_file_max_size              max size of log files before rollover
-                                    (default 100000000)
+                                     (default 100000000)
     --log_file_num_backups           number of log files to keep (default 10)
     --log_file_prefix=PATH           Path prefix for log files. Note that if you
-                                    are running multiple tornado processes,
-                                    log_file_prefix must be different for each
-                                    of them (e.g. include the port number)
+                                     are running multiple tornado processes,
+                                     log_file_prefix must be different for each
+                                     of them (e.g. include the port number)
     --log_to_stderr                  Send log output to stderr (colorized if
-                                    possible). By default use stderr if
-                                    --log_file_prefix is not set and no other
-                                    logging is configured.
+                                     possible). By default use stderr if
+                                     --log_file_prefix is not set and no other
+                                     logging is configured.
     --logging=debug|info|warning|error|none
-                                    Set the Python log level. If 'none', tornado
-                                    won't touch the logging configuration.
-                                    (default info)
+                                     Set the Python log level. If 'none', tornado
+                                     won't touch the logging configuration.
+                                     (default info)
 ```
 
 Bug tracker
@@ -458,14 +465,18 @@ Contributors
 
 * Andrej Kuročenko (https://github.com/kurochenko)
 * Cody Soyland (https://github.com/codysoyland)
+* Garrett Heel (https://github.com/GarrettHeel)
 * George Ionita (https://github.com/georgeionita)
 * James Yuzawa (https://github.com/yuzawa-san)
+* Konstantin Bakulin (https://github.com/kbakulin)
+* Miguel Moll (https://github.com/MiguelMoll)
 * Nick Pillitteri (https://github.com/56quarters)
 * Niku Toivola (https://github.com/nikut)
+* Olli-Pekka Puolitaival (https://github.com/OPpuolitaival)
 * Raine Virta (https://github.com/raine)
+* Scott Nonnenberg (https://github.com/scottnonnenberg)
 * Thomas Clavier (https://github.com/tclavier)
 * dugeem (https://github.com/dugeem)
-* Olli-Pekka Puolitaival (https://github.com/OPpuolitaival)
 
 License
 --------

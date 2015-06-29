@@ -61,3 +61,7 @@ target/
 
 # Vim backup files
 *~
+
+/.env
+/.ropeproject
+/.tox

@@ -106,6 +106,8 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         self.history_size = parse_interval(self.history_size)
         self.history_size = int(math.ceil(self.history_size / interval))
 
+        self.no_data = options.get('no_data', self.reactor.options['no_data'])
+
         if self.reactor.options.get('debug'):
             self.callback = ioloop.PeriodicCallback(self.load, 5000)
         else:
@@ -136,7 +138,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         for value, target in records:
             LOGGER.info("%s [%s]: %s", self.name, target, value)
             if value is None:
-                self.notify('critical', value, target)
+                self.notify(self.no_data, value, target)
                 continue
             for rule in self.rules:
                 if self.evaluate_rule(rule, value, target):
@@ -223,7 +225,9 @@ class GraphiteAlert(BaseAlert):
                                                    auth_password=self.auth_password,
                                                    request_timeout=self.request_timeout)
                 records = (GraphiteRecord(line.decode('utf-8')) for line in response.buffer)
-                data = [(None if record.empty else getattr(record, self.method), record.target) for record in records]
+                data = [
+                    (None if record.empty else getattr(record, self.method), record.target)
+                    for record in records]
                 if len(data) == 0:
                     raise ValueError('No data')
                 self.check(data)
@@ -236,6 +240,7 @@ class GraphiteAlert(BaseAlert):
         return self._graphite_url(target, graphite_url=graphite_url, raw_data=False)
 
     def _graphite_url(self, query, raw_data=False, graphite_url=None):
+        """ Build Graphite URL. """
         query = escape.url_escape(query)
         graphite_url = graphite_url or self.reactor.options['graphite_url']
         url = "{base}/render/?target={query}&from=-{time_window}&until=-{until}".format(

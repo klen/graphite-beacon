@@ -37,6 +37,7 @@ class Reactor(object):
         'until': '0second',
         'logging': 'info',
         'method': 'average',
+        'no_data': 'critical',
         'normal_handlers': ['log', 'smtp'],
         'pidfile': None,
         'prefix': '[BEACON]',
