@@ -133,7 +133,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
     historicValues = {}
     def check(self, records):
         LOGGER.debug("check")
-        print historicValues
+        print self.historicValues
         work = False
         if datetime.now().time().hour == (pastHour+1)%24 and not self.recorded:
              work = True
@@ -143,10 +143,10 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
             self.recorded = False
         for value, target in records:
             # INSERT DAILY STUFF HERE #
-            if work and not value is None and target in historicValues:
+            if work and not value is None and target in self.historicValues:
                 conn = psycopg2.connect(self.reactor.options.get('database'))
                 cur  = conn.cursor()
-                cur.execute("INSERT INTO history (query, value, day, hour) VALUES (%s, %s, %s, %s);", (target, historicValues[target][0]/historicValues[target][1] , str(datetime.now().date().year)+"-"+str(datetime.now().date().month)+"-"+str(datetime.now().date().day), str(datetime().now().time().hour)))
+                cur.execute("INSERT INTO history (query, value, day, hour) VALUES (%s, %s, %s, %s);", (target, self.historicValues[target][0]/self.historicValues[target][1] , str(datetime.now().date().year)+"-"+str(datetime.now().date().month)+"-"+str(datetime.now().date().day), str(datetime().now().time().hour)))
                 if datetime.now().time().hour == 0:
                     cur.execute("SELECT * FROM history WHERE day == date %s - integer 1 AND query == %s;", (str(datetime.now().date().year)+"-"+str(datetime.now().date().month)+"-"+str(datetime.now().date().day) ,target))
                     lista = cur.fetchall()
@@ -160,16 +160,16 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
                 conn.commit()
                 cur.close()
                 conn.close()
-                del historicValues[target]
+                del self.historicValues[target]
                 #database call#
             LOGGER.info("%s [%s]: %s", self.name, target, value)
             if value is None:
                 self.notify('critical', value, target)
                 continue
-            if target not in historicValues:
-                historicValues[target] = (value, 1)
+            if target not in self.historicValues:
+                self.historicValues[target] = (value, 1)
             else:
-                historicValues[target] = (historicValues[target][0]+value, historicValues[target][1]+1)
+                self.historicValues[target] = (self.historicValues[target][0]+value, self.historicValues[target][1]+1)
             for rule in self.rules:
                 rvalue = self.get_value_for_rule(rule, target)
                 if rvalue is None:
