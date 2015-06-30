@@ -129,23 +129,37 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         self.callback.stop()
         return self
     recorded = False
+    pastHour = datetime.now().time().hour
     historicValues = {}
     def check(self, records):
+        print historicValues
         work = False
-        if datetime.now().time().hour == 0 and not self.recorded:
+        if datetime.now().time().hour == (pastHour+1)%24 and not self.recorded:
              work = True
              self.recorded = True
-        elif datetime.now().time().hour == 1 and self.recorded:
+             pastHour = (pastHour+1)%24
+        elif datetime.now().time().hour == pastHour and self.recorded:
             self.recorded = False
         for value, target in records:
             # INSERT DAILY STUFF HERE #
             if work and not value is None and target in historicValues:
                 conn = psycopg2.connect(self.reactor.options.get('database'))
                 cur  = conn.cursor()
-                cur.execute("INSERT INTO history (query, value, day) VALUES (%s, %s, %s);", (target, historicValues[target][0]/historicValues[target][1] , datetime.now().date().year+"-"+datetime.now().date().month+"-"+datetime.now().date().day))
+                cur.execute("INSERT INTO history (query, value, day, hour) VALUES (%s, %s, %s, %s);", (target, historicValues[target][0]/historicValues[target][1] , str(datetime.now().date().year)+"-"+str(datetime.now().date().month)+"-"+str(datetime.now().date().day), str(datetime().now().time().hour)))
+                if datetime.now().time().hour == 0:
+                    cur.execute("SELECT * FROM history WHERE day == date %s - integer 1 AND query == %s;", (str(datetime.now().date().year)+"-"+str(datetime.now().date().month)+"-"+str(datetime.now().date().day) ,target))
+                    lista = cur.fetchall()
+                    count = 0
+                    total = 0
+                    for item in lista:
+                        count += 1
+                        total += item['value']
+                    total /= count
+                    cur.execute("INSERT INTO history (query, value, day, hour) VALUES (%s, %s, date %s - integer 1, %s);",  (target, total , str(datetime.now().date().year)+"-"+str(datetime.now().date().month)+"-"+str(datetime.now().date().day), 24))
                 conn.commit()
                 cur.close()
                 conn.close()
+                del historicValues[target]
                 #database call#
             LOGGER.info("%s [%s]: %s", self.name, target, value)
             if value is None:
