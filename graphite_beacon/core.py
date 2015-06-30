@@ -26,19 +26,19 @@ class Reactor(object):
             info = {}
             try:
                 info["startdate"] = self.get_argument('startdate', True)
-            except Error:
+            except:
                 print "no start date"
             try:
                 info["enddate"] = self.get_argument('enddate', True)
-            except Error:
+            except:
                 print "no end date"
             try:
                 info["interval"] = self.get_argument('interval', True)
-            except Error:
+            except:
                 print "no interval"
             try:
                 info["query"] = self.get_argunent('query', True)
-            except Error:
+            except:
                 print "no query"
             conn = psycopg2.connect(self.reactor.options.get('database'))
             cur  = conn.cursor()
