@@ -279,7 +279,7 @@ class Reactor(object):
                 fpid.write(str(os.getpid()))
         application = web.Application(
             [
-                (r'/(.*)', self.UpdateHandler, dict(react=self)),
+                (r'/alerts/(.*)', self.UpdateHandler, dict(react=self)),
                 (r'/history/', self.HistoryHandler, dict(react=self))
             ]
         )
