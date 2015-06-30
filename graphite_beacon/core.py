@@ -280,7 +280,7 @@ class Reactor(object):
         application = web.Application(
             [
                 (r'/alerts/(.*)', self.UpdateHandler, dict(react=self)),
-                (r'/history/', self.HistoryHandler, dict(react=self))
+                (r'/history', self.HistoryHandler, dict(react=self))
             ]
         )
         application.listen(3030)
