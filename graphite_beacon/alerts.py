@@ -57,6 +57,9 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         self.options = options
         self.client = hc.AsyncHTTPClient()
 
+        self.recorded = False
+        self.pastHour = datetime.now().time().hour
+        self.historicValues = {}
         try:
             self.configure(**options)
         except Exception as e:
@@ -128,18 +131,15 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
     def stop(self):
         self.callback.stop()
         return self
-    recorded = False
-    pastHour = datetime.now().time().hour
-    historicValues = {}
     def check(self, records):
         LOGGER.debug("check")
         print self.historicValues
         work = False
-        if datetime.now().time().hour == (pastHour+1)%24 and not self.recorded:
+        if datetime.now().time().hour == (self.pastHour+1)%24 and not self.recorded:
              work = True
              self.recorded = True
-             pastHour = (pastHour+1)%24
-        elif datetime.now().time().hour == pastHour and self.recorded:
+             self.pastHour = (self.pastHour+1)%24
+        elif datetime.now().time().hour == self.pastHour and self.recorded:
             self.recorded = False
         for value, target in records:
             # INSERT DAILY STUFF HERE #
