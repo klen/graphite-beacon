@@ -132,6 +132,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
     pastHour = datetime.now().time().hour
     historicValues = {}
     def check(self, records):
+        LOGGER.debug("check")
         print historicValues
         work = False
         if datetime.now().time().hour == (pastHour+1)%24 and not self.recorded:
