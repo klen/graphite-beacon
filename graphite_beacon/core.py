@@ -24,6 +24,7 @@ class Reactor(object):
             self.reactor = react
         def get(self):
             info = {}
+            info["query"] = self.get_argunent('query', True)
             try:
                 info["startdate"] = self.get_argument('startdate', True)
             except:
