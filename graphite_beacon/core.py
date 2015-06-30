@@ -23,8 +23,23 @@ class Reactor(object):
         def initialize(self, react):
             self.reactor = react
         def get(self):
-            print self.request.body
-            info = json.loads(self.request.body)
+            info = {}
+            try:
+                info["startdate"] = self.get_argument('startdate', True)
+            except Error:
+                print "no start date"
+            try:
+                info["enddate"] = self.get_argument('enddate', True)
+            except Error:
+                print "no end date"
+            try:
+                info["interval"] = self.get_argument('interval', True)
+            except Error:
+                print "no interval"
+            try:
+                info["query"] = self.get_argunent('query', True)
+            except Error:
+                print "no query"
             conn = psycopg2.connect(self.reactor.options.get('database'))
             cur  = conn.cursor()
             if not "query" in info:
