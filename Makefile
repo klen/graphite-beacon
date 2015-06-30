@@ -111,7 +111,7 @@ $(VIRTUALENV): requirements.txt
 	@$(VIRTUALENV)/bin/pip install -r requirements.txt
 	@touch $(VIRTUALENV)
 
-$(VIRTUALENV)/bin/py.test: requirements-test.txt
+$(VIRTUALENV)/bin/py.test: $(VIRTUALENV) requirements-test.txt
 	@$(VIRTUALENV)/bin/pip install -r requirements-test.txt
 	@touch $(VIRTUALENV)/bin/py.test
 
@@ -124,4 +124,4 @@ run: $(VIRTUALENV)
 .PHONY: t
 # target: t - Runs tests
 t: $(VIRTUALENV)/bin/py.test
-	py.test -xs tests.py
+	$(VIRTUALENV)/bin/py.test -xs tests.py
