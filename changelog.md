@@ -1,10 +1,11 @@
-## 0.25.0
+## 0.25.1
 
 - Fix issue #46
 - Support `until` option for Graphite queries
 - Customize alert behaviour with no data
 - Enhance expressions (support AND/OR)
 - Added VictorOps handler
+- Better Slack notifications
 
 ## 0.24.0
 
