@@ -23,6 +23,7 @@ class Reactor(object):
         def initialize(self, react):
             self.reactor = react
         def get(self):
+            print self.request.body
             info = json.loads(self.request.body)
             conn = psycopg2.connect(self.reactor.options.get('database'))
             cur  = conn.cursor()
