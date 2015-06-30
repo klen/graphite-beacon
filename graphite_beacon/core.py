@@ -24,7 +24,6 @@ class Reactor(object):
             self.reactor = react
         def get(self):
             info = {}
-            info["query"] = self.get_argunent('query', True)
             try:
                 info["startdate"] = self.get_argument('startdate', True)
             except:
@@ -38,7 +37,7 @@ class Reactor(object):
             except:
                 print "no interval"
             try:
-                info["query"] = self.get_argunent('query', True)
+                info["query"] = self.get_argument('query', True)
             except:
                 print "no query"
             conn = psycopg2.connect(self.reactor.options.get('database'))
