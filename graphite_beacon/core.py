@@ -25,19 +25,19 @@ class Reactor(object):
         def get(self):
             info = {}
             try:
-                info["startdate"] = self.get_argument('startdate', True)
+                info["startdate"] = self.get_argument('startdate')
             except:
                 print "no start date"
             try:
-                info["enddate"] = self.get_argument('enddate', True)
+                info["enddate"] = self.get_argument('enddate')
             except:
                 print "no end date"
             try:
-                info["interval"] = self.get_argument('interval', True)
+                info["interval"] = self.get_argument('interval')
             except:
                 print "no interval"
             try:
-                info["query"] = self.get_argument('query', True)
+                info["query"] = self.get_argument('query')
             except:
                 print "no query"
             conn = psycopg2.connect(self.reactor.options.get('database'))
