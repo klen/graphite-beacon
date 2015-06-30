@@ -18,11 +18,47 @@ COMMENT_RE = re('//\s+.*$', M)
 
 
 class Reactor(object):
+    # Handles get requests for historical data
+    class HistoryHandler(web.RequestHandler):
+        def initialize(self, react):
+            self.reactor = react
+        def get(self):
+            info = json.loads(self.request.body)
+            conn = psycopg2.connect(self.reactor.options.get('database'))
+            cur  = conn.cursor()
+            if not "query" in info:
+                self.write("no query")
+            elif "startdate" in info and "enddate" in info:
+                #make DB call for range startdate to enddate
+                cur.execute("SELECT * FROM history WHERE day >= %s AND day <= %s AND query = %s", (info["startdate"], info["enddate"], info["query"]))
+                self.write(json.dumps(cur.fetchall()))
+            elif "interval" in info:
+                if "startdate" in info:
+                    #start from there and move forward
+                    cur.execute("SELECT * FROM history WHERE day >= %s AND day <= date %s + integer %s AND query = %s", (info["startdate"], info["startdate"], info["interval"], info["query"]))
+                    self.write(json.dumps(cur.fetchall()))
+                elif "enddate" in info:
+                    #start from there and move backward
+                    cur.execute("SELECT * FROM history WHERE day >= date %s - integer %s AND day <= date %s AND query = %s", (info["enddate"], info["interval"], info["enddate"], info["query"]))
+                    self.write(json.dumps(cur.fetchall()))
+                else:
+                    #Default ending date is current day
+                    curDate = datetime.now().date().year + "-" + datetime.now().date().month + "-" + datetime.now().date().day
+                    cur.execute("SELECT * FROM history where day >= date %s - integer %s AND day <= date %s AND query = %s", (curDate, info["interval"], curDate, info["query"]))
+                    self.write(json.dumps(cur.fetchall()))
+            else:
+                #dump all data with no regard to dates
+                cur.execute("SELECT * FROM history WHERE query = %s", (info["query"],))
+                self.write(json.dumps(cur.fetchall()))
+            conn.commit();
+            cur.close();
+            conn.close();
+    # Handles web requests for updating alerts
     class UpdateHandler(web.RequestHandler):
         # react is the overall reactor object such that options can be changed
         def initialize(self, react):
             self.reactor = react
-        
+
         # Supports upsert. Adds new alerts or updates existing alerts with data
         def put(self, arg):
             info = json.loads(self.request.body)
@@ -43,8 +79,8 @@ class Reactor(object):
             cur.close()
             conn.close()
             self.write("All good")
-            
-        # Deletes alert with arg-specified query 
+
+        # Deletes alert with arg-specified query
         def delete(self, arg):
             for i in range(len(self.reactor.options.get('alerts'))):
                 if self.reactor.options.get('alerts')[i].get('query') == arg:
@@ -63,8 +99,8 @@ class Reactor(object):
             cur.close()
             conn.close()
             self.write("All good")
-            
-        # Adds new alert. Unnecessary, use PUT    
+
+        # Adds new alert. Unnecessary, use PUT
         def post(self, arg):
             info = json.loads(self.request.body)
             self.reactor.options.get('alerts').append(info)
@@ -79,7 +115,7 @@ class Reactor(object):
             cur.close()
             conn.close()
             self.write("All good")
-            
+
         # No arguments: Return current options (including setup of alerts)
         # Query Specified: Returns the alert settings of the given query
         def get(self, arg):
@@ -164,6 +200,7 @@ class Reactor(object):
         cur  = conn.cursor()
         cur.execute("CREATE TABLE IF NOT EXISTS alerts (query text, name text, source text, format text, interval text, history_size text, rules text);")
         cur.execute("CREATE TABLE IF NOT EXISTS cache (original_query text, resolved_query text, level text, description text);")
+        cur.execute("CREATE TABLE IF NOT EXISTS history (query text, value text, day date);")
         cur.execute("SELECT * FROM alerts;")
         alertList = cur.fetchall()
         if not 'alerts' in self.options:
@@ -185,7 +222,7 @@ class Reactor(object):
 
     def reinit(self, *args, **options):
         LOGGER.info('Read configuration')
-        
+
         self.options.update(options)
         print "reinit called"
         self.include_config(self.options.get('config'))
@@ -242,7 +279,8 @@ class Reactor(object):
                 fpid.write(str(os.getpid()))
         application = web.Application(
             [
-                (r'/(.*)', self.UpdateHandler, dict(react=self))
+                (r'/(.*)', self.UpdateHandler, dict(react=self)),
+                (r'/history/', self.HistoryHandler, dict(react=self))
             ]
         )
         application.listen(3030)
@@ -265,8 +303,8 @@ class Reactor(object):
 
         if ntype is None:
             ntype = alert.source
-            
-        if not target == 'loading': 
+
+        if not target == 'loading':
             conn = psycopg2.connect(self.options.get('database'))
             cur  = conn.cursor()
             cur.execute("UPDATE cache SET level=%s, description=%s WHERE resolved_query = %s AND original_query = %s;", (level, value, target, alert.query))
@@ -274,7 +312,7 @@ class Reactor(object):
             conn.commit();
             cur.close();
             conn.close();
-        
+
         for handler in self.handlers.get(level, []):
             handler.notify(level, alert, value, target=target, ntype=ntype, rule=rule)
 

@@ -4,9 +4,10 @@ from . import _compat as _
 from .graphite import GraphiteRecord
 from .utils import convert_to_format, parse_interval, parse_rule, HISTORICAL, interval_to_graphite
 import math
+import psycopg2
 from collections import deque, defaultdict
 from itertools import islice
-
+from datetime import datetime
 
 LOGGER = log.gen_log
 METHODS = "average", "last_value", "sum"
@@ -127,13 +128,33 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
     def stop(self):
         self.callback.stop()
         return self
-
+    recorded = False
+    historicValues = {}
     def check(self, records):
+        work = False
+        if datetime.now().time().hour == 0 and not self.recorded:
+             work = True
+             self.recorded = True
+        elif datetime.now().time().hour == 1 and self.recorded:
+            self.recorded = False
         for value, target in records:
+            # INSERT DAILY STUFF HERE #
+            if work and not value is None and target in historicValues:
+                conn = psycopg2.connect(self.reactor.options.get('database'))
+                cur  = conn.cursor()
+                cur.execute("INSERT INTO history (query, value, day) VALUES (%s, %s, %s);", (target, historicValues[target][0]/historicValues[target][1] , datetime.now().date().year+"-"+datetime.now().date().month+"-"+datetime.now().date().day))
+                conn.commit()
+                cur.close()
+                conn.close()
+                #database call#
             LOGGER.info("%s [%s]: %s", self.name, target, value)
             if value is None:
                 self.notify('critical', value, target)
                 continue
+            if target not in historicValues:
+                historicValues[target] = (value, 1)
+            else:
+                historicValues[target] = (historicValues[target][0]+value, historicValues[target][1]+1)
             for rule in self.rules:
                 rvalue = self.get_value_for_rule(rule, target)
                 if rvalue is None:
