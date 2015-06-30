@@ -60,7 +60,7 @@ class Reactor(object):
                     self.write(json.dumps(cur.fetchall()))
                 else:
                     #Default ending date is current day
-                    curDate = datetime.now().date().year + "-" + datetime.now().date().month + "-" + datetime.now().date().day
+                    curDate = str(datetime.now().date().year) + "-" + str(datetime.now().date().month) + "-" + str(datetime.now().date().day)
                     cur.execute("SELECT * FROM history where day >= date %s - integer %s AND day <= date %s AND query = %s", (curDate, info["interval"], curDate, info["query"]))
                     self.write(json.dumps(cur.fetchall()))
             else:
