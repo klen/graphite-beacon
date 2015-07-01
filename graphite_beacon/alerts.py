@@ -58,7 +58,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         self.client = hc.AsyncHTTPClient()
 
         self.recorded = False
-        self.pastHour = (datetime.now().time().hour+23)%24
+        self.pastHour = datetime.now().time().hour
         self.historicValues = {}
         try:
             self.configure(**options)
