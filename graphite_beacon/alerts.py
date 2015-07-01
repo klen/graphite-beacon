@@ -164,6 +164,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
             if work and not value is None and target in self.historicValues:
                 conn = psycopg2.connect(self.reactor.options.get('database'))
                 cur  = conn.cursor()
+                LOGGER.info("datebase call made");
                 cur.execute("INSERT INTO history (query, value, day, hour) VALUES (%s, %s, %s, %s);", (target, self.historicValues[target][0]/self.historicValues[target][1] , str(datetime.now().date().year)+"-"+str(datetime.now().date().month)+"-"+str(datetime.now().date().day), str(datetime().now().time().hour)))
                 if datetime.now().time().hour == 0:
                     cur.execute("SELECT * FROM history WHERE day == date %s - integer 1 AND query == %s;", (str(datetime.now().date().year)+"-"+str(datetime.now().date().month)+"-"+str(datetime.now().date().day) ,target))
