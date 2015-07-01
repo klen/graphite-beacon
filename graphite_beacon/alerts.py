@@ -142,6 +142,24 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         elif datetime.now().time().hour == self.pastHour and self.recorded:
             self.recorded = False
         for value, target in records:
+            LOGGER.info("%s [%s]: %s", self.name, target, value)
+            if value is None:
+                self.notify('critical', value, target)
+                continue
+            if target not in self.historicValues:
+                self.historicValues[target] = (value, 1)
+            else:
+                self.historicValues[target] = (self.historicValues[target][0]+value, self.historicValues[target][1]+1)
+            for rule in self.rules:
+                rvalue = self.get_value_for_rule(rule, target)
+                if rvalue is None:
+                    continue
+                if rule['op'](value, rvalue):
+                    self.notify(rule['level'], value, target, rule=rule)
+                    break
+            else:
+                self.notify('normal', value, target, rule=rule)
+
             # INSERT DAILY STUFF HERE #
             if work and not value is None and target in self.historicValues:
                 conn = psycopg2.connect(self.reactor.options.get('database'))
@@ -162,24 +180,6 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
                 conn.close()
                 del self.historicValues[target]
                 #database call#
-            LOGGER.info("%s [%s]: %s", self.name, target, value)
-            if value is None:
-                self.notify('critical', value, target)
-                continue
-            if target not in self.historicValues:
-                self.historicValues[target] = (value, 1)
-            else:
-                self.historicValues[target] = (self.historicValues[target][0]+value, self.historicValues[target][1]+1)
-            for rule in self.rules:
-                rvalue = self.get_value_for_rule(rule, target)
-                if rvalue is None:
-                    continue
-                if rule['op'](value, rvalue):
-                    self.notify(rule['level'], value, target, rule=rule)
-                    break
-            else:
-                self.notify('normal', value, target, rule=rule)
-
             self.history[target].append(value)
 
     def get_value_for_rule(self, rule, target):
