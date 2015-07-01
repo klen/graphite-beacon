@@ -159,7 +159,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
                     break
             else:
                 self.notify('normal', value, target, rule=rule)
-            LOGGER.info("work: %s pasthour: %s", self.work, self.pastHour)
+            LOGGER.info("work: %s pasthour: %s recorded: %s", work, self.pastHour, self.recorded)
             print historicValues
             # INSERT DAILY STUFF HERE #
             if work and not value is None and target in self.historicValues:
