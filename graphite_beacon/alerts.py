@@ -132,8 +132,6 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         self.callback.stop()
         return self
     def check(self, records):
-        LOGGER.debug("check")
-        print self.historicValues
         work = False
         if datetime.now().time().hour == (self.pastHour+1)%24 and not self.recorded:
              work = True
@@ -159,8 +157,6 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
                     break
             else:
                 self.notify('normal', value, target, rule=rule)
-            LOGGER.info("work: %s pasthour: %s recorded: %s", work, self.pastHour, self.recorded)
-            print self.historicValues
             # INSERT DAILY STUFF HERE #
             if work and not value is None and target in self.historicValues:
                 conn = psycopg2.connect(self.reactor.options.get('database'))
