@@ -216,7 +216,7 @@ class Reactor(object):
         conn = psycopg2.connect(self.options.get('database'))
         cur  = conn.cursor()
         cur.execute("CREATE TABLE IF NOT EXISTS alerts (query text, name text, source text, format text, interval text, history_size text, rules text);")
-        cur.execute("CREATE TABLE IF NOT EXISTS cache (original_query text, resolved_query text, level text, description text);")
+        cur.execute("CREATE TABLE IF NOT EXISTS cache (original_query text, resolved_query text, level text, description text, datetime text);")
         cur.execute("CREATE TABLE IF NOT EXISTS history (query text, value text, day date, hour text);")
         cur.execute("SELECT * FROM alerts;")
         alertList = cur.fetchall()
@@ -324,8 +324,8 @@ class Reactor(object):
         if not target == 'loading':
             conn = psycopg2.connect(self.options.get('database'))
             cur  = conn.cursor()
-            cur.execute("UPDATE cache SET level=%s, description=%s WHERE resolved_query = %s AND original_query = %s;", (level, value, target, alert.query))
-            cur.execute("INSERT INTO cache (resolved_query, original_query, level, description) SELECT %s, %s, %s, %s WHERE NOT EXISTS (SELECT 1 FROM cache WHERE resolved_query = %s AND original_query = %s);", (target, alert.query, level, value, target, alert.query))
+            cur.execute("UPDATE cache SET level=%s, description=%s, datetime=%s WHERE resolved_query = %s AND original_query = %s;", (level, value, str(datetime.now()), target, alert.query))
+            cur.execute("INSERT INTO cache (resolved_query, original_query, level, description, datetime) SELECT %s, %s, %s, %s WHERE NOT EXISTS (SELECT 1 FROM cache WHERE resolved_query = %s AND original_query = %s);", (target, alert.query, level, value, str(datetime.now()), target, alert.query))
             conn.commit();
             cur.close();
             conn.close();
