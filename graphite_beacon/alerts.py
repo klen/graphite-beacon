@@ -2,7 +2,7 @@ from tornado import ioloop, httpclient as hc, gen, log, escape
 
 from . import _compat as _
 from .graphite import GraphiteRecord
-from .utils import convert_to_format, parse_interval, parse_rule, HISTORICAL, interval_to_graphite
+from .utils import convert_to_format, parse_interval, parse_rule, HISTORICAL, HISTORICAL_TOD, interval_to_graphite
 import math
 import psycopg2
 from collections import deque, defaultdict
@@ -182,7 +182,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
                     self.history_TOD_value[target] = total
                 else:
                     LOGGER.error("No history data for %s" % target)
-                    
+
                 ### Insert Hourly Data into database ###
 
                 cur.execute("INSERT INTO history (query, value, day, hour) VALUES (%s, %s, %s, %s);", (target, self.historicValues[target][0]/self.historicValues[target][1] , str(datetime.now().date())))
