@@ -168,6 +168,21 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
                 cur  = conn.cursor()
                 LOGGER.info("datebase call made");
 
+                ### Pull new history_TOD data by averaging database data ###
+
+                cur.execute("SELECT * FROM history where day >= date %s - integer %s AND query == %s;", (str(datetime.now().date()), self.history_TOD_size, target))
+                lista = cur.fetchall()
+                count = 0
+                total = 0
+                for item in lista:
+                    count += 1
+                    total += item['value']
+                if count > 0:
+                    total /= count
+                    self.history_TOD_value[target] = total
+                else:
+                    LOGGER.error("No history data for %s" % target)
+                    
                 ### Insert Hourly Data into database ###
 
                 cur.execute("INSERT INTO history (query, value, day, hour) VALUES (%s, %s, %s, %s);", (target, self.historicValues[target][0]/self.historicValues[target][1] , str(datetime.now().date())))
@@ -186,20 +201,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
                         total /= count
                         cur.execute("INSERT INTO history (query, value, day, hour) VALUES (%s, %s, date %s - integer 1, %s);",  (target, total , str(datetime.now().date().year)+"-"+str(datetime.now().date().month)+"-"+str(datetime.now().date().day), 24))
 
-                ### Pull new history_TOD data by averaging database data ###
 
-                cur.execute("SELECT * FROM history where day >= date %s - integer %s AND query == %s;", (str(datetime.now().date()), self.history_TOD_size, target))
-                lista = cur.fetchall()
-                count = 0
-                total = 0
-                for item in lista:
-                    count += 1
-                    total += item['value']
-                if count > 0:
-                    total /= count
-                    self.history_TOD_value[target] = total
-                else:
-                    LOGGER.error("No history data for %s" % target)
 
                 ### Commit Changes. Database calls done ###
 
