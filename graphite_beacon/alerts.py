@@ -284,7 +284,7 @@ class GraphiteAlert(BaseAlert):
         else:
             self.waiting = True
             try:
-                response = yield self.client.fetch(self.url, auth_username=self.auth_username,
+                response =  self.client.fetch(self.url, auth_username=self.auth_username,
                                                    auth_password=self.auth_password,
                                                    request_timeout=self.request_timeout)
                 print response.buffer
