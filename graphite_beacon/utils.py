@@ -48,8 +48,8 @@ RULE_RE = re(
     (
         "|".join(OPERATORS.keys()),
         "|".join(sorted(CONVERT_HASH.keys(), reverse=True)),
-        HISTORICAL,
         HISTORICAL_TOD,
+        HISTORICAL,
     ))
 
 
@@ -96,6 +96,7 @@ def parse_rule(rule):
     if not match:
         raise ValueError('Invalid rule: %s' % rule)
     level, cond, value, mod = match.groups()
+    print 'parserule',value
     if value != HISTORICAL and value != HISTORICAL_TOD:
         value = convert_from_format(value)
 
