@@ -228,7 +228,6 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
                 return None
             rvalue = sum(history) / len(history)
         if rvalue == HISTORICAL_TOD:
-            LOGGER.info("HISTORICAL_TOD CALLED")
             try:
                 rvalue = self.history_TOD_value[target]
             except KeyError:
@@ -288,6 +287,7 @@ class GraphiteAlert(BaseAlert):
                                                    auth_password=self.auth_password,
                                                    request_timeout=self.request_timeout)
                 records = (GraphiteRecord(line.decode('utf-8')) for line in response.buffer)
+                print records
                 data = [(None if record.empty else getattr(record, self.method), record.target) for record in records]
                 if len(data) == 0:
                     raise ValueError('No data')
