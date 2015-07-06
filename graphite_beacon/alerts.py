@@ -177,7 +177,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
                 total = 0
                 for item in lista:
                     count += 1
-                    total += item['value']
+                    total += item[1]
                     if count > 0:
                         total /= count
                         self.history_TOD_value[target] = total
@@ -205,7 +205,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
                     total = 0
                     for item in lista:
                         count += 1
-                        total += item['value']
+                        total += item[1]
                     if count > 0:
                         total /= count
                         cur.execute("INSERT INTO history (query, value, day, hour) VALUES (%s, %s, date %s - integer \' 1 \', %s);",  (target, total , str(datetime.now().date()), 24))
