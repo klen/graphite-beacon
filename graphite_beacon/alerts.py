@@ -235,7 +235,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
                 rvalue = self.history_TOD_value[target]
             except KeyError:
                 LOGGER.error("KeyError for %s, No Historical Data" % target)
-                rvalue = 0
+                return None
         rvalue = rule['mod'](rvalue)
         return rvalue
 
