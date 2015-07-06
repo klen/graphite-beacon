@@ -131,8 +131,11 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
             self.state[target] = "normal"
 
     def start(self):
-        self.load()
         self.callback.start()
+        if not self.load():
+            self.callback.stop()
+            self.load()
+            self.callback.start()
         return self
 
     def stop(self):
@@ -291,10 +294,14 @@ class GraphiteAlert(BaseAlert):
                 records = (GraphiteRecord(line.decode('utf-8')) for line in response.buffer)
                 data = [(1 if record.empty else getattr(record, self.method), record.target) for record in records]
                 if data[0][0] == 1:
+                    return False
+                """
+                if data[0][0] == 1:
                     LOGGER.info("Restarting client")
                     self.client.close()
                     self.client = hc.AsyncHTTPClient()
                 print data
+                """
                 if len(data) == 0:
                     raise ValueError('No data')
                 self.check(data)
@@ -302,6 +309,7 @@ class GraphiteAlert(BaseAlert):
             except Exception as e:
                 self.notify('critical', 'Loading error: %s' % e, target='loading', ntype='common')
             self.waiting = False
+            return True
 
     def get_graph_url(self, target, graphite_url=None):
         query = escape.url_escape(target)
