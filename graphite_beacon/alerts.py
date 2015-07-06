@@ -194,7 +194,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
 
                 ### Insert Hourly Data into database ###
 
-                cur.execute("INSERT INTO history (query, value, day, hour) VALUES (%s, %s, %s, %s);", (target, self.historicValues[target][0]/self.historicValues[target][1] , str(datetime.now().date())))
+                cur.execute("INSERT INTO history (query, value, day, hour) VALUES (%s, %s, %s, %s);", (target, self.historicValues[target][0]/self.historicValues[target][1] , str(datetime.now().date()), str(datetime.now().time().hour)))
 
                 ### If the start of a day, insert average of past day's data into database ###
 
@@ -208,7 +208,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
                         total += item['value']
                     if count > 0:
                         total /= count
-                        cur.execute("INSERT INTO history (query, value, day, hour) VALUES (%s, %s, date %s - integer 1, %s);",  (target, total , str(datetime.now().date().year)+"-"+str(datetime.now().date().month)+"-"+str(datetime.now().date().day), 24))
+                        cur.execute("INSERT INTO history (query, value, day, hour) VALUES (%s, %s, date %s - integer 1, %s);",  (target, total , str(datetime.now().date()), 24))
 
                 ### Commit Changes. Database calls done ###
 
