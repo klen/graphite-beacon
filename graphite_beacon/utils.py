@@ -88,7 +88,9 @@ def parse_interval(interval):
 def interval_to_graphite(interval):
     _, num, unit = NUMBER_RE.split(interval)
     unit = TIME_UNIT_SYN2.get(unit, unit) or 'second'
+    print 'interval to graphite'
     if num < 20 and unit == 'second':
+        print 'num = 20'
         num = 20
     return num + unit
 
