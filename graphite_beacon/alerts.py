@@ -155,16 +155,6 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
                 self.historicValues[target] = (value, 1)
             else:
                 self.historicValues[target] = (self.historicValues[target][0]+value, self.historicValues[target][1]+1)
-            for rule in self.rules:
-                rvalue = self.get_value_for_rule(rule, target)
-                if rvalue is None:
-                    continue
-                if rule['op'](value, rvalue):
-                    self.notify(rule['level'], value, target, rule=rule)
-                    break
-            else:
-                self.notify('normal', value, target, rule=rule)
-            # INSERT DAILY STUFF HERE #
             if (self.first or work) and not value is None and target in self.historicValues:
                 conn = psycopg2.connect(self.reactor.options.get('database'))
                 cur  = conn.cursor()
@@ -186,6 +176,17 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
                 conn.commit()
                 cur.close()
                 conn.close()
+
+            for rule in self.rules:
+                rvalue = self.get_value_for_rule(rule, target)
+                if rvalue is None:
+                    continue
+                if rule['op'](value, rvalue):
+                    self.notify(rule['level'], value, target, rule=rule)
+                    break
+            else:
+                self.notify('normal', value, target, rule=rule)
+            # INSERT DAILY STUFF HERE #
 
             if work and not value is None and target in self.historicValues:
                 conn = psycopg2.connect(self.reactor.options.get('database'))
@@ -231,7 +232,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
             try:
                 rvalue = self.history_TOD_value[target]
             except KeyError:
-                LOGGER.error("KeyError for %s" % target)
+                LOGGER.error("KeyError for %s, No Historical Data" % target)
                 rvalue = 0
         rvalue = rule['mod'](rvalue)
         return rvalue
