@@ -112,7 +112,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
 
         self.history_TOD_size = options.get('history_TOD_size', '1d')
         self.history_TOD_size = int(parse_interval(self.history_TOD_size) / 86400000.0)
-
+        print self.history_TOD_size
         if self.reactor.options.get('debug'):
             self.callback = ioloop.PeriodicCallback(self.load, 5000)
         else:
