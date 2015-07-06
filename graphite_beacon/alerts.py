@@ -165,7 +165,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
             else:
                 self.notify('normal', value, target, rule=rule)
             # INSERT DAILY STUFF HERE #
-            if (first or work) and not value is None and target in self.historicValues:
+            if (self.first or work) and not value is None and target in self.historicValues:
                 conn = psycopg2.connect(self.reactor.options.get('database'))
                 cur  = conn.cursor()
 
