@@ -132,10 +132,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
 
     def start(self):
         self.callback.start()
-        if not self.load():
-            self.callback.stop()
-            self.load()
-            self.callback.start()
+        self.load()
         return self
 
     def stop(self):
@@ -294,7 +291,8 @@ class GraphiteAlert(BaseAlert):
                 records = (GraphiteRecord(line.decode('utf-8')) for line in response.buffer)
                 data = [(1 if record.empty else getattr(record, self.method), record.target) for record in records]
                 if data[0][0] == 1:
-                    return False
+                    self.callback.stop()
+                    self.callback.start()
                 """
                 if data[0][0] == 1:
                     LOGGER.info("Restarting client")
@@ -309,7 +307,6 @@ class GraphiteAlert(BaseAlert):
             except Exception as e:
                 self.notify('critical', 'Loading error: %s' % e, target='loading', ntype='common')
             self.waiting = False
-            return True
 
     def get_graph_url(self, target, graphite_url=None):
         query = escape.url_escape(target)
