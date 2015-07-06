@@ -227,6 +227,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
                 return None
             rvalue = sum(history) / len(history)
         if rvalue == HISTORICAL_TOD:
+            LOGGER.info("HISTORICAL_TOD CALLED")
             try:
                 rvalue = self.history_TOD_value[target]
             except KeyError:
