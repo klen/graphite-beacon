@@ -1,5 +1,6 @@
 from tornado import ioloop, httpclient as hc, gen, log, escape
 
+import time
 from . import _compat as _
 from .graphite import GraphiteRecord
 from .utils import convert_to_format, parse_interval, parse_rule, HISTORICAL, HISTORICAL_TOD, interval_to_graphite
@@ -291,6 +292,7 @@ class GraphiteAlert(BaseAlert):
                 data = [(1 if record.empty else getattr(record, self.method), record.target) for record in records]
                 if data[0][0] == 1:
                     LOGGER.info("Restarting client")
+                    time.sleep(1)
                     self.client.close()
                     self.client = hc.AsyncHTTPClient()
                 print data
