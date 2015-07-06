@@ -107,7 +107,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         self.history_size = parse_interval(self.history_size)
         self.history_size = int(math.ceil(self.history_size / interval))
 
-        self.history_TOD_size = options.get('history_TOD_size', 10)
+        self.history_TOD_size = options.get('history_TOD_size', '10d')
         self.history_TOD_size = int(parse_interval(self.history_TOD_size) / 86400.0)
 
         if self.reactor.options.get('debug'):
