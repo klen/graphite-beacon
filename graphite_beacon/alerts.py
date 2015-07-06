@@ -289,6 +289,8 @@ class GraphiteAlert(BaseAlert):
                                                    request_timeout=self.request_timeout)
                 #print response.buffer
                 records = (GraphiteRecord(line.decode('utf-8')) for line in response.buffer)
+                data1 = [(record) for record in records]
+                print data1
                 data = [(None if record.empty else getattr(record, self.method), record.target) for record in records]
                 if len(data) == 0:
                     raise ValueError('No data')
