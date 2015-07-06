@@ -157,6 +157,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
             else:
                 self.historicValues[target] = (self.historicValues[target][0]+value, self.historicValues[target][1]+1)
             if (self.first or work) and not value is None and target in self.historicValues:
+                self.first = False
                 conn = psycopg2.connect(self.reactor.options.get('database'))
                 cur  = conn.cursor()
 
@@ -164,6 +165,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
 
                 cur.execute("SELECT * FROM history where day >= date %s - integer  \' %s \' AND day < date %s AND query LIKE %s;", (str(datetime.now().date()),self.history_TOD_size,  str(datetime.now().date()), target))
                 lista = cur.fetchall()
+                print lista
                 count = 0
                 total = 0
                 for item in lista:
