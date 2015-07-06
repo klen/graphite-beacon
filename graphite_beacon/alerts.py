@@ -132,7 +132,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
 
     def start(self):
         self.callback.start()
-        self.load()
+        #self.load()
         return self
 
     def stop(self):
@@ -292,7 +292,6 @@ class GraphiteAlert(BaseAlert):
                 data = [(1 if record.empty else getattr(record, self.method), record.target) for record in records]
                 if data[0][0] == 1:
                     LOGGER.info("Restarting client")
-                    time.sleep(5)
                     self.client.close()
                     self.client = hc.AsyncHTTPClient()
                 print data
