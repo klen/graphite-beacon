@@ -325,7 +325,7 @@ class Reactor(object):
             conn = psycopg2.connect(self.options.get('database'))
             cur  = conn.cursor()
             cur.execute("UPDATE cache SET level=%s, description=%s, datetime=%s WHERE resolved_query = %s AND original_query = %s;", (level, value, str(datetime.now()), target, alert.query))
-            cur.execute("INSERT INTO cache (resolved_query, original_query, level, description, datetime) SELECT %s, %s, %s, %s WHERE NOT EXISTS (SELECT 1 FROM cache WHERE resolved_query = %s AND original_query = %s);", (target, alert.query, level, value, str(datetime.now()), target, alert.query))
+            cur.execute("INSERT INTO cache (resolved_query, original_query, level, description, datetime) SELECT %s, %s, %s, %s, %s WHERE NOT EXISTS (SELECT 1 FROM cache WHERE resolved_query = %s AND original_query = %s);", (target, alert.query, level, value, str(datetime.now()), target, alert.query))
             conn.commit();
             cur.close();
             conn.close();
