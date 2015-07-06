@@ -131,8 +131,8 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
             self.state[target] = "normal"
 
     def start(self):
+        self.load()
         self.callback.start()
-        #self.load()
         return self
 
     def stop(self):
