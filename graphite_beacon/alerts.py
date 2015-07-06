@@ -163,7 +163,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
 
                 ### Pull new history_TOD data by averaging database data ###
 
-                cur.execute("SELECT * FROM history where day >= date %s - integer  \' %s \' AND day < date %s AND query LIKE %s;", (str(datetime.now().date()),self.history_TOD_size,  str(datetime.now().date()), target))
+                cur.execute("SELECT * FROM history where day >= date %s - integer  \' %s \' AND day < date %s AND query LIKE %s AND hour LIKE %s;", (str(datetime.now().date()),self.history_TOD_size,  str(datetime.now().date()), target, str(datetime.now().time().hour)))
                 lista = cur.fetchall()
                 print lista
                 count = 0
