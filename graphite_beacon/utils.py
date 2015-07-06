@@ -44,7 +44,7 @@ HISTORICAL = 'historical'
 HISTORICAL_TOD = 'historical_TOD'
 OPERATORS = {'>': op.gt, '>=': op.ge, '<': op.lt, '<=': op.le, '==': op.eq, '!=': op.ne}
 RULE_RE = re(
-    '(critical|warning|normal):\s+(%s)\s+(\d+\.?\d*(?:%s)?|%s)\s*((?:\*|\+|-|\/)\s*\d+\.?\d*)?' %
+    '(critical|warning|normal):\s+(%s)\s+(\d+\.?\d*(?:%s)?|%s|%s)\s*((?:\*|\+|-|\/)\s*\d+\.?\d*)?' %
     (
         "|".join(OPERATORS.keys()),
         "|".join(sorted(CONVERT_HASH.keys(), reverse=True)),
