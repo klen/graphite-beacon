@@ -289,7 +289,8 @@ class GraphiteAlert(BaseAlert):
                 #print response.buffer
                 records = (GraphiteRecord(line.decode('utf-8')) for line in response.buffer)
                 data = [(1 if record.empty else getattr(record, self.method), record.target) for record in records]
-                if data[0] == 1:
+                if data[0][0] == 1:
+                    LOGGER.info("Restarting client")
                     self.client.close()
                     self.client = hc.AsyncHTTPClient()
                 print data
