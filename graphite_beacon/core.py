@@ -52,16 +52,16 @@ class Reactor(object):
             elif "interval" in info:
                 if "startdate" in info:
                     #start from there and move forward
-                    cur.execute("SELECT * FROM history WHERE day >= %s AND day <= date %s + integer %s AND query = %s  AND hour = 24;", (info["startdate"], info["startdate"], info["interval"], info["query"]))
+                    cur.execute("SELECT * FROM history WHERE day >= %s AND day <= date %s + integer \' %s \' AND query = %s  AND hour = 24;", (info["startdate"], info["startdate"], info["interval"], info["query"]))
                     self.write(json.dumps(cur.fetchall()))
                 elif "enddate" in info:
                     #start from there and move backward
-                    cur.execute("SELECT * FROM history WHERE day >= date %s - integer %s AND day <= date %s AND query = %s  AND hour = 24;", (info["enddate"], info["interval"], info["enddate"], info["query"]))
+                    cur.execute("SELECT * FROM history WHERE day >= date %s - integer \' %s \' AND day <= date %s AND query = %s  AND hour = 24;", (info["enddate"], info["interval"], info["enddate"], info["query"]))
                     self.write(json.dumps(cur.fetchall()))
                 else:
                     #Default ending date is current day
                     curDate = str(datetime.now().date().year) + "-" + str(datetime.now().date().month) + "-" + str(datetime.now().date().day)
-                    cur.execute("SELECT * FROM history where day >= date %s - integer %s AND day <= date %s AND query = %s AND hour = 24;", (curDate, info["interval"], curDate, info["query"]))
+                    cur.execute("SELECT * FROM history where day >= date %s - integer \' %s \' AND day <= date %s AND query = %s AND hour = 24;", (curDate, info["interval"], curDate, info["query"]))
                     self.write(json.dumps(cur.fetchall()))
             else:
                 #dump all data with no regard to dates
