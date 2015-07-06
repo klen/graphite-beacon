@@ -61,6 +61,8 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         self.recorded = False
         self.pastHour = datetime.now().time().hour
         self.historicValues = {}
+        self.first = True
+
         try:
             self.configure(**options)
         except Exception as e:
@@ -163,10 +165,9 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
             else:
                 self.notify('normal', value, target, rule=rule)
             # INSERT DAILY STUFF HERE #
-            if work and not value is None and target in self.historicValues:
+            if (first or work) and not value is None and target in self.historicValues:
                 conn = psycopg2.connect(self.reactor.options.get('database'))
                 cur  = conn.cursor()
-                LOGGER.info("datebase call made");
 
                 ### Pull new history_TOD data by averaging database data ###
 
@@ -177,11 +178,19 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
                 for item in lista:
                     count += 1
                     total += item['value']
-                if count > 0:
-                    total /= count
-                    self.history_TOD_value[target] = total
-                else:
-                    LOGGER.error("No history data for %s" % target)
+                    if count > 0:
+                        total /= count
+                        self.history_TOD_value[target] = total
+                    else:
+                        LOGGER.error("No history data for %s" % target)
+                conn.commit()
+                cur.close()
+                conn.close()
+
+            if work and not value is None and target in self.historicValues:
+                conn = psycopg2.connect(self.reactor.options.get('database'))
+                cur  = conn.cursor()
+                LOGGER.info("datebase call made");
 
                 ### Insert Hourly Data into database ###
 
@@ -200,8 +209,6 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
                     if count > 0:
                         total /= count
                         cur.execute("INSERT INTO history (query, value, day, hour) VALUES (%s, %s, date %s - integer 1, %s);",  (target, total , str(datetime.now().date().year)+"-"+str(datetime.now().date().month)+"-"+str(datetime.now().date().day), 24))
-
-
 
                 ### Commit Changes. Database calls done ###
 
