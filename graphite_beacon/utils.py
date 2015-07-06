@@ -41,6 +41,7 @@ DEFAULT_MOD = lambda x: x
 
 
 HISTORICAL = 'historical'
+HISTORICAL_TOD = 'historical_TOD'
 OPERATORS = {'>': op.gt, '>=': op.ge, '<': op.lt, '<=': op.le, '==': op.eq, '!=': op.ne}
 RULE_RE = re(
     '(critical|warning|normal):\s+(%s)\s+(\d+\.?\d*(?:%s)?|%s)\s*((?:\*|\+|-|\/)\s*\d+\.?\d*)?' %
@@ -48,6 +49,7 @@ RULE_RE = re(
         "|".join(OPERATORS.keys()),
         "|".join(sorted(CONVERT_HASH.keys(), reverse=True)),
         HISTORICAL,
+        HISTORICAL_TOD,
     ))
 
 
@@ -94,7 +96,7 @@ def parse_rule(rule):
     if not match:
         raise ValueError('Invalid rule: %s' % rule)
     level, cond, value, mod = match.groups()
-    if value != HISTORICAL:
+    if value != HISTORICAL and value != HISTORICAL_TOD:
         value = convert_from_format(value)
 
     if mod:

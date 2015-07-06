@@ -57,6 +57,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         self.options = options
         self.client = hc.AsyncHTTPClient()
 
+        self.history_TOD_value = {}
         self.recorded = False
         self.pastHour = datetime.now().time().hour
         self.historicValues = {}
@@ -106,6 +107,9 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         self.history_size = parse_interval(self.history_size)
         self.history_size = int(math.ceil(self.history_size / interval))
 
+        self.history_TOD_size = options.get('history_TOD_size', 10)
+        self.history_TOD_size = int(parse_interval(self.history_TOD_size) / 86400.0)
+
         if self.reactor.options.get('debug'):
             self.callback = ioloop.PeriodicCallback(self.load, 5000)
         else:
@@ -137,6 +141,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
              work = True
              self.recorded = True
              self.pastHour = (self.pastHour+1)%24
+             #DB call
         elif datetime.now().time().hour == self.pastHour and self.recorded:
             self.recorded = False
         for value, target in records:
@@ -162,17 +167,42 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
                 conn = psycopg2.connect(self.reactor.options.get('database'))
                 cur  = conn.cursor()
                 LOGGER.info("datebase call made");
-                cur.execute("INSERT INTO history (query, value, day, hour) VALUES (%s, %s, %s, %s);", (target, self.historicValues[target][0]/self.historicValues[target][1] , str(datetime.now().date().year)+"-"+str(datetime.now().date().month)+"-"+str(datetime.now().date().day), str(datetime.now().time().hour)))
+
+                ### Insert Hourly Data into database ###
+
+                cur.execute("INSERT INTO history (query, value, day, hour) VALUES (%s, %s, %s, %s);", (target, self.historicValues[target][0]/self.historicValues[target][1] , str(datetime.now().date())))
+
+                ### If the start of a day, insert average of past day's data into database ###
+
                 if datetime.now().time().hour == 0:
-                    cur.execute("SELECT * FROM history WHERE day == date %s - integer 1 AND query == %s;", (str(datetime.now().date().year)+"-"+str(datetime.now().date().month)+"-"+str(datetime.now().date().day) ,target))
+                    cur.execute("SELECT * FROM history WHERE day == date %s - integer 1 AND query == %s;", (str(datetime.now().date()) ,target))
                     lista = cur.fetchall()
                     count = 0
                     total = 0
                     for item in lista:
                         count += 1
                         total += item['value']
+                    if count > 0:
+                        total /= count
+                        cur.execute("INSERT INTO history (query, value, day, hour) VALUES (%s, %s, date %s - integer 1, %s);",  (target, total , str(datetime.now().date().year)+"-"+str(datetime.now().date().month)+"-"+str(datetime.now().date().day), 24))
+
+                ### Pull new history_TOD data by averaging database data ###
+
+                cur.execute("SELECT * FROM history where day >= date %s - integer %s AND query == %s;", (str(datetime.now().date()), self.history_TOD_size, target))
+                lista = cur.fetchall()
+                count = 0
+                total = 0
+                for item in lista:
+                    count += 1
+                    total += item['value']
+                if count > 0:
                     total /= count
-                    cur.execute("INSERT INTO history (query, value, day, hour) VALUES (%s, %s, date %s - integer 1, %s);",  (target, total , str(datetime.now().date().year)+"-"+str(datetime.now().date().month)+"-"+str(datetime.now().date().day), 24))
+                    self.history_TOD_value[target] = total
+                else:
+                    LOGGER.error("No history data for %s" % target)
+
+                ### Commit Changes. Database calls done ###
+
                 conn.commit()
                 cur.close()
                 conn.close()
@@ -187,7 +217,12 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
             if len(history) < self.history_size:
                 return None
             rvalue = sum(history) / len(history)
-
+        if rvalue == HISTORICAL_TOD:
+            try:
+                rvalue = self.history_TOD_value[target]
+            except KeyError:
+                LOGGER.error("KeyError for %s" % target)
+                rvalue = 0
         rvalue = rule['mod'](rvalue)
         return rvalue
 
