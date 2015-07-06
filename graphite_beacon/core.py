@@ -196,7 +196,7 @@ class Reactor(object):
         'history_size': '1day',
         'interval': '10minute',
         'logging': 'info',
-        'method': 'last_value',
+        'method': 'average',
         'normal_handlers': ['log', 'smtp'],
         'pidfile': None,
         'prefix': '[BEACON]',
