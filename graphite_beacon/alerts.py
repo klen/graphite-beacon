@@ -162,7 +162,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
 
                 ### Pull new history_TOD data by averaging database data ###
 
-                cur.execute("SELECT * FROM history where day >= date %s - integer  \' %s \' AND query LIKE %s;", (str(datetime.now().date()), self.history_TOD_size, target))
+                cur.execute("SELECT * FROM history where day >= date %s - integer  \' %s \' AND day < date %s AND query LIKE %s;", (str(datetime.now().date()), str(datetime.now().date()), self.history_TOD_size, target))
                 lista = cur.fetchall()
                 count = 0
                 total = 0
@@ -289,7 +289,6 @@ class GraphiteAlert(BaseAlert):
                                                    request_timeout=self.request_timeout)
                 records = (GraphiteRecord(line.decode('utf-8')) for line in response.buffer)
                 data = [(None if record.empty else getattr(record, self.method), record.target) for record in records]
-                print data
                 if len(data) == 0:
                     raise ValueError('No data')
                 self.check(data)
