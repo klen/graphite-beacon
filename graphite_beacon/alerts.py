@@ -169,11 +169,11 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
                 for item in lista:
                     count += 1
                     total += float(item[1])
-                    if count > 0:
-                        total /= count
-                        self.history_TOD_value[target] = total
-                    else:
-                        LOGGER.error("No history data for %s" % target)
+                if count > 0:
+                    total /= count
+                    self.history_TOD_value[target] = total
+                else:
+                    LOGGER.error("No history data for %s" % target)
                 conn.commit()
                 cur.close()
                 conn.close()
