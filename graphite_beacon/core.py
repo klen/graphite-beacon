@@ -90,8 +90,8 @@ class Reactor(object):
             conn = psycopg2.connect(self.reactor.options.get('database'))
             cur  = conn.cursor()
             #Upsert
-            cur.execute("UPDATE alerts SET name = %s, source = %s, format = %s, interval = %s, history_size = %s, rules = %s WHERE query = %s;", (info['name'], info['source'], info['format'], info['interval'], info['history_size'], ', '.join(info['rules']), info['query']))
-            cur.execute("INSERT INTO alerts (query, name, source, format, interval, history_size, rules) SELECT %s, %s, %s, %s, %s, %s, %s WHERE NOT EXISTS (SELECT 1 FROM alerts WHERE query = %s);", (info['query'], info['name'], info['source'], info['format'], info['interval'], info['history_size'], ', '.join(info['rules']), info['query']))
+            cur.execute("UPDATE alerts SET name = %s, source = %s, format = %s, interval = %s, history_size = %s, rules = %s, history_TOD_size = %s WHERE query = %s;", (info['name'], info['source'], info['format'], info['interval'], info['history_size'], ', '.join(info['rules']), info['history_TOD_size'], info['query']))
+            cur.execute("INSERT INTO alerts (query, name, source, format, interval, history_size, rules, history_TOD_size) SELECT %s, %s, %s, %s, %s, %s, %s, %s WHERE NOT EXISTS (SELECT 1 FROM alerts WHERE query = %s);", (info['query'], info['name'], info['source'], info['format'], info['interval'], info['history_size'], ', '.join(info['rules']), info['history_TOD_size'] , info['query']))
             conn.commit()
             cur.close()
             conn.close()
@@ -125,7 +125,7 @@ class Reactor(object):
             conn = psycopg2.connect(self.reactor.options.get('database'))
             cur  = conn.cursor()
             try:
-                cur.execute("INSERT INTO alerts (name, query, source, format, interval, history_size, rules) VALUES (%s, %s, %s, %s, %s, %s, %s);", (info['name'], info['query'], info['source'], info['format'], info['interval'], info['history_size'], ', '.join(info['rules'])))
+                cur.execute("INSERT INTO alerts (name, query, source, format, interval, history_size, rules, history_TOD_size) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);", (info['name'], info['query'], info['source'], info['format'], info['interval'], info['history_size'], ', '.join(info['rules']), info['history_TOD_size']))
             except Exception as e:
                 self.write(e)
             conn.commit()
@@ -215,7 +215,7 @@ class Reactor(object):
         self.reinit(**options)
         conn = psycopg2.connect(self.options.get('database'))
         cur  = conn.cursor()
-        cur.execute("CREATE TABLE IF NOT EXISTS alerts (query text, name text, source text, format text, interval text, history_size text, rules text);")
+        cur.execute("CREATE TABLE IF NOT EXISTS alerts (query text, name text, source text, format text, interval text, history_size text, rules text, history_TOD_size text);")
         cur.execute("CREATE TABLE IF NOT EXISTS cache (original_query text, resolved_query text, level text, description text, datetime text);")
         cur.execute("CREATE TABLE IF NOT EXISTS history (query text, value text, day date, hour text);")
         cur.execute("SELECT * FROM alerts;")
@@ -226,10 +226,10 @@ class Reactor(object):
             for i in range(len(self.options.get('alerts'))):
                 if alert[0] == self.options.get('alerts')[i].get('query'):
                     self.options.get('alerts').pop(i)
-                    self.options.get('alerts').append(dict(query=alert[0], name=alert[1], source=alert[2], format=alert[3], interval=alert[4], history_size=alert[5],rules=alert[6].split(',')))
+                    self.options.get('alerts').append(dict(query=alert[0], name=alert[1], source=alert[2], format=alert[3], interval=alert[4], history_size=alert[5],rules=alert[6].split(','), history_TOD_size=alert[7]))
                     break
             else:
-                self.options.get('alerts').append(dict(query=alert[0], name=alert[1], source=alert[2], format=alert[3], interval=alert[4], history_size=alert[5],rules=alert[6].split(',')))
+                self.options.get('alerts').append(dict(query=alert[0], name=alert[1], source=alert[2], format=alert[3], interval=alert[4], history_size=alert[5],rules=alert[6].split(','), history_TOD_size=alert[7]))
         conn.commit()
         cur.close()
         conn.close()
