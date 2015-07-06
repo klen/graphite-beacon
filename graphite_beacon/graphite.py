@@ -4,10 +4,12 @@ class GraphiteRecord(object):
         meta, data = metric_string.split('|')
         self.target, start_time, end_time, step = meta.rsplit(',', 3)
         print meta
-        self.start_time = int(start_time)-1
-        self.end_time = int(end_time)-1
+        self.start_time = int(start_time)
+        self.end_time = int(end_time)
         self.step = int(step)
+        print data
         self.values = list(self._values(data.rsplit(',')))
+        print self.values
         if len(self.values) == 0:
             self.empty = True
         else:
