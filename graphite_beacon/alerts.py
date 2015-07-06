@@ -221,6 +221,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
 
     def get_value_for_rule(self, rule, target):
         rvalue = rule['value']
+        print rvalue
         if rvalue == HISTORICAL:
             history = self.history[target]
             if len(history) < self.history_size:
