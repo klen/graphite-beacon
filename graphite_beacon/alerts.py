@@ -292,6 +292,7 @@ class GraphiteAlert(BaseAlert):
                 data1 = [(record) for record in records]
                 print data1
                 data = [(None if record.empty else getattr(record, self.method), record.target) for record in records]
+                print data
                 if len(data) == 0:
                     raise ValueError('No data')
                 self.check(data)
