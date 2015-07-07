@@ -125,6 +125,10 @@ Value units:
         // Graphite server URL
         "graphite_url": "http://localhost",
 
+        // Public graphite server URL
+        // Used when notifying handlers, defaults to graphite_url
+        "public_graphite_url": null,
+
         // HTTP AUTH username
         "auth_username": null,
 
@@ -135,11 +139,11 @@ Value units:
         "pidfile": null,
 
         // Default values format (none, bytes, s, ms, short)
-        // Can be redfined for each alert.
+        // Can be redefined for each alert.
         "format": "short",
 
         // Default query interval
-        // Can be redfined for each alert.
+        // Can be redefined for each alert.
         "interval": "10minute",
 
         // Default time window for Graphite queries

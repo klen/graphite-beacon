@@ -22,7 +22,7 @@ class OpsgenieHandler(AbstractHandler):
 
         message = self.get_short(level, alert, value, target, *args, **kwargs)
         description = "{url}/composer/?{params}".format(
-                        url=self.reactor.options['graphite_url'],
+                        url=self.reactor.options['public_graphite_url'],
                         params=urllib.urlencode({'target': alert.query}))
         alias = target + ':' + alert.name
 
