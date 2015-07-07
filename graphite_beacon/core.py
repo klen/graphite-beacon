@@ -24,6 +24,11 @@ class Reactor(object):
         def initialize(self, react):
             self.reactor = react
         def get(self):
+            def format(s):
+                ret = []
+                for a in s:
+                    ret.append(dict(value=a[1], day=str(a[2]), hour=a[3]))
+                return json.dumps(ret)
             info = {}
             try:
                 info["startdate"] = self.get_argument('startdate')
@@ -48,25 +53,25 @@ class Reactor(object):
             elif "startdate" in info and "enddate" in info:
                 #make DB call for range startdate to enddate
                 cur.execute("SELECT * FROM history WHERE day >= %s AND day <= %s AND query = %s AND hour = 24;", (info["startdate"], info["enddate"], info["query"]))
-                self.write(json.dumps(cur.fetchall()))
+                self.write(format(cur.fetchall()))
             elif "interval" in info:
                 if "startdate" in info:
                     #start from there and move forward
                     cur.execute("SELECT * FROM history WHERE day >= %s AND day <= date %s + integer \' %s \' AND query = %s  AND hour = 24;", (info["startdate"], info["startdate"], info["interval"], info["query"]))
-                    self.write(json.dumps(cur.fetchall()))
+                    self.write(format(cur.fetchall()))
                 elif "enddate" in info:
                     #start from there and move backward
                     cur.execute("SELECT * FROM history WHERE day >= date %s - integer \' %s \' AND day <= date %s AND query = %s  AND hour = 24;", (info["enddate"], info["interval"], info["enddate"], info["query"]))
-                    self.write(json.dumps(cur.fetchall()))
+                    self.write(format(cur.fetchall()))
                 else:
                     #Default ending date is current day
                     curDate = str(datetime.now().date().year) + "-" + str(datetime.now().date().month) + "-" + str(datetime.now().date().day)
                     cur.execute("SELECT * FROM history where day >= date %s - integer \' %s \' AND day <= date %s AND query = %s AND hour = 24;", (curDate, info["interval"], curDate, info["query"]))
-                    self.write(json.dumps(cur.fetchall()))
+                    self.write(format(cur.fetchall()))
             else:
                 #dump all data with no regard to dates
                 cur.execute("SELECT * FROM history WHERE query = %s  AND hour = 24;", (info["query"],))
-                self.write(json.dumps(cur.fetchall()))
+                self.write(format(cur.fetchall()))
             conn.commit();
             cur.close();
             conn.close();
