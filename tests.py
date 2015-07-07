@@ -47,6 +47,17 @@ def test_convert_config_log_level():
     assert logging.CRITICAL == _get_numeric_log_level('CRITICAL')
 
 
+def test_public_graphite_url():
+    from graphite_beacon.core import Reactor
+
+    rr = Reactor(graphite_url='http://localhost', public_graphite_url=None)
+    rr.reinit()
+    assert rr.options.get("public_graphite_url") == 'http://localhost'
+
+    rr.reinit(public_graphite_url="http://public")
+    assert rr.options.get("public_graphite_url") == "http://public"
+
+
 def test_alert(reactor):
     from graphite_beacon.alerts import BaseAlert, GraphiteAlert, URLAlert
 

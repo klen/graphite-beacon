@@ -32,6 +32,7 @@ class Reactor(object):
         'debug': False,
         'format': 'short',
         'graphite_url': 'http://localhost',
+        'public_graphite_url': None,
         'history_size': '1day',
         'interval': '10minute',
         'until': '0second',
@@ -63,6 +64,9 @@ class Reactor(object):
         self.include_config(self.options.get('config'))
         for config in self.options.pop('include', []):
             self.include_config(config)
+
+        if not self.options['public_graphite_url']:
+            self.options['public_graphite_url'] = self.options['graphite_url']
 
         LOGGER.setLevel(_get_numeric_log_level(self.options.get('logging', 'info')))
         registry.clean()
