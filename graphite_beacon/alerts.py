@@ -100,7 +100,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         interval = parse_interval(self.interval)
 
         self.time_window = interval_to_graphite(
-            options.get('time_window', options.get('interval', self.reactor.options['interval'])))
+            options.get('time_window', options.get('time_window', self.reactor.options['time_window'])))
 
         self._format = options.get('format', self.reactor.options['format'])
         self.request_timeout = options.get(
