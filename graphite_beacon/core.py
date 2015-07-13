@@ -86,13 +86,13 @@ class Reactor(object):
                     self.write(format(cur.fetchall()))
             else:
                 #dump all data with no regard to dates
-                print info["query"]
+                #print info["query"]
                 if 'avg' in info and info['avg'] == 'True':
                     cur.execute("SELECT * FROM history WHERE query = %s  AND hour = %s;", (info["query"], str(24)))
                 else:
                     cur.execute("SELECT * FROM history WHERE query = %s  AND hour != %s;", (info["query"], str(24)))
-                print format(cur.fetchall())
-                #self.write(format(cur.fetchall()))
+                #print format(cur.fetchall())
+                self.write(format(cur.fetchall()))
             conn.commit();
             cur.close();
             conn.close();
