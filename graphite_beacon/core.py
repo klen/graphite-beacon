@@ -86,6 +86,7 @@ class Reactor(object):
                     self.write(format(cur.fetchall()))
             else:
                 #dump all data with no regard to dates
+                print info["query"]
                 if 'avg' in info and info['avg'] == 'True':
                     cur.execute("SELECT * FROM history WHERE query = %s  AND hour = %s;", (info["query"], str(24)))
                 else:
