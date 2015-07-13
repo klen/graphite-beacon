@@ -46,31 +46,50 @@ class Reactor(object):
                 info["query"] = self.get_argument('query')
             except:
                 print "no query"
+            try:
+                info["avg"] = self.get_argument('avg')
+            except:
+                print "no avg"
             conn = psycopg2.connect(self.reactor.options.get('database'))
             cur  = conn.cursor()
             if not "query" in info:
                 self.write("no query")
             elif "startdate" in info and "enddate" in info:
                 #make DB call for range startdate to enddate
-                cur.execute("SELECT * FROM history WHERE day >= %s AND day <= %s AND query = %s AND hour = 24;", (info["startdate"], info["enddate"], info["query"]))
+                if 'avg' in info and info['avg'] == 'True':
+                    cur.execute("SELECT * FROM history WHERE day >= %s AND day <= %s AND query = %s AND hour = %s;", (info["startdate"], info["enddate"], info["query"], str(24)))
+                else:
+                    cur.execute("SELECT * FROM history WHERE day >= %s AND day <= %s AND query = %s AND hour != %s;", (info["startdate"], info["enddate"], info["query"], str(24)))
                 self.write(format(cur.fetchall()))
             elif "interval" in info:
                 if "startdate" in info:
                     #start from there and move forward
-                    cur.execute("SELECT * FROM history WHERE day >= %s AND day <= date %s + integer \' %s \' AND query = %s  AND hour = 24;", (info["startdate"], info["startdate"], info["interval"], info["query"]))
+                    if 'avg' in info and info['avg'] == 'True':
+                        cur.execute("SELECT * FROM history WHERE day >= %s AND day <= date %s + integer \' %s \' AND query = %s  AND hour = %s;", (info["startdate"], info["startdate"], info["interval"], info["query"], str(24)))
+                    else:
+                        cur.execute("SELECT * FROM history WHERE day >= %s AND day <= date %s + integer \' %s \' AND query = %s  AND hour != %s;", (info["startdate"], info["startdate"], info["interval"], info["query"], str(24)))
                     self.write(format(cur.fetchall()))
                 elif "enddate" in info:
                     #start from there and move backward
-                    cur.execute("SELECT * FROM history WHERE day >= date %s - integer \' %s \' AND day <= date %s AND query = %s  AND hour = 24;", (info["enddate"], info["interval"], info["enddate"], info["query"]))
+                    if 'avg' in info and info['avg'] == 'True':
+                        cur.execute("SELECT * FROM history WHERE day >= date %s - integer \' %s \' AND day <= date %s AND query = %s  AND hour = %s;", (info["enddate"], info["interval"], info["enddate"], info["query"], str(24)))
+                    else:
+                        cur.execute("SELECT * FROM history WHERE day >= date %s - integer \' %s \' AND day <= date %s AND query = %s  AND hour != %s;", (info["enddate"], info["interval"], info["enddate"], info["query"], str(24)))
                     self.write(format(cur.fetchall()))
                 else:
                     #Default ending date is current day
                     curDate = str(datetime.now().date().year) + "-" + str(datetime.now().date().month) + "-" + str(datetime.now().date().day)
-                    cur.execute("SELECT * FROM history where day >= date %s - integer \' %s \' AND day <= date %s AND query = %s AND hour = 24;", (curDate, info["interval"], curDate, info["query"]))
+                    if 'avg' in info and info['avg'] == 'True':
+                        cur.execute("SELECT * FROM history where day >= date %s - integer \' %s \' AND day <= date %s AND query = %s AND hour = %s;", (curDate, info["interval"], curDate, info["query"], str(24)))
+                    else:
+                        cur.execute("SELECT * FROM history where day >= date %s - integer \' %s \' AND day <= date %s AND query = %s AND hour != %s;", (curDate, info["interval"], curDate, info["query"], str(24)))
                     self.write(format(cur.fetchall()))
             else:
                 #dump all data with no regard to dates
-                cur.execute("SELECT * FROM history WHERE query = %s  AND hour = 24;", (info["query"],))
+                if 'avg' in info and info['avg'] == 'True':
+                    cur.execute("SELECT * FROM history WHERE query = %s  AND hour = %s;", (info["query"], str(24)))
+                else:
+                    cur.execute("SELECT * FROM history WHERE query = %s  AND hour != %s;", (info["query"], str(24)))
                 self.write(format(cur.fetchall()))
             conn.commit();
             cur.close();
