@@ -90,7 +90,8 @@ class Reactor(object):
                     cur.execute("SELECT * FROM history WHERE query = %s  AND hour = %s;", (info["query"], str(24)))
                 else:
                     cur.execute("SELECT * FROM history WHERE query = %s  AND hour != %s;", (info["query"], str(24)))
-                self.write(format(cur.fetchall()))
+                print format(cur.fetchall())
+                #self.write(format(cur.fetchall()))
             conn.commit();
             cur.close();
             conn.close();
