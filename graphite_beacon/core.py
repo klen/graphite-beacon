@@ -176,6 +176,7 @@ class Reactor(object):
                         a['resolved_query'] = item[1]
                         a['description'] = item[3]
                         a['level'] = item[2]
+                        a['datetime'] = item[4]
                         alert['events'].append(a)
                 conn.commit();
                 cur.close();
