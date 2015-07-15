@@ -116,8 +116,8 @@ class Reactor(object):
             conn = psycopg2.connect(self.reactor.options.get('database'))
             cur  = conn.cursor()
             #Upsert
-            cur.execute("UPDATE alerts SET name = %s, source = %s, format = %s, interval = %s, history_size = %s, rules = %s, history_TOD_size = %s WHERE query = %s;", (info['name'], info['source'], info['format'], info['interval'], info['history_size'], ', '.join(info['rules']), info['history_TOD_size'], info['query']))
-            cur.execute("INSERT INTO alerts (query, name, source, format, interval, history_size, rules, history_TOD_size) SELECT %s, %s, %s, %s, %s, %s, %s, %s WHERE NOT EXISTS (SELECT 1 FROM alerts WHERE query = %s);", (info['query'], info['name'], info['source'], info['format'], info['interval'], info['history_size'], ', '.join(info['rules']), info['history_TOD_size'] , info['query']))
+            cur.execute("UPDATE alerts SET name = %s, source = %s, format = %s, interval = %s, history_size = %s, rules = %s, history_TOD_size = %s WHERE query = %s;", (info['name'], info['source'], info['format'], info['interval'], info['history_size'], ','.join(info['rules']), info['history_TOD_size'], info['query']))
+            cur.execute("INSERT INTO alerts (query, name, source, format, interval, history_size, rules, history_TOD_size) SELECT %s, %s, %s, %s, %s, %s, %s, %s WHERE NOT EXISTS (SELECT 1 FROM alerts WHERE query = %s);", (info['query'], info['name'], info['source'], info['format'], info['interval'], info['history_size'], ','.join(info['rules']), info['history_TOD_size'] , info['query']))
             conn.commit()
             cur.close()
             conn.close()
@@ -151,7 +151,7 @@ class Reactor(object):
             conn = psycopg2.connect(self.reactor.options.get('database'))
             cur  = conn.cursor()
             try:
-                cur.execute("INSERT INTO alerts (name, query, source, format, interval, history_size, rules, history_TOD_size) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);", (info['name'], info['query'], info['source'], info['format'], info['interval'], info['history_size'], ', '.join(info['rules']), info['history_TOD_size']))
+                cur.execute("INSERT INTO alerts (name, query, source, format, interval, history_size, rules, history_TOD_size) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);", (info['name'], info['query'], info['source'], info['format'], info['interval'], info['history_size'], ','.join(info['rules']), info['history_TOD_size']))
             except Exception as e:
                 self.write(e)
             conn.commit()
@@ -216,7 +216,7 @@ class Reactor(object):
         'auth_password': None,
         'auth_username': None,
         'config': 'config.json',
-        'critical_handlers': ['log', 'smtp'],
+        'critical_handlers': ['log','smtp'],
         'debug': False,
         'format': 'short',
         'graphite_url': 'http://localhost',
@@ -224,13 +224,13 @@ class Reactor(object):
         'interval': '10minute',
         'logging': 'info',
         'method': 'average',
-        'normal_handlers': ['log', 'smtp'],
+        'normal_handlers': ['log','smtp'],
         'pidfile': None,
         'prefix': '[BEACON]',
         'repeat_interval': '2hour',
         'request_timeout': 20.0,
         'send_initial': False,
-        'warning_handlers': ['log', 'smtp'],
+        'warning_handlers': ['log','smtp'],
     }
 
     # Handles database table initialization along with pulling old alerts from DB
@@ -273,7 +273,7 @@ class Reactor(object):
         for config in self.options.pop('include', []):
             self.include_config(config)
 
-        LOGGER.setLevel(_get_numeric_log_level(self.options.get('logging', 'info')))
+        LOGGER.setLevel(_get_numeric_log_level(self.options.get('logging','info')))
         registry.clean()
 
         self.handlers = {'warning': set(), 'critical': set(), 'normal': set()}

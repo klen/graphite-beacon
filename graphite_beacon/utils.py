@@ -91,7 +91,8 @@ def interval_to_graphite(interval):
     return num + unit
 
 
-def parse_rule(rule):
+def parse_rule(rule1):
+    rule = rule1.strip()
     match = RULE_RE.match(rule)
     if not match:
         raise ValueError('Invalid rule: %s' % rule)
