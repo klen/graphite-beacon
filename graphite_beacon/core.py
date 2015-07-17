@@ -272,6 +272,7 @@ class Reactor(object):
         self.options.update(options)
         print "reinit called"
         self.include_config(self.options.get('config'))
+        self.options['config'] = False
         for config in self.options.pop('include', []):
             self.include_config(config)
 
