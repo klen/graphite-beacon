@@ -239,6 +239,7 @@ class Reactor(object):
         self.alerts = set()
         self.loop = ioloop.IOLoop.instance()
         self.options = dict(self.defaults)
+        self.reinit(**options)
         conn = psycopg2.connect(self.options.get('database'))
         cur  = conn.cursor()
         cur.execute("CREATE TABLE IF NOT EXISTS alerts (query text, name text, source text, format text, interval text, history_size text, rules text, history_TOD_size text);")
