@@ -239,7 +239,6 @@ class Reactor(object):
         self.alerts = set()
         self.loop = ioloop.IOLoop.instance()
         self.options = dict(self.defaults)
-        self.reinit(**options)
         conn = psycopg2.connect(self.options.get('database'))
         cur  = conn.cursor()
         cur.execute("CREATE TABLE IF NOT EXISTS alerts (query text, name text, source text, format text, interval text, history_size text, rules text, history_TOD_size text);")
@@ -250,7 +249,6 @@ class Reactor(object):
         if not 'alerts' in self.options:
             self.options['alerts'] = []
         for alert in alertList:
-            LOGGER.info(str(alert))
             for i in range(len(self.options.get('alerts'))):
                 if alert[0] == self.options.get('alerts')[i].get('query'):
                     self.options.get('alerts').pop(i)
@@ -261,6 +259,7 @@ class Reactor(object):
         conn.commit()
         cur.close()
         conn.close()
+        self.reinit(**options)
         self.options['config'] = 0
         self.callback = ioloop.PeriodicCallback(
             self.repeat, parse_interval(self.options['repeat_interval']))
