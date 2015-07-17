@@ -250,6 +250,7 @@ class Reactor(object):
         if not 'alerts' in self.options:
             self.options['alerts'] = []
         for alert in alertList:
+            LOGGER.info(str(alert))
             for i in range(len(self.options.get('alerts'))):
                 if alert[0] == self.options.get('alerts')[i].get('query'):
                     self.options.get('alerts').pop(i)
