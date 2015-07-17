@@ -257,7 +257,6 @@ class Reactor(object):
                     break
             else:
                 self.options.get('alerts').append(dict(query=alert[0], name=alert[1], source=alert[2], format=alert[3], interval=alert[4], history_size=alert[5],rules=alert[6].split(','), history_TOD_size=alert[7]))
-        LOGGER.info(str(self.options.get('alerts')))
         conn.commit()
         cur.close()
         conn.close()
@@ -288,7 +287,6 @@ class Reactor(object):
             alert.stop()
             self.alerts.remove(alert)
         for alert in self.options.get('alerts'):
-            LOGGER.info(str(alert))
             if not isinstance(alert['rules'], list):
                 alert['rules'] = alert['rules'].split(',')
         self.alerts = set(
