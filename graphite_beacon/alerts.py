@@ -107,6 +107,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         self.history_size = int(math.ceil(self.history_size / interval))
 
         self.no_data = options.get('no_data', self.reactor.options['no_data'])
+        self.loading_error = options.get('loading_error', self.reactor.options['loading_error'])
 
         if self.reactor.options.get('debug'):
             self.callback = ioloop.PeriodicCallback(self.load, 5000)
@@ -236,7 +237,7 @@ class GraphiteAlert(BaseAlert):
                 self.check(data)
                 self.notify('normal', 'Metrics are loaded', target='loading', ntype='common')
             except Exception as e:
-                self.notify('critical', 'Loading error: %s' % e, target='loading', ntype='common')
+                self.notify(self.loading_error, 'Loading error: %s' % e, target='loading', ntype='common')
             self.waiting = False
 
     def get_graph_url(self, target, graphite_url=None):

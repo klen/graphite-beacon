@@ -48,6 +48,7 @@ class Reactor(object):
         'warning_handlers': ['log', 'smtp'],
         'default_nan_value': 0,
         'ignore_nan': False,
+        'loading_error': 'critical'
     }
 
     def __init__(self, **options):
