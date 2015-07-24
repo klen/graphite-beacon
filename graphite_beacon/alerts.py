@@ -254,6 +254,9 @@ class URLAlert(BaseAlert):
 
     source = 'url'
 
+    def get_data(self, response):
+        return response.code
+
     @gen.coroutine
     def load(self):
         LOGGER.debug('%s: start checking: %s' % (self.name, self.query))
@@ -265,10 +268,10 @@ class URLAlert(BaseAlert):
                 response = yield self.client.fetch(self.query,
                                                    method=self.options.get('method', 'GET'),
                                                    request_timeout=self.request_timeout)
-                self.check([(response.code, self.query)])
-                self.notify('normal', 'Metrics are loaded', target='loading')
+                self.check([(self.get_data(response), self.query)])
+                self.notify('normal', 'Metrics are loaded', target='loading', ntype='common')
 
             except Exception as e:
-                self.notify('critical', str(e), target='loading')
+                self.notify('critical', str(e), target='loading', ntype='common')
 
             self.waiting = False
