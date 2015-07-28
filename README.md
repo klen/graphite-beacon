@@ -176,6 +176,10 @@ Value units:
         // Send initial values (Send current values when reactor starts)
         "send_initial": true,
 
+        // used together to ignore the missing value
+        "default_nan_value": -1,
+        "ignore_nan": false,
+
         // Default alerts (see configuration below)
         "alerts": []
     }
