@@ -19,11 +19,24 @@ COMMENT_RE = re('//\s+.*$', M)
 
 
 class Reactor(object):
-    # Handles get requests for historical data
     class HistoryHandler(web.RequestHandler):
+        """
+        Handles RESTful api calls for historical_TOD values
+        """
         def initialize(self, react):
             self.reactor = react
         def get(self):
+            """
+            GET Request which returns historical values given a query for an interval.
+            When nothing is specified, all data is returned.
+
+            Parameters:
+                'query'     : Required parameter. The query for which you want history data.
+                'startdate' : The starting date in YYYY-MM-DD format
+                'enddate'   : The ending date in YYYY-MM-DD format
+                'interval'  : integer denoting interval in days
+                'avg'       : if True, returns daily averages instead of hour by hour
+            """
             def format(s):
                 ret = []
                 for a in s:
@@ -86,24 +99,28 @@ class Reactor(object):
                     self.write(format(cur.fetchall()))
             else:
                 #dump all data with no regard to dates
-                #print info["query"]
                 if 'avg' in info and info['avg'] == 'True':
                     cur.execute("SELECT * FROM history WHERE query = %s  AND hour = %s;", (info["query"], str(24)))
                 else:
                     cur.execute("SELECT * FROM history WHERE query = %s  AND hour != %s;", (info["query"], str(24)))
-                #print format(cur.fetchall())
                 self.write(format(cur.fetchall()))
             conn.commit();
             cur.close();
             conn.close();
-    # Handles web requests for updating alerts
+
+
     class UpdateHandler(web.RequestHandler):
-        # react is the overall reactor object such that options can be changed
+        """
+        The RESTful API in charge of handling alerts
+        """
         def initialize(self, react):
             self.reactor = react
 
-        # Supports upsert. Adds new alerts or updates existing alerts with data
         def put(self, arg):
+            """
+            Upsert with the body, as a json object, being an alert.
+            Must include name, source, format, interval, history_size, rules, history_TOD_size, and query.
+            """
             info = json.loads(self.request.body)
             for i in range(len(self.reactor.options.get('alerts'))):
                 if self.reactor.options.get('alerts')[i].get('query').strip() == info.get('query').strip():
@@ -123,8 +140,11 @@ class Reactor(object):
             conn.close()
             self.write("All good")
 
-        # Deletes alert with arg-specified query
         def delete(self, arg):
+            """
+            Deletes an alert with an arg-specified query (in the URL).
+            The query must be the ORIGINAL query, not any resolved queries.
+            """
             for i in range(len(self.reactor.options.get('alerts'))):
                 if self.reactor.options.get('alerts')[i].get('query') == arg:
                     break
@@ -143,8 +163,10 @@ class Reactor(object):
             conn.close()
             self.write("All good")
 
-        # Adds new alert. Unnecessary, use PUT
         def post(self, arg):
+            """
+            An insert in the same format as put. Redundant, put has same functionality with extra precaution for preexisting alerts.
+            """
             info = json.loads(self.request.body)
             self.reactor.options.get('alerts').append(info)
             self.reactor.reinit()
@@ -159,9 +181,11 @@ class Reactor(object):
             conn.close()
             self.write("All good")
 
-        # No arguments: Return current options (including setup of alerts)
-        # Query Specified: Returns the alert settings of the given query
         def get(self, arg):
+            """
+            Returns data about alerts. If no query is specified, all alert data is dumped.
+            Otherwise, only data pertaining to the specified ORIGINAL query is dumped.
+            """
             if arg == "":
                 tempDict = dict(self.reactor.options)
                 if not 'alerts' in tempDict:
@@ -233,9 +257,11 @@ class Reactor(object):
         'warning_handlers': ['log','smtp'],
     }
 
-    # Handles database table initialization along with pulling old alerts from DB
-    # Database overrides config.json
     def __init__(self, **options):
+        """
+        Initialization of the reactor along with the database tables (pulls old alerts from database)
+        Note: Any alerts in the database take precedence over alerts specified in the config.json.
+        """
         self.alerts = set()
         self.loop = ioloop.IOLoop.instance()
         self.options = dict(self.defaults)
@@ -341,7 +367,6 @@ class Reactor(object):
             os.unlink(self.options.get('pidfile'))
         LOGGER.info('Reactor has stopped')
 
-    # Notifies via handlers but also caches last alert status for loading on clients
     def notify(self, level, alert, value, target=None, ntype=None, rule=None):
         """ Provide the event to the handlers. """
 

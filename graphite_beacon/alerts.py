@@ -139,6 +139,12 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         self.callback.stop()
         return self
     def check(self, records):
+
+        """
+        Called at an interval to check if any values have exceeded alert thresholds.
+        History is also recorded in a local table and History_TOD is stored in the database at the top of the hour.
+        """
+
         work = False
         if datetime.now().time().hour == (self.pastHour+1)%24 and not self.recorded:
              work = True
