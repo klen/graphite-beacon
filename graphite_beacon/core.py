@@ -148,6 +148,9 @@ class Reactor(object):
             for i in range(len(self.reactor.options.get('alerts'))):
                 if self.reactor.options.get('alerts')[i].get('query') == arg:
                     break
+            else:
+                self.write("No such Alert")
+                return
             self.reactor.options.get('alerts').pop(i)
             self.reactor.reinit()
             conn = psycopg2.connect(self.reactor.options.get('database'))
