@@ -227,7 +227,7 @@ class Reactor(object):
                 for alert in self.reactor.options.get('alerts'):
                     if alert['query'] == arg:
                         self.write(json.dumps(alert))
-                        continue
+                        break
                     for event in alert['events']:
                         if event['resolved_query'] == arg:
                             self.write(json.dumps(alert))
