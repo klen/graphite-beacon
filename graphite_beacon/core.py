@@ -298,7 +298,6 @@ class Reactor(object):
         LOGGER.info('Read configuration')
 
         self.options.update(options)
-        print "reinit called"
         self.include_config(self.options.get('config'))
         for config in self.options.pop('include', []):
             self.include_config(config)
