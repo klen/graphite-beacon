@@ -242,7 +242,8 @@ class GraphiteAlert(BaseAlert):
     def _graphite_url(self, query, raw_data=False, graphite_url=None):
         """ Build Graphite URL. """
         query = escape.url_escape(query)
-        graphite_url = graphite_url or self.reactor.options['graphite_url']
+        graphite_url = graphite_url or self.reactor.options.get('public_graphite_url')
+
         url = "{base}/render/?target={query}&from=-{time_window}&until=-{until}".format(
             base=graphite_url, query=query, time_window=self.time_window, until=self.until)
         if raw_data:
