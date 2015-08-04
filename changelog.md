@@ -1,11 +1,15 @@
-## 0.25.1
+## 0.24.2
 
-- Fix issue #46
-- Support `until` option for Graphite queries
-- Customize alert behaviour with no data
-- Enhance expressions (support AND/OR)
-- Added VictorOps handler
-- Better Slack notifications
+- Added `public_graphite_url` option;
+
+## 0.24.1
+
+- Fix issue #46;
+- Support `until` option for Graphite queries;
+- Customize alert behaviour with no data;
+- Enhance expressions (support AND/OR);
+- Added VictorOps handler;
+- Better Slack notifications;
 
 ## 0.24.0
 
