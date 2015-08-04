@@ -45,6 +45,8 @@ class Reactor(object):
         'request_timeout': 20.0,
         'send_initial': False,
         'warning_handlers': ['log', 'smtp'],
+        'default_nan_value': 0,
+        'ignore_nan': False,
     }
 
     def __init__(self, **options):

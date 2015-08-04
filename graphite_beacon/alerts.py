@@ -205,6 +205,8 @@ class GraphiteAlert(BaseAlert):
         super(GraphiteAlert, self).configure(**options)
 
         self.method = options.get('method', self.reactor.options['method'])
+        self.default_nan_value = options.get('default_nan_value', self.reactor.options['default_nan_value'])
+        self.ignore_nan = options.get('ignore_nan', self.reactor.options['ignore_nan'])
         assert self.method in METHODS, "Method is invalid"
 
         self.auth_username = self.reactor.options.get('auth_username')
@@ -224,7 +226,8 @@ class GraphiteAlert(BaseAlert):
                 response = yield self.client.fetch(self.url, auth_username=self.auth_username,
                                                    auth_password=self.auth_password,
                                                    request_timeout=self.request_timeout)
-                records = (GraphiteRecord(line.decode('utf-8')) for line in response.buffer)
+                records = (GraphiteRecord(line.decode('utf-8'), self.default_nan_value, self.ignore_nan) \
+                    for line in response.buffer)
                 data = [
                     (None if record.empty else getattr(record, self.method), record.target)
                     for record in records]
