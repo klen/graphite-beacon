@@ -488,6 +488,7 @@ Contributors
 * Olli-Pekka Puolitaival (https://github.com/OPpuolitaival)
 * Raine Virta (https://github.com/raine)
 * Scott Nonnenberg (https://github.com/scottnonnenberg)
+* Terry Peng (https://github.com/tpeng)
 * Thomas Clavier (https://github.com/tclavier)
 * dugeem (https://github.com/dugeem)
 
