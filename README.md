@@ -169,6 +169,11 @@ Value units:
         // Can be redefined for each alert
         "no_data": "critical",
 
+        // Default alert to send when loading failed (timeout, server error, etc)
+        // (normal = no alert)
+        // Can be redefined for each alert
+        "loading_error": "critical"
+
         // Default prefix (used for notifications)
         "prefix": "[BEACON]",
 
