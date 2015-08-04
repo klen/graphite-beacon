@@ -270,9 +270,10 @@ class URLAlert(BaseAlert):
         else:
             self.waiting = True
             try:
-                response = yield self.client.fetch(self.query,
-                                                   method=self.options.get('method', 'GET'),
-                                                   request_timeout=self.request_timeout)
+                response = yield self.client.fetch(
+                    self.query, method=self.options.get('method', 'GET'),
+                    request_timeout=self.request_timeout,
+                    validate_cert=self.options.get('validate_cert', True))
                 self.check([(self.get_data(response), self.query)])
                 self.notify('normal', 'Metrics are loaded', target='loading', ntype='common')
 
