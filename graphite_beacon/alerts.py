@@ -2,7 +2,14 @@ from tornado import ioloop, httpclient as hc, gen, log, escape
 
 from . import _compat as _
 from .graphite import GraphiteRecord
-from .utils import convert_to_format, parse_interval, parse_rule, HISTORICAL, LOGICAL_OPERATORS, interval_to_graphite
+from .utils import (
+    HISTORICAL,
+    LOGICAL_OPERATORS,
+    convert_to_format,
+    interval_to_graphite,
+    parse_interval,
+    parse_rule,
+)
 import math
 from collections import deque, defaultdict
 from itertools import islice
@@ -59,6 +66,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         try:
             self.configure(**options)
         except Exception as e:
+            LOGGER.exception(e)
             raise ValueError("Invalid alert configuration: %s" % e)
 
         self.waiting = False
@@ -206,7 +214,8 @@ class GraphiteAlert(BaseAlert):
         super(GraphiteAlert, self).configure(**options)
 
         self.method = options.get('method', self.reactor.options['method'])
-        self.default_nan_value = options.get('default_nan_value', self.reactor.options['default_nan_value'])
+        self.default_nan_value = options.get(
+            'default_nan_value', self.reactor.options['default_nan_value'])
         self.ignore_nan = options.get('ignore_nan', self.reactor.options['ignore_nan'])
         assert self.method in METHODS, "Method is invalid"
 
@@ -227,7 +236,8 @@ class GraphiteAlert(BaseAlert):
                 response = yield self.client.fetch(self.url, auth_username=self.auth_username,
                                                    auth_password=self.auth_password,
                                                    request_timeout=self.request_timeout)
-                records = (GraphiteRecord(line.decode('utf-8'), self.default_nan_value, self.ignore_nan) \
+                records = (
+                    GraphiteRecord(line.decode('utf-8'), self.default_nan_value, self.ignore_nan)
                     for line in response.buffer)
                 data = [
                     (None if record.empty else getattr(record, self.method), record.target)
@@ -237,7 +247,8 @@ class GraphiteAlert(BaseAlert):
                 self.check(data)
                 self.notify('normal', 'Metrics are loaded', target='loading', ntype='common')
             except Exception as e:
-                self.notify(self.loading_error, 'Loading error: %s' % e, target='loading', ntype='common')
+                self.notify(
+                    self.loading_error, 'Loading error: %s' % e, target='loading', ntype='common')
             self.waiting = False
 
     def get_graph_url(self, target, graphite_url=None):

@@ -215,6 +215,7 @@ def test_convert():
 def test_parse_interval():
     from graphite_beacon.utils import parse_interval
 
+    assert parse_interval(10) == 10000.0
     assert parse_interval('10') == 10000.0
     assert parse_interval('15s') == 15000.0
     assert parse_interval('5minute') == 300000.0
