@@ -1,4 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 
-ps -eaf | grep [u]pstart && start graphite-beacon
-ps -eaf | grep [s]ystemd && systemctl start graphite-beacon
+if [[ `/sbin/init --version` =~ upstart ]]; then start graphite-beacon;
+elif [[ `systemctl` =~ -\.mount ]]; then systemctl start graphite-beacon;
+elif [[ -f /etc/init.d/cron && ! -h /etc/init.d/cron ]]; then /etc/init.d/graphite-beacon start;
+fi

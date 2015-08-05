@@ -1,3 +1,3 @@
 #!/bin/sh
 
-easy_install tornado
+pip install tornado funcparserlib

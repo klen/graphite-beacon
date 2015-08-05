@@ -73,9 +73,10 @@ PACKAGE_MAINTAINER="Kirill Klenov <horneds@gmail.com>"
 PACKAGE_DESCRIPTION="Simple allerting system for Graphite metrics."
 PACKAGE_URL=https://github.com/klen/graphite-beacon.git
 deb: clean
-	@mkdir -p $(BUILD)/etc/init $(BUILD)/etc/systemd/system $(BUILD)/$(TARGET)
+	@mkdir -p $(BUILD)/etc/init $(BUILD)/etc/init.d $(BUILD)/etc/systemd/system $(BUILD)/$(TARGET)
 	@cp -r $(CURDIR)/graphite_beacon debian/config.json $(BUILD)/$(TARGET)/.
 	@cp $(CURDIR)/debian/upstart.conf $(BUILD)/etc/init/graphite-beacon.conf
+	@cp $(CURDIR)/debian/graphite_beacon.init $(BUILD)/etc/init.d/graphite-beacon
 	@cp $(CURDIR)/debian/systemd.service $(BUILD)/etc/systemd/system/graphite-beacon.service
 	@fpm -s dir -t deb -a all \
 	    -n $(PACKAGE_FULLNAME) \
@@ -95,6 +96,7 @@ deb: clean
 	    --after-install $(CURDIR)/debian/after_install.sh \
 	    -C $(CURDIR)/build \
 	    -d "python" \
+	    -d "python-dev" \
 	    -d "python-pip" \
 	    opt etc
 	echo "%$(subst $(space),,$(PACKAGE_VERSION))%"
