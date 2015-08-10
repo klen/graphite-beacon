@@ -222,7 +222,7 @@ class GraphiteAlert(BaseAlert):
         self.auth_username = self.reactor.options.get('auth_username')
         self.auth_password = self.reactor.options.get('auth_password')
 
-        self.url = self._graphite_url(self.query, raw_data=True)
+        self.url = self._graphite_url(self.query, graphite_url=self.reactor.options.get('graphite_url'), raw_data=True)
         LOGGER.debug('%s: url = %s' % (self.name, self.url))
 
     @gen.coroutine
