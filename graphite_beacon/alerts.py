@@ -109,6 +109,8 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         self._format = options.get('format', self.reactor.options['format'])
         self.request_timeout = options.get(
             'request_timeout', self.reactor.options['request_timeout'])
+        self.connect_timeout = options.get(
+            'connect_timeout', self.reactor.options['connect_timeout'])
 
         self.history_size = options.get('history_size', self.reactor.options['history_size'])
         self.history_size = parse_interval(self.history_size)
@@ -235,7 +237,8 @@ class GraphiteAlert(BaseAlert):
             try:
                 response = yield self.client.fetch(self.url, auth_username=self.auth_username,
                                                    auth_password=self.auth_password,
-                                                   request_timeout=self.request_timeout)
+                                                   request_timeout=self.request_timeout,
+                                                   connect_timeout=self.connect_timeout)
                 records = (
                     GraphiteRecord(line.decode('utf-8'), self.default_nan_value, self.ignore_nan)
                     for line in response.buffer)
@@ -284,6 +287,7 @@ class URLAlert(BaseAlert):
                 response = yield self.client.fetch(
                     self.query, method=self.options.get('method', 'GET'),
                     request_timeout=self.request_timeout,
+                    connect_timeout=self.connect_timeout,
                     validate_cert=self.options.get('validate_cert', True))
                 self.check([(self.get_data(response), self.query)])
                 self.notify('normal', 'Metrics are loaded', target='loading', ntype='common')
