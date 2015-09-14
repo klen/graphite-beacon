@@ -43,6 +43,7 @@ class Reactor(object):
         'public_graphite_url': None,
         'repeat_interval': '2hour',
         'request_timeout': 20.0,
+        'connect_timeout': 20.0,
         'send_initial': False,
         'until': '0second',
         'warning_handlers': ['log', 'smtp'],
