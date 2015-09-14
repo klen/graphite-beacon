@@ -434,6 +434,20 @@ Enable "pagerduty" handler and set the options in your beacon configuration.
 }
 ```
 
+### Setup TelegramHandler
+
+Enable "telegram" handler and set the options in your beacon configuration.
+```js
+{
+    ...
+    "telegram": {
+        "token": "telegram bot token",
+        "bot_ident": "token used to activate bot in a group"
+    },
+    ...
+}
+```
+
 ### Command line
 
 ```
