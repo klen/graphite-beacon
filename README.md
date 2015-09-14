@@ -488,13 +488,12 @@ the issue tracker at https://github.com/klen/graphite-beacon/issues
 Contributors
 -------------
 
-* Kirill Klenov     (https://github.com/klen, horneds@gmail.com)
-
 * Andrej Kuročenko (https://github.com/kurochenko)
 * Cody Soyland (https://github.com/codysoyland)
 * Garrett Heel (https://github.com/GarrettHeel)
 * George Ionita (https://github.com/georgeionita)
 * James Yuzawa (https://github.com/yuzawa-san)
+* Kirill Klenov (https://github.com/klen)
 * Konstantin Bakulin (https://github.com/kbakulin)
 * Lammert Hellinga (https://github.com/Kogelvis)
 * Miguel Moll (https://github.com/MiguelMoll)
@@ -504,6 +503,7 @@ Contributors
 * Phillip Hagedorn (https://github.com/phagedorn)
 * Raine Virta (https://github.com/raine)
 * Scott Nonnenberg (https://github.com/scottnonnenberg)
+* Sean Johnson (https://github.com/pirogoeth)
 * Terry Peng (https://github.com/tpeng)
 * Thomas Clavier (https://github.com/tclavier)
 * dugeem (https://github.com/dugeem)
