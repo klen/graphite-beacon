@@ -1,7 +1,7 @@
 from tornado import log
 
-from .. import _compat as _
-from ..template import TEMPLATES
+from graphite_beacon import _compat as _
+from graphite_beacon.template import TEMPLATES
 
 LOGGER = log.gen_log
 
@@ -16,7 +16,7 @@ class HandlerMeta(type):
         name = params.get('name')
         if name:
             mcs.handlers[name] = cls
-            LOGGER.info("Register Handler: %s" % name)
+            LOGGER.info("Register Handler: %s", name)
         return cls
 
     @classmethod

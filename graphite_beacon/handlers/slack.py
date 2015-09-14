@@ -1,8 +1,9 @@
 import json
+
 from tornado import gen, httpclient as hc
 
-from . import AbstractHandler, LOGGER
-from ..template import TEMPLATES
+from graphite_beacon.handlers import AbstractHandler, LOGGER
+from graphite_beacon.template import TEMPLATES
 
 
 class SlackHandler(AbstractHandler):

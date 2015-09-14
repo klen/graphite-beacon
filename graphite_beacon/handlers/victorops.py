@@ -6,7 +6,7 @@ except ImportError:
 
 from tornado import gen, httpclient as hc
 
-from . import AbstractHandler, LOGGER
+from graphite_beacon.handlers import AbstractHandler, LOGGER
 
 
 class VictorOpsHandler(AbstractHandler):

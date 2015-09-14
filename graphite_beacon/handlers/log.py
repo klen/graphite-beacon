@@ -1,7 +1,9 @@
-from . import AbstractHandler, LOGGER
+from graphite_beacon.handlers import AbstractHandler, LOGGER
 
 
 class LogHandler(AbstractHandler):
+
+    """Handle events to log output."""
 
     name = 'log'
 

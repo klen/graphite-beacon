@@ -1,7 +1,8 @@
 import json
+
 from tornado import gen, httpclient as hc
 
-from . import AbstractHandler, LOGGER
+from graphite_beacon.handlers import AbstractHandler, LOGGER
 
 
 class PagerdutyHandler(AbstractHandler):
@@ -28,7 +29,7 @@ class PagerdutyHandler(AbstractHandler):
     def notify(self, level, alert, value, target=None, ntype=None, rule=None):
         LOGGER.debug("Handler (%s) %s", self.name, level)
         message = self.get_short(level, alert, value, target=target, ntype=ntype, rule=rule)
-        LOGGER.debug('message1:{}'.format(message))
+        LOGGER.debug('message1:%s', message)
         if level == 'normal':
             event_type = 'resolve'
         else:

@@ -1,3 +1,5 @@
+"""Implement alerts."""
+
 from tornado import ioloop, httpclient as hc, gen, log, escape
 
 from . import _compat as _
@@ -26,7 +28,10 @@ LEVELS = {
 
 class sliceable_deque(deque):
 
+    """Deque with slices support."""
+
     def __getitem__(self, index):
+        """Support slices."""
         try:
             return deque.__getitem__(self, index)
         except TypeError:
@@ -35,30 +40,33 @@ class sliceable_deque(deque):
 
 class AlertFabric(type):
 
-    """ Register alert's classes and produce an alert by source. """
+    """Register alert's classes and produce an alert by source."""
 
     alerts = {}
 
     def __new__(mcs, name, bases, params):
+        """Register an Alert Class in self."""
         source = params.get('source')
         cls = super(AlertFabric, mcs).__new__(mcs, name, bases, params)
         if source:
             mcs.alerts[source] = cls
-            LOGGER.info('Register Alert: %s' % source)
+            LOGGER.info('Register Alert: %s', source)
         return cls
 
     def get(cls, reactor, source='graphite', **options):
+        """Get Alert Class by source."""
         acls = cls.alerts[source]
         return acls(reactor, **options)
 
 
 class BaseAlert(_.with_metaclass(AlertFabric)):
 
-    """ Abstract basic alert class. """
+    """Abstract basic alert class."""
 
     source = None
 
     def __init__(self, reactor, **options):
+        """Initialize alert."""
         self.reactor = reactor
         self.options = options
         self.client = hc.AsyncHTTPClient()
@@ -73,22 +81,28 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         self.state = {None: "normal", "waiting": "normal", "loading": "normal"}
         self.history = defaultdict(lambda: sliceable_deque([], self.history_size))
 
-        LOGGER.info("Alert '%s': has inited" % self)
+        LOGGER.info("Alert '%s': has inited", self)
 
     def __hash__(self):
+        """Provide alert's hash."""
         return hash(self.name) ^ hash(self.source)
 
     def __eq__(self, other):
+        """Check that other alert iis the same."""
         return hash(self) == hash(other)
 
     def __str__(self):
+        """String representation."""
         return "%s (%s)" % (self.name, self.interval)
 
     def configure(self, name=None, rules=None, query=None, **options):
-        assert name, "Alert's name is invalid"
+        """Configure the alert."""
         self.name = name
+        if not name:
+            raise AssertionError("Alert's name should be defined and not empty.")
 
-        assert rules, "%s: Alert's rules is invalid" % name
+        if not rules:
+            raise AssertionError("%s: Alert's rules is invalid" % name)
         self.rules = [parse_rule(rule) for rule in rules]
         self.rules = list(sorted(self.rules, key=lambda r: LEVELS.get(r.get('level'), 99)))
 
@@ -224,12 +238,13 @@ class GraphiteAlert(BaseAlert):
         self.auth_username = self.reactor.options.get('auth_username')
         self.auth_password = self.reactor.options.get('auth_password')
 
-        self.url = self._graphite_url(self.query, graphite_url=self.reactor.options.get('graphite_url'), raw_data=True)
-        LOGGER.debug('%s: url = %s' % (self.name, self.url))
+        self.url = self._graphite_url(
+            self.query, graphite_url=self.reactor.options.get('graphite_url'), raw_data=True)
+        LOGGER.debug('%s: url = %s', self.name, self.url)
 
     @gen.coroutine
     def load(self):
-        LOGGER.debug('%s: start checking: %s' % (self.name, self.query))
+        LOGGER.debug('%s: start checking: %s', self.name, self.query)
         if self.waiting:
             self.notify('warning', 'Process takes too much time', target='waiting', ntype='common')
         else:
@@ -278,7 +293,7 @@ class URLAlert(BaseAlert):
 
     @gen.coroutine
     def load(self):
-        LOGGER.debug('%s: start checking: %s' % (self.name, self.query))
+        LOGGER.debug('%s: start checking: %s', self.name, self.query)
         if self.waiting:
             self.notify('warning', 'Process takes too much time', target='waiting', ntype='common')
         else:

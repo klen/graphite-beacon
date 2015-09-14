@@ -1,8 +1,8 @@
 import json
 from tornado import gen, httpclient
 
-from . import AbstractHandler, LOGGER
-from ..template import TEMPLATES
+from graphite_beacon.handlers import AbstractHandler, LOGGER
+from graphite_beacon.template import TEMPLATES
 
 
 class TelegramHandler(AbstractHandler):
@@ -41,21 +41,16 @@ class TelegramHandler(AbstractHandler):
 
         self._last_update = None
 
-        update_body = {
-            "timeout": 2,
-        }
+        update_body = {"timeout": 2}
 
-        update_headers = {
-            "Content-Type": "application/json",
-        }
+        update_headers = {"Content-Type": "application/json"}
 
         while True:
             if self._last_update:
                 update_body.update({"offset": self._last_update + 1})
-            update_resp = self.client.fetch(self.url + "getUpdates",
-                headers=update_headers,
-                body=json.dumps(update_body),
-                method="POST")
+            update_resp = self.client.fetch(
+                self.url + "getUpdates", headers=update_headers,
+                body=json.dumps(update_body), method="POST")
             update_resp.add_done_callback(self._respond_commands)
             yield gen.sleep(5)
 
@@ -78,19 +73,18 @@ class TelegramHandler(AbstractHandler):
             if msp[0].startswith("/activate"):
                 try:
                     if msp[1] == self.bot_ident:
-                        LOGGER.debug("Adding chat [%s] to notify list." % 
-                            (update["message"]["chat"]["id"]))
+                        LOGGER.debug(
+                            "Adding chat [%s] to notify list.", update["message"]["chat"]["id"])
                         self._chats.append(update["message"]["chat"]["id"])
-                    yield self.client.fetch(self.url + "sendMessage",
-                            body=json.dumps({
-                                "chat_id": update["message"]["chat"]["id"],
-                                "reply_to_message_id": update["message"]["message_id"],
-                                "text": "Activated!" }),
-                            method="POST",
-                            headers={
-                                "Content-Type": "application/json",
-                            })
-                except: continue
+                    yield self.client.fetch(
+                        self.url + "sendMessage", body=json.dumps({
+                            "chat_id": update["message"]["chat"]["id"],
+                            "reply_to_message_id": update["message"]["message_id"],
+                            "text": "Activated!"}),
+                        method="POST",
+                        headers={"Content-Type": "application/json"})
+                except:
+                    continue
             else:
                 continue
 
@@ -101,12 +95,6 @@ class TelegramHandler(AbstractHandler):
 
         message = self.get_message(level, *args, **kwargs)
         for chat in self._chats:
-            yield self.client.fetch(self.url + "sendMessage",
-                    body=json.dumps({
-                        "chat_id": chat,
-                        "text": message }),
-                    method="POST",
-                    headers={
-                        "Content-Type": "application/json",
-                    })
-
+            yield self.client.fetch(
+                self.url + "sendMessage", body=json.dumps({"chat_id": chat, "text": message}),
+                method="POST", headers={"Content-Type": "application/json"})

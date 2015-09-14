@@ -1,11 +1,11 @@
 import datetime as dt
-
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from smtplib import SMTP
+
 from tornado import gen, concurrent
 
-from . import AbstractHandler, TEMPLATES, LOGGER
+from graphite_beacon.handlers import AbstractHandler, TEMPLATES, LOGGER
 
 
 class SMTPHandler(AbstractHandler):
@@ -51,7 +51,7 @@ class SMTPHandler(AbstractHandler):
             yield smtp_login(smtp, self.options['username'], self.options['password'])
 
         try:
-            LOGGER.debug("Send message to: %s" % ", ".join(self.options['to']))
+            LOGGER.debug("Send message to: %s", ", ".join(self.options['to']))
             smtp.sendmail(self.options['from'], self.options['to'], msg.as_string())
         finally:
             smtp.quit()
@@ -84,3 +84,5 @@ def smtp_starttls(smtp, callback):
 @concurrent.return_future
 def smtp_login(smtp, username, password, callback):
     callback(smtp.login(username, password))
+
+#  pylama:ignore=E1120
