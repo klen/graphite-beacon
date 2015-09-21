@@ -67,6 +67,8 @@ class TelegramHandler(AbstractHandler):
             update_content = json.loads(update_content)
 
         for update in update_content["result"]:
+            if not update["message"].get('text'):
+                continue
             message = update["message"]["text"].encode("utf-8")
             msp = message.split()
             self._last_update = update["update_id"]
