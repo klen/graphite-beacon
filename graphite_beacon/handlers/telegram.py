@@ -70,19 +70,28 @@ class TelegramHandler(AbstractHandler):
             message = update["message"]["text"].encode("utf-8")
             msp = message.split()
             self._last_update = update["update_id"]
-            if msp[0].startswith("/activate"):
+            if len(msp) > 1 and msp[0].startswith("/activate"):
                 try:
-                    if msp[1] == self.bot_ident:
+                    chat_id = update["message"]["chat"]["id"]
+                    if msp[1] == self.bot_ident and chat_id not in self._chats:
                         LOGGER.debug(
-                            "Adding chat [%s] to notify list.", update["message"]["chat"]["id"])
-                        self._chats.append(update["message"]["chat"]["id"])
-                    yield self.client.fetch(
-                        self.url + "sendMessage", body=json.dumps({
-                            "chat_id": update["message"]["chat"]["id"],
-                            "reply_to_message_id": update["message"]["message_id"],
-                            "text": "Activated!"}),
-                        method="POST",
-                        headers={"Content-Type": "application/json"})
+                            "Adding chat [%s] to notify list.", chat_id)
+                        self._chats.append(chat_id)
+                        yield self.client.fetch(
+                            self.url + "sendMessage", body=json.dumps({
+                                "chat_id": update["message"]["chat"]["id"],
+                                "reply_to_message_id": update["message"]["message_id"],
+                                "text": "Activated!"}),
+                            method="POST",
+                            headers={"Content-Type": "application/json"})
+                    elif msp[1] == self.bot_ident and chat_id in self._chats:
+                        yield self.client.fetch(
+                            self.url + "sendMessage", body=json.dumps({
+                                "chat_id": update["message"]["chat"]["id"],
+                                "reply_to_message_id": update["message"]["message_id"],
+                                "text": "This chat is already activated."}),
+                            method="POST",
+                            headers={"Content-Type": "application/json"})
                 except:
                     continue
             else:
