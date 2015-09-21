@@ -18,7 +18,6 @@ Features:
 [![Version](http://img.shields.io/pypi/v/graphite-beacon.svg?style=flat-square)](https://pypi.python.org/pypi/graphite_beacon)
 [![License](http://img.shields.io/pypi/l/graphite-beacon.svg?style=flat-square)](https://pypi.python.org/pypi/graphite_beacon)
 [![Downloads](http://img.shields.io/pypi/dm/graphite-beacon.svg?style=flat-square)](https://pypi.python.org/pypi/graphite_beacon)
-[![Donate](http://img.shields.io/gratipay/klen.svg?style=flat-square)](https://www.gratipay.com/klen/)
 
 Example:
 ```js
@@ -506,9 +505,18 @@ Contributors
 * Sean Johnson (https://github.com/pirogoeth)
 * Terry Peng (https://github.com/tpeng)
 * Thomas Clavier (https://github.com/tclavier)
+* Yuriy Ilyin (https://github.com/YuriyIlyin)
 * dugeem (https://github.com/dugeem)
 
 License
 --------
 
 Licensed under a [MIT license](http://www.linfo.org/mitlicense.html)
+
+If you wish to express your appreciation for the role, you are welcome to send
+a postcard to:
+
+    Kirill Klenov
+    pos. Severny 8-3
+    MO, Istra, 143500
+    Russia
