@@ -1,5 +1,0 @@
-[report]
-source=graphite_beacon
-
-[run]
-source=graphite_beacon

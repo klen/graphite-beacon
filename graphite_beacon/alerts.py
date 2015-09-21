@@ -139,27 +139,30 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
             self.callback = ioloop.PeriodicCallback(self.load, interval)
 
     def convert(self, value):
+        """Convert self value."""
         return convert_to_format(value, self._format)
 
     def reset(self):
-        """ Reset state to normal for all targets.
+        """Reset state to normal for all targets.
 
         It will repeat notification if a metric is still failed.
-
         """
         for target in self.state:
             self.state[target] = "normal"
 
     def start(self):
+        """Start checking."""
         self.callback.start()
         self.load()
         return self
 
     def stop(self):
+        """Stop checking."""
         self.callback.stop()
         return self
 
     def check(self, records):
+        """Check current value."""
         for value, target in records:
             LOGGER.info("%s [%s]: %s", self.name, target, value)
             if value is None:
@@ -175,6 +178,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
             self.history[target].append(value)
 
     def evaluate_rule(self, rule, value, target):
+        """Calculate the value."""
         def evaluate(expr):
             if expr in LOGICAL_OPERATORS.values():
                 return expr
@@ -191,6 +195,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         return evaluated[0]
 
     def get_value_for_expr(self, expr, target):
+        """I have no idea."""
         if expr in LOGICAL_OPERATORS.values():
             return None
         rvalue = expr['value']
@@ -204,8 +209,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         return rvalue
 
     def notify(self, level, value, target=None, ntype=None, rule=None):
-        """ Notify main reactor about event. """
-
+        """Notify main reactor about event."""
         # Did we see the event before?
         if target in self.state and level == self.state[target]:
             return False
@@ -219,14 +223,18 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         return self.reactor.notify(level, self, value, target=target, ntype=ntype, rule=rule)
 
     def load(self):
+        """Load from remote."""
         raise NotImplementedError()
 
 
 class GraphiteAlert(BaseAlert):
 
+    """Check graphite records."""
+
     source = 'graphite'
 
     def configure(self, **options):
+        """Configure the alert."""
         super(GraphiteAlert, self).configure(**options)
 
         self.method = options.get('method', self.reactor.options['method'])
@@ -244,6 +252,7 @@ class GraphiteAlert(BaseAlert):
 
     @gen.coroutine
     def load(self):
+        """Load data from Graphite."""
         LOGGER.debug('%s: start checking: %s', self.name, self.query)
         if self.waiting:
             self.notify('warning', 'Process takes too much time', target='waiting', ntype='common')
@@ -270,10 +279,11 @@ class GraphiteAlert(BaseAlert):
             self.waiting = False
 
     def get_graph_url(self, target, graphite_url=None):
+        """Get Graphite URL."""
         return self._graphite_url(target, graphite_url=graphite_url, raw_data=False)
 
     def _graphite_url(self, query, raw_data=False, graphite_url=None):
-        """ Build Graphite URL. """
+        """Build Graphite URL."""
         query = escape.url_escape(query)
         graphite_url = graphite_url or self.reactor.options.get('public_graphite_url')
 
@@ -286,13 +296,18 @@ class GraphiteAlert(BaseAlert):
 
 class URLAlert(BaseAlert):
 
+    """Check URLs."""
+
     source = 'url'
 
-    def get_data(self, response):
+    @staticmethod
+    def get_data(response):
+        """Value is response.status."""
         return response.code
 
     @gen.coroutine
     def load(self):
+        """Load URL."""
         LOGGER.debug('%s: start checking: %s', self.name, self.query)
         if self.waiting:
             self.notify('warning', 'Process takes too much time', target='waiting', ntype='common')
