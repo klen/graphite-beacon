@@ -34,3 +34,11 @@ class GraphiteRecord(object):
     @property
     def sum(self):
         return sum(self.values)
+
+    @property
+    def minimum(self):
+        return min(self.values)
+
+    @property
+    def maximum(self):
+        return max(self.values)

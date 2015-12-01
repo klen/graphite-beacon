@@ -160,7 +160,7 @@ Value units:
         // Default loglevel
         "logging": "info",
 
-        // Default method (average, last_value, sum).
+        // Default method (average, last_value, sum, minimum, maximum).
         // Can be redefined for each alert.
         "method": "average",
 
@@ -228,7 +228,7 @@ At the moment **Graphite-beacon** supports two type of alerts:
       // (optional) Default values format (none, bytes, s, ms, short)
       "format": "bytes",
 
-      // (optional) Alert method (average, last_value, sum)
+      // (optional) Alert method (average, last_value, sum, minimum, maximum)
       "method": "average",
 
       // (optional) Alert interval [eg. 15second, 30minute, 2hour, 1day, 3month, 1year]
