@@ -1,3 +1,7 @@
+## unreleased
+
+- Added 'minimum' and 'maximum' methods
+
 ## 0.24.2
 
 - Added `public_graphite_url` option;
