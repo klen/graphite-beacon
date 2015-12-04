@@ -185,20 +185,23 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         self.loading_error = options.get('loading_error', self.reactor.options['loading_error'])
 
         interval = options.get('interval', self.reactor.options['interval'])
+        time_window = options.get('time_window', None)
 
         if is_cron(interval):
             self.interval = interval
-            self.time_window = interval_to_graphite(options.get('time_window', None))
-            self.time_window = interval_to_graphite(
-                options.get('time_window', self.reactor.options['interval']))
+            assert time_window, "%s: Must supply time_window for cron scheduled alerts" % self.name
+            self.time_window = interval_to_graphite(time_window)
             if self.reactor.options.get('debug'):
                 self.callback = ioloop.PeriodicCallback(self.load, 5000)
             else:
                 self.callback = CronCallback(self.load, interval)
         else:
             self.interval = interval_to_graphite(interval)
-            self.time_window = interval_to_graphite(options.get('time_window', interval))
             interval = parse_interval(self.interval)
+            if time_window:
+                self.time_window = interval_to_graphite(time_window)
+            else:
+                self.time_window = interval_to_graphite(self.interval)
             self.history_size = int(math.ceil(self.history_size / interval))
             if self.reactor.options.get('debug'):
                 self.callback = ioloop.PeriodicCallback(self.load, 5000)
