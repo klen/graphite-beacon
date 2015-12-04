@@ -43,7 +43,7 @@ class sliceable_deque(deque):
 
 def is_cron(expr):
     """Detect if an expression is a valid cron expression."""
-    return expr is not None and len(expr.split()) >= 5
+    return expr is not None and len(expr.split()) == 5
 
 
 class CronCallback(object):
