@@ -118,9 +118,6 @@ Value units:
 ```js
 
     {
-        // Path to a configuration
-        "config": "config.json",
-
         // Graphite server URL
         "graphite_url": "http://localhost",
 
@@ -189,20 +186,15 @@ Value units:
         "ignore_nan": false,
 
         // Default alerts (see configuration below)
-        "alerts": []
+        "alerts": [],
+
+        // Path to other configuration files to include
+        "include": []
     }
 ```
 
 You can setup options with a configuration file. See
 `example-config.json` or `example-config.yaml`.
-
-#### Include
-
-You can include any configuration files:
-```js
-...
-"include": [ "path/to/config1.json", "path/to/config2.json"]
-```
 
 #### Setup alerts
 
@@ -245,6 +237,7 @@ At the moment **Graphite-beacon** supports two type of alerts:
       // Level one of [critical, warning, normal]
       // Operator one of [>, <, >=, <=, ==, !=]
       // Value (absolute value: 3000000 or short form like 3MB/12minute)
+      // Multiple conditions can be separated by AND or OR conditions
       "rules": [ "critical: < 200MB", "warning: < 300MB" ]
     }
   ]
@@ -263,35 +256,32 @@ Or memory is twice less than usual:
 
 
 Graphite-beacon keeps history of values for each target in metric. Historical value
-is average of values from history. "Historical" rule becames work when it has enough
-values (Read about history size bellow).
+is tthe average of values from history. "Historical" rules work when only after enough
+values have been collected (read about history size below).
 
-History values are keeping 1 day by default. You can change it by using Reactor option
-'history_size'.
+History values are kept for 1 day by default. You can change it with the `history_size`
+option.
 
-By example, send warning when today' new user is less than 80% of average for last 10 days:
+See the below example for how to send a warning when today's new user count is 
+less than 80% of the last 10 day average:
 
 ```js
-...
 alerts: [
-...
-{
-  "name": "Registrations",
-  // Run once per day
-  "interval": "1day",
-  "query": "Your graphite query here",
-  // Get average for last 10 days
-  "history_size": 10day,
-  "rules": [
-    // Warning if today's new user less than 80% of average for 10 days
-    "warning: < historical * 0.8",
-   // Critical if today's new user less than 50% of average for 10 days
-    "critical: < historical * 0.5"
-  ]
-}
-...
+  {
+    "name": "Registrations",
+    // Run once per day
+    "interval": "1day",
+    "query": "Your graphite query here",
+    // Get average for last 10 days
+    "history_size": "10day",
+    "rules": [
+      // Warning if today's new user less than 80% of average for 10 days
+      "warning: < historical * 0.8",
+     // Critical if today's new user less than 50% of average for 10 days
+      "critical: < historical * 0.5"
+    ]
+  }
 ],
-...
 ```
 
 ### Setup SMTP

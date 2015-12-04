@@ -27,7 +27,6 @@ alerts:
   # A ping alert
   -
     name: "Site"
-    # Source (graphite, url). By default: graphite
     source: "url"
     query: "http://google.com"
     interval: "20second"
