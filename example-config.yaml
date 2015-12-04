@@ -13,8 +13,6 @@ logging: "debug"
 #   to:
 #     - "myemail@gmail.com"
 
-debug: true
-
 alerts:
   # A graphite alert
   -
