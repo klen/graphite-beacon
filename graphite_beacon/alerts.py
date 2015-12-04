@@ -15,6 +15,9 @@ from .utils import (
 import math
 from collections import deque, defaultdict
 from itertools import islice
+from croniter import croniter
+from datetime import datetime
+from threading import Lock
 
 
 LOGGER = log.gen_log
@@ -36,6 +39,76 @@ class sliceable_deque(deque):
             return deque.__getitem__(self, index)
         except TypeError:
             return type(self)(islice(self, index.start, index.stop, index.step))
+
+
+def synchronized(lock):
+    """ Synchronization decorator. """
+
+    def wrap(f):
+        def newFunction(*args, **kw):
+            lock.acquire()
+            try:
+                return f(*args, **kw)
+            finally:
+                lock.release()
+        return newFunction
+    return wrap
+
+
+def is_cron(expr):
+    """Detect if an expression is a valid cron expression."""
+    return not(expr is None or len(expr.split()) < 5)
+
+
+class CronCallback(object):
+
+    """Callback that runs on a cron schedule."""
+    lock = Lock()
+
+    def __init__(self, callback, cron):
+        """Initialize a CronCallback object with the specified cron schedule and callback."""
+        self.callback = callback
+        self.cron = croniter(cron)
+        self.is_running = False
+        self.handle = None
+
+    @synchronized(lock)
+    def start(self):
+        """Start running."""
+        if not self.is_running:
+            self.is_running = True
+            self.schedule_next_run()
+
+    @synchronized(lock)
+    def stop(self):
+        """Stop running."""
+        if self.is_running:
+            handle = self.handle
+            self.is_running = False
+            if handle:
+                ioloop.remove_timeout(handle)
+                self.handle = None
+
+    @synchronized(lock)
+    def is_running(self):
+        """Is running."""
+        return self.is_running
+
+    @synchronized(lock)
+    def scheduled_run(self):
+        """Invoke the callback and schedule the next run."""
+        if self.is_running:
+            self.callback()
+            self.schedule_next_run()
+
+    @synchronized(lock)
+    def schedule_next_run(self):
+        """Schedule the next run of this callback."""
+        if self.is_running:
+            now = datetime.now()
+            while not next or next <= now:
+                next = self.cron.get_next(datetime)
+            self.handle = ioloop.call_later((next-now).total_seconds(), self.scheduled_run)
 
 
 class AlertFabric(type):
@@ -109,13 +182,6 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         assert query, "%s: Alert's query is invalid" % self.name
         self.query = query
 
-        self.interval = interval_to_graphite(
-            options.get('interval', self.reactor.options['interval']))
-        interval = parse_interval(self.interval)
-
-        self.time_window = interval_to_graphite(
-            options.get('time_window', options.get('interval', self.reactor.options['interval'])))
-
         self.until = interval_to_graphite(
             options.get('until', self.reactor.options['until'])
         )
@@ -128,15 +194,30 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
 
         self.history_size = options.get('history_size', self.reactor.options['history_size'])
         self.history_size = parse_interval(self.history_size)
-        self.history_size = int(math.ceil(self.history_size / interval))
 
         self.no_data = options.get('no_data', self.reactor.options['no_data'])
         self.loading_error = options.get('loading_error', self.reactor.options['loading_error'])
 
-        if self.reactor.options.get('debug'):
-            self.callback = ioloop.PeriodicCallback(self.load, 5000)
+        interval = options.get('interval', self.reactor.options['interval'])
+
+        if is_cron(interval):
+            self.interval = interval
+            self.time_window = interval_to_graphite(options.get('time_window', None))
+            self.time_window = interval_to_graphite(
+                options.get('time_window', self.reactor.options['interval']))
+            if self.reactor.options.get('debug'):
+                self.callback = ioloop.PeriodicCallback(self.load, 5000)
+            else:
+                self.callback = CronCallback(self.load, interval)
         else:
-            self.callback = ioloop.PeriodicCallback(self.load, interval)
+            self.interval = interval_to_graphite(interval)
+            self.time_window = interval_to_graphite(options.get('time_window', interval))
+            interval = parse_interval(self.interval)
+            self.history_size = int(math.ceil(self.history_size / interval))
+            if self.reactor.options.get('debug'):
+                self.callback = ioloop.PeriodicCallback(self.load, 5000)
+            else:
+                self.callback = ioloop.PeriodicCallback(self.load, interval)
 
     def convert(self, value):
         """Convert self value."""

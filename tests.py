@@ -76,6 +76,9 @@ def test_alert(reactor):
     assert alert1 == alert3
     assert set([alert1, alert3]) == set([alert1])
 
+    alert4 = BaseAlert.get(reactor, name='Test', query='*', interval='*/10 09-18 * * 1-5', time_window='1h', rules=["normal: == 0"])
+    assert alert4.interval == '*/10 09-18 * * 1-5'
+
     alert = BaseAlert.get(reactor, name='Test', query='*', rules=["warning: >= 3MB"])
     assert alert.rules[0]['exprs'][0]['value'] == 3145728
 
