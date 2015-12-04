@@ -1,11 +1,7 @@
-## unreleased
+## 0.24.2
 
 - Added 'minimum' and 'maximum' methods
 - Allow alerts to be defined in multiple config files
-
-## 0.24.2
-
-- Added `public_graphite_url` option;
 
 ## 0.24.1
 
@@ -15,6 +11,7 @@
 - Enhance expressions (support AND/OR);
 - Added VictorOps handler;
 - Better Slack notifications;
+- Added `public_graphite_url` option;
 
 ## 0.24.0
 

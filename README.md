@@ -196,6 +196,9 @@ Value units:
 You can setup options with a configuration file. See
 `example-config.json` or `example-config.yaml`.
 
+A `config.json` file in the same directory that you run `graphite-beacon`
+from will be used automatically.
+
 #### Setup alerts
 
 At the moment **Graphite-beacon** supports two type of alerts:
