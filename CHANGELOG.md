@@ -1,4 +1,4 @@
-## 0.24.2
+## 0.24.3
 
 - Added 'minimum' and 'maximum' methods
 - Allow alerts to be defined in multiple config files
