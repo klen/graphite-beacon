@@ -1,9 +1,9 @@
-## 0.24.3
+## 0.25.3
 
 - Added 'minimum' and 'maximum' methods
 - Allow alerts to be defined in multiple config files
 
-## 0.24.1
+## 0.25.1
 
 - Fix issue #46;
 - Support `until` option for Graphite queries;
