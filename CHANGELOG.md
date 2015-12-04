@@ -1,6 +1,7 @@
 ## unreleased
 
 - Added 'minimum' and 'maximum' methods
+- Allow alerts to be defined in multiple config files
 
 ## 0.24.2
 

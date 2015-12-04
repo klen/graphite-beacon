@@ -22,7 +22,7 @@ def test_reactor():
     rr = Reactor(include=['example-config.json'], alerts=[
         {'name': 'test', 'query': '*', 'rules': ["normal: == 0"]}])
     assert rr.options['interval'] == '20minute'
-    assert len(rr.alerts) == 2
+    assert len(rr.alerts) == 3
 
 
 def test_convert_config_log_level():
