@@ -125,6 +125,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
             'request_timeout', self.reactor.options['request_timeout'])
         self.connect_timeout = options.get(
             'connect_timeout', self.reactor.options['connect_timeout'])
+        self.url_retries = options.get('url_retries', self.reactor.options['url_retries'])
 
         self.history_size = options.get('history_size', self.reactor.options['history_size'])
         self.history_size = parse_interval(self.history_size)
@@ -161,21 +162,28 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         self.callback.stop()
         return self
 
-    def check(self, records):
-        """Check current value."""
+    def check(self, records, final=True):
+        """Check current value. Returns true if check succeeded."""
+        rvalue = True
         for value, target in records:
             LOGGER.info("%s [%s]: %s", self.name, target, value)
             if value is None:
-                self.notify(self.no_data, value, target)
+                if final:
+                    self.notify(self.no_data, value, target)
+                rvalue = False
                 continue
             for rule in self.rules:
                 if self.evaluate_rule(rule, value, target):
-                    self.notify(rule['level'], value, target, rule=rule)
+                    if final:
+                        self.notify(rule['level'], value, target, rule=rule)
+                    rvalue = False
                     break
             else:
                 self.notify('normal', value, target, rule=rule)
 
             self.history[target].append(value)
+
+        return rvalue
 
     def evaluate_rule(self, rule, value, target):
         """Calculate the value."""
@@ -313,16 +321,25 @@ class URLAlert(BaseAlert):
             self.notify('warning', 'Process takes too much time', target='waiting', ntype='common')
         else:
             self.waiting = True
-            try:
-                response = yield self.client.fetch(
-                    self.query, method=self.options.get('method', 'GET'),
-                    request_timeout=self.request_timeout,
-                    connect_timeout=self.connect_timeout,
-                    validate_cert=self.options.get('validate_cert', True))
-                self.check([(self.get_data(response), self.query)])
-                self.notify('normal', 'Metrics are loaded', target='loading', ntype='common')
+            retries_remaining = self.url_retries
+            while True:
+                final = retries_remaining <= 0
+                retries_remaining -= 1
+                try:
+                    response = yield self.client.fetch(
+                        self.query, method=self.options.get('method', 'GET'),
+                        request_timeout=self.request_timeout,
+                        connect_timeout=self.connect_timeout,
+                        validate_cert=self.options.get('validate_cert', True))
+                    if self.check([(self.get_data(response), self.query)], final):
+                        self.notify('normal', 'Metrics are loaded', target='loading', ntype='common')
+                        break
+                    elif final:
+                        break
 
-            except Exception as e:
-                self.notify('critical', str(e), target='loading', ntype='common')
+                except Exception as e:
+                    if final:
+                        self.notify('critical', str(e), target='loading', ntype='common')
+                        break
 
             self.waiting = False
