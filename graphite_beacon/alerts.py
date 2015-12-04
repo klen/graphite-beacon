@@ -41,29 +41,14 @@ class sliceable_deque(deque):
             return type(self)(islice(self, index.start, index.stop, index.step))
 
 
-def synchronized(lock):
-    """ Synchronization decorator. """
-
-    def wrap(f):
-        def newFunction(*args, **kw):
-            lock.acquire()
-            try:
-                return f(*args, **kw)
-            finally:
-                lock.release()
-        return newFunction
-    return wrap
-
-
 def is_cron(expr):
     """Detect if an expression is a valid cron expression."""
-    return not(expr is None or len(expr.split()) < 5)
+    return expr is not None and len(expr.split()) >= 5
 
 
 class CronCallback(object):
 
     """Callback that runs on a cron schedule."""
-    lock = Lock()
 
     def __init__(self, callback, cron):
         """Initialize a CronCallback object with the specified cron schedule and callback."""
@@ -72,43 +57,44 @@ class CronCallback(object):
         self.is_running = False
         self.handle = None
 
-    @synchronized(lock)
     def start(self):
         """Start running."""
         if not self.is_running:
             self.is_running = True
             self.schedule_next_run()
 
-    @synchronized(lock)
     def stop(self):
         """Stop running."""
         if self.is_running:
             handle = self.handle
             self.is_running = False
             if handle:
-                ioloop.remove_timeout(handle)
+                ioloop.IOLoop.instance().remove_timeout(handle)
                 self.handle = None
 
-    @synchronized(lock)
     def is_running(self):
         """Is running."""
         return self.is_running
 
-    @synchronized(lock)
     def scheduled_run(self):
         """Invoke the callback and schedule the next run."""
         if self.is_running:
-            self.callback()
-            self.schedule_next_run()
+            LOGGER.debug("running cron schedule")
+            try:
+                self.callback()
+            finally:
+                self.schedule_next_run()
 
-    @synchronized(lock)
     def schedule_next_run(self):
         """Schedule the next run of this callback."""
         if self.is_running:
             now = datetime.now()
-            while not next or next <= now:
+            next = self.cron.get_next(datetime)
+            while next <= now:
                 next = self.cron.get_next(datetime)
-            self.handle = ioloop.call_later((next-now).total_seconds(), self.scheduled_run)
+            LOGGER.debug("now: %s", now)
+            LOGGER.debug("next: %s", next)
+            self.handle = ioloop.IOLoop.instance().call_later((next-now).total_seconds(), self.scheduled_run)
 
 
 class AlertFabric(type):
