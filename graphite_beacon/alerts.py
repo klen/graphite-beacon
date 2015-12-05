@@ -125,7 +125,10 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
             'request_timeout', self.reactor.options['request_timeout'])
         self.connect_timeout = options.get(
             'connect_timeout', self.reactor.options['connect_timeout'])
-        self.url_retries = options.get('url_retries', self.reactor.options['url_retries'])
+        self.url_retries = options.get(
+            'url_retries', self.reactor.options['url_retries'])
+        self.url_retry_delay = parse_interval(options.get(
+            'url_retry_delay', self.reactor.options['url_retry_delay'])) / 1000
 
         self.history_size = options.get('history_size', self.reactor.options['history_size'])
         self.history_size = parse_interval(self.history_size)
@@ -336,10 +339,14 @@ class URLAlert(BaseAlert):
                         break
                     elif final:
                         break
+                    elif self.url_retry_delay > 0:
+                        yield gen.sleep(self.url_retry_delay)
 
                 except Exception as e:
                     if final:
                         self.notify('critical', str(e), target='loading', ntype='common')
                         break
+                    elif self.url_retry_delay > 0:
+                        yield gen.sleep(self.url_retry_delay)
 
             self.waiting = False
