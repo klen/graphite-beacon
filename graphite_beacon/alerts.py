@@ -94,7 +94,9 @@ class CronCallback(object):
                 next = self.cron.get_next(datetime)
             LOGGER.debug("now: %s", now)
             LOGGER.debug("next: %s", next)
-            self.handle = ioloop.IOLoop.instance().call_later((next-now).total_seconds(), self.scheduled_run)
+            td = next - now
+            total_seconds = (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / 10**6
+            self.handle = ioloop.IOLoop.instance().call_later(total_seconds, self.scheduled_run)
 
 
 class AlertFabric(type):
