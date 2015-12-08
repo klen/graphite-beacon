@@ -500,6 +500,7 @@ Contributors
 * Thomas Clavier (https://github.com/tclavier)
 * Yuriy Ilyin (https://github.com/YuriyIlyin)
 * dugeem (https://github.com/dugeem)
+* Joakim (https://github.com/VibyJocke)
 
 License
 --------

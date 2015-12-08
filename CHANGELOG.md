@@ -1,3 +1,7 @@
+## unreleased
+
+- Bug fix: don't crash due to lack of SIGHUP on Windows (#94)
+
 ## 0.25.3
 
 - Added 'minimum' and 'maximum' methods
