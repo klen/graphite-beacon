@@ -17,7 +17,8 @@ def run():
 
     signal.signal(signal.SIGTERM, r.stop)
     signal.signal(signal.SIGINT, r.stop)
-    signal.signal(signal.SIGHUP, r.reinit)
+    if hasattr(signal, 'SIGHUP'):
+        signal.signal(signal.SIGHUP, r.reinit)
 
     r.start()
 
