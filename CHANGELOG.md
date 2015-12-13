@@ -1,6 +1,7 @@
 ## unreleased
 
 - Bug fix: don't crash due to lack of SIGHUP on Windows (#94)
+- Bug fix: access dict correctly in hipchat handler (#96)
 
 ## 0.25.3
 
