@@ -35,7 +35,7 @@ Example:
     {   "name": "CPU",
         "format": "percent",
         "query": "aliasByNode(sumSeriesWithWildcards(collectd.*.cpu-*.cpu-user, 2), 1)",
-        "rules": ["critical: >= 80%", "warning: >= 70%"] },
+        "rules": ["critical: >= 80%", "warning: >= 70%"] }
 ]}
 ```
 
