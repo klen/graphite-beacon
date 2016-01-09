@@ -28,7 +28,7 @@ class SlackHandler(AbstractHandler):
         assert self.webhook, 'Slack webhook is not defined.'
 
         self.channel = self.options.get('channel')
-        if self.channel and not self.channel.startswith('#'):
+        if self.channel and not self.channel.startswith(('#', '@')):
             self.channel = '#' + self.channel
         self.username = self.options.get('username')
         self.client = hc.AsyncHTTPClient()
