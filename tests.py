@@ -19,7 +19,7 @@ def test_reactor():
     assert rr
     assert rr.reinit()
 
-    rr = Reactor(include=['example-config.json'], alerts=[
+    rr = Reactor(include=['examples/example-config.json'], alerts=[
         {'name': 'test', 'query': '*', 'rules': ["normal: == 0"]}])
     assert rr.options['interval'] == '20minute'
     assert len(rr.alerts) == 3
