@@ -7,11 +7,11 @@ Simple alerting system for [Graphite](http://graphite.wikidot.com/) metrics.
 
 Features:
 
-- Simplest installation (one python package dependency);
-- No software dependencies (Databases, AMQP and etc);
-- Light and full asyncronous;
-- SMTP, Hipchat, Slack, Pagerduty, HTTP handlers (Please make a request for additional handlers);
-- Easy configurable and support "historical values"
+- Simplest installation (one python package dependency)
+- No software dependencies (Databases, AMQP and etc)
+- Light and full asyncronous
+- SMTP, HipChat, Slack, PagerDuty, HTTP handlers (Please make a request for additional handlers)
+- Easy configurable and supports historical values
 
 [![Build status](http://img.shields.io/travis/klen/graphite-beacon.svg?style=flat-square)](http://travis-ci.org/klen/graphite-beacon)
 [![Coverage](http://img.shields.io/coveralls/klen/graphite-beacon.svg?style=flat-square)](https://coveralls.io/r/klen/graphite-beacon)
@@ -35,7 +35,7 @@ Example:
     {   "name": "CPU",
         "format": "percent",
         "query": "aliasByNode(sumSeriesWithWildcards(collectd.*.cpu-*.cpu-user, 2), 1)",
-        "rules": ["critical: >= 80%", "warning: >= 70%"] },
+        "rules": ["critical: >= 80%", "warning: >= 70%"] }
 ]}
 ```
 
@@ -44,6 +44,7 @@ Requirements
 
 - python (2.6, 2.7, 3.3, 3.4)
 - tornado
+- funcparserlib
 
 
 Installation
@@ -51,7 +52,7 @@ Installation
 
 ### Python package
 
-**Graphite-beacon** could be installed using pip:
+**graphite-beacon** can be installed using pip:
 
     pip install graphite-beacon
 
@@ -111,16 +112,13 @@ Value units:
 
 > time: '2s', '3m', '4h', '5d'
 
-**Graphite-beacon** default options are:
+The default options are:
 
-> Comment lines are not allowed in JSON, but Graphite-beacon strips them
+> Note: comments are not allowed in JSON, but graphite-beacon strips them
 
 ```js
 
     {
-        // Path to a configuration
-        "config": "config.json",
-
         // Graphite server URL
         "graphite_url": "http://localhost",
 
@@ -189,28 +187,27 @@ Value units:
         "ignore_nan": false,
 
         // Default alerts (see configuration below)
-        "alerts": []
+        "alerts": [],
+
+        // Path to other configuration files to include
+        "include": []
     }
 ```
 
-You can setup options with a configuration file. See
-`example-config.json` or `example-config.yaml`.
+You can setup options with a configuration file. See examples for
+[JSON](examples/example-config.json) and
+[YAML](examples/example-config.yaml).
 
-#### Include
-
-You can include any configuration files:
-```js
-...
-"include": [ "path/to/config1.json", "path/to/config2.json"]
-```
+A `config.json` file in the same directory that you run `graphite-beacon`
+from will be used automatically.
 
 #### Setup alerts
 
-At the moment **Graphite-beacon** supports two type of alerts:
+Currently two types of alerts are supported:
 - Graphite alert (default) - check graphite metrics
-- URL alert (default) - load http and check status
+- URL alert - load http and check status
 
-> Comment lines are not allowed in JSON, but Graphite-beacon strips them
+> Note: comments are not allowed in JSON, but graphite-beacon strips them
 
 ```js
 
@@ -245,6 +242,7 @@ At the moment **Graphite-beacon** supports two type of alerts:
       // Level one of [critical, warning, normal]
       // Operator one of [>, <, >=, <=, ==, !=]
       // Value (absolute value: 3000000 or short form like 3MB/12minute)
+      // Multiple conditions can be separated by AND or OR conditions
       "rules": [ "critical: < 200MB", "warning: < 300MB" ]
     }
   ]
@@ -252,99 +250,78 @@ At the moment **Graphite-beacon** supports two type of alerts:
 
 ##### Historical values
 
-Graphite-beacon supports "historical" values for a rule.
-By example, you want to get warning when CPU usage is more than 150% from normal usage:
+graphite-beacon supports "historical" values for a rule.
+For example you may want to get warning when CPU usage is greater than 150% of normal usage:
 
     "warning: > historical * 1.5"
 
-Or memory is twice less than usual:
+Or memory is less than half the usual value:
 
     "warning: < historical / 2"
 
 
-Graphite-beacon keeps history of values for each target in metric. Historical value
-is average of values from history. "Historical" rule becames work when it has enough
-values (Read about history size bellow).
+Historical values for each query are kept. A historical value
+represents the average of all values in history. Rules using a historical value will
+only work after enough values have been collected (see `history_size`).
 
-History values are keeping 1 day by default. You can change it by using Reactor option
-'history_size'.
+History values are kept for 1 day by default. You can change this with the `history_size`
+option.
 
-By example, send warning when today' new user is less than 80% of average for last 10 days:
+See the below example for how to send a warning when today's new user count is
+less than 80% of the last 10 day average:
 
 ```js
-...
 alerts: [
-...
-{
-  "name": "Registrations",
-  // Run once per day
-  "interval": "1day",
-  "query": "Your graphite query here",
-  // Get average for last 10 days
-  "history_size": 10day,
-  "rules": [
-    // Warning if today's new user less than 80% of average for 10 days
-    "warning: < historical * 0.8",
-   // Critical if today's new user less than 50% of average for 10 days
-    "critical: < historical * 0.5"
-  ]
-}
-...
+  {
+    "name": "Registrations",
+    // Run once per day
+    "interval": "1day",
+    "query": "Your graphite query here",
+    // Get average for last 10 days
+    "history_size": "10day",
+    "rules": [
+      // Warning if today's new user less than 80% of average for 10 days
+      "warning: < historical * 0.8",
+     // Critical if today's new user less than 50% of average for 10 days
+      "critical: < historical * 0.5"
+    ]
+  }
 ],
-...
 ```
 
-### Setup SMTP
+### Handlers
 
-Enable "smtp" handler (enabled by default) and set the options in your beacon
-configuration.
+Handlers allow for notifying an external service or process of an alert firing.
+
+#### Email Handler
+
+Sends an email (enabled by default).
 
 ```js
 {
-    ...
     // SMTP default options
     "smtp": {
-
-        // Set from email
         "from": "beacon@graphite",
-
-        // Set "to" email
-        "to": [],
-
-        // Set SMTP host
-        "host": "localhost",
-
-        // Set SMTP port
-        "port": 25,
-
-        // Set SMTP user
-        "username": null,
-
-        // Set SMTP password
-        "password": null,
-
-        // Use TLS
-        "use_tls": false,
-
-        // Send HTML emails
-        "html": true,
+        "to": [],                   // List of email addresses to send to
+        "host": "localhost",        // SMTP host
+        "port": 25,                 // SMTP port
+        "username": null,           // SMTP user (optional)
+        "password": null,           // SMTP password (optional)
+        "use_tls": false,           // Use TLS?
+        "html": true,               // Send HTML emails?
 
         // Graphite link for emails (By default is equal to main graphite_url)
         "graphite_url": null
-
     }
-
-    ...
 }
 ```
 
-### Setup HipChat
+#### HipChat Handler
 
-Enable "hipchat" handler and set the options in your beacon configuration.
+Sends a message to a HipChat room.
 
 ```js
 {
-    ...
     "hipchat": {
         // (optional) Custom HipChat URL
         "url": 'https://api.custom.hipchat.my',
@@ -352,102 +329,87 @@ Enable "hipchat" handler and set the options in your beacon configuration.
         "room": "myroom",
         "key": "mykey"
     }
-    ...
 }
 ```
 
-### Setup HttpHandler
+#### Webhook Handler (HTTP)
 
-Enable "http" handler and set the options in your beacon configuration.
+Triggers a webhook.
 
 ```js
 {
-    ...
     "http": {
         "url": "http://myhook.com",
-
-        // (optional) Additional query(data) params
-        "params": {},
-
-        // (optional) HTTP method
-        "method": "GET"
-
+        "params": {},                 // (optional) Additional query(data) params
+        "method": "GET"               // (optional) HTTP method
     }
-    ...
 }
 ```
 
-### Setup SlackHandler
+#### Slack Handler
 
-Enable "slack" handler and set the options in your beacon configuration.
+Sends a message to a user or channel on Slack.
 
 ```js
 {
-    ...
     "slack": {
-        "webhook": "http://myhook.com",
-        // optional
-        "channel": "#general",
-        // optional
+        "webhook": "https://hooks.slack.com/services/...",
+        "channel": "#general",          // #channel or @user (optional)
         "username": "graphite-beacon",
     }
-    ...
 }
 ```
 
-### Setup CliHandler
+#### Command Line Handler
 
-Enable handler for running command line commands and set the options in your beacon configuration.
+Runs a command.
 
 ```js
 {
-    ...
     "cli": {
-        // Several variables that will be substituted by values are allowed in configuration
-        // ${level} -- alert level
-        // ${name} -- alert name
-        // ${value} -- current metrics value
-        // ${limit_value} -- metrics limit value
-        // required
+        // Command to run (required)
+        // Several variables that will be substituted by values are allowed:
+        //  ${level} -- alert level
+        //  ${name} -- alert name
+        //  ${value} -- current metrics value
+        //  ${limit_value} -- metrics limit value
         "command": "./myscript ${level} ${name} ${value} ...",
-        // optional -- if present only alerts with specified names will trigger this handler. If not present, all alerts will trigger handler
+
+        // Whitelist of alerts that will trigger this handler (optional)
+        // All alerts will trigger this handler if absent.
         "alerts_whitelist": ["..."]
     }
-    ...
 }
 ```
 
-### Setup PagerdutyHandler
+#### PagerDuty Handler
 
-Enable "pagerduty" handler and set the options in your beacon configuration.
+Triggers a PagerDuty incident.
 
 ```js
 {
-    ...
     "pagerduty": {
         "subdomain": "yoursubdomain",
         "apitoken": "apitoken",
         "service_key": "servicekey",
     }
-    ...
 }
 ```
 
-### Setup TelegramHandler
+#### Telegram Handler
 
-Enable "telegram" handler and set the options in your beacon configuration.
+Sends a Telegram message.
+
 ```js
 {
-    ...
     "telegram": {
         "token": "telegram bot token",
         "bot_ident": "token used to activate bot in a group"
-    },
-    ...
+    }
 }
 ```
 
-### Command line
+### Command Line Usage
 
 ```
   $ graphite-beacon --help
@@ -507,6 +469,7 @@ Contributors
 * Thomas Clavier (https://github.com/tclavier)
 * Yuriy Ilyin (https://github.com/YuriyIlyin)
 * dugeem (https://github.com/dugeem)
+* Joakim (https://github.com/VibyJocke)
 
 License
 --------

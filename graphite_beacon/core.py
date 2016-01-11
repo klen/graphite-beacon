@@ -49,7 +49,8 @@ class Reactor(object):
         'warning_handlers': ['log', 'smtp'],
         'default_nan_value': 0,
         'ignore_nan': False,
-        'loading_error': 'critical'
+        'loading_error': 'critical',
+        'alerts': []
     }
 
     def __init__(self, **options):
@@ -85,7 +86,7 @@ class Reactor(object):
             self.alerts.remove(alert)
 
         self.alerts = set(
-            BaseAlert.get(self, **opts).start() for opts in self.options.get('alerts', []))
+            BaseAlert.get(self, **opts).start() for opts in self.options.get('alerts'))
 
         LOGGER.debug('Loaded with options:')
         LOGGER.debug(json.dumps(self.options, indent=2))
@@ -99,7 +100,9 @@ class Reactor(object):
                 with open(config) as fconfig:
                     source = COMMENT_RE.sub("", fconfig.read())
                     config = loader(source)
+                    self.options.get('alerts').extend(config.pop("alerts", []))
                     self.options.update(config)
+
             except (IOError, ValueError):
                 LOGGER.error('Invalid config file: %s' % config)
 

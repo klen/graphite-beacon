@@ -28,7 +28,7 @@ class SMTPHandler(AbstractHandler):
     def init_handler(self):
         """ Check self options. """
         assert self.options.get('host') and self.options.get('port'), "Invalid options"
-        assert self.options.get('to'), 'Recepients list is empty. SMTP disabled.'
+        assert self.options.get('to'), 'Recipients list is empty. SMTP disabled.'
         if not isinstance(self.options['to'], (list, tuple)):
             self.options['to'] = [self.options['to']]
 

@@ -5,6 +5,5 @@ end
 
 desc "Run demo docker container"
 task :run => :build do
-  sh "docker run -v $(pwd)/example-config.json:/config.json graphite-beacon"
+  sh "docker run -v $(pwd)/examples/example-config.json:/config.json graphite-beacon"
 end
-

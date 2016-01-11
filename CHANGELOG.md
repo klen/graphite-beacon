@@ -1,12 +1,15 @@
-## unreleased
+## 0.25.4
+
+- Bug fix: don't crash due to lack of SIGHUP on Windows (#94)
+- Bug fix: access dict correctly in hipchat handler (#96)
+- Improvement: Allow slack notifications to users (#100)
+
+## 0.25.3
 
 - Added 'minimum' and 'maximum' methods
+- Allow alerts to be defined in multiple config files
 
-## 0.24.2
-
-- Added `public_graphite_url` option;
-
-## 0.24.1
+## 0.25.1
 
 - Fix issue #46;
 - Support `until` option for Graphite queries;
@@ -14,6 +17,7 @@
 - Enhance expressions (support AND/OR);
 - Added VictorOps handler;
 - Better Slack notifications;
+- Added `public_graphite_url` option;
 
 ## 0.24.0
 
