@@ -68,7 +68,11 @@ class Reactor(object):
 
         self.include_config(self.options.get('config'))
         for config in self.options.pop('include', []):
-            self.include_config(config)
+            if os.path.isdir(config):
+                for chunk in os.listdir(config):
+                    self.include_config(os.path.abspath(os.path.join(config, chunk)))
+            else:
+                self.include_config(config)
 
         if not self.options['public_graphite_url']:
             self.options['public_graphite_url'] = self.options['graphite_url']
@@ -100,7 +104,10 @@ class Reactor(object):
                 with open(config) as fconfig:
                     source = COMMENT_RE.sub("", fconfig.read())
                     config = loader(source)
-                    self.options.get('alerts').extend(config.pop("alerts", []))
+                    cur_alerts = [alert['name'] for alert in self.options.get('alerts')]
+                    candidates = config.pop("alerts", [])
+                    ext = [alert for alert in candidates if alert['name'] not in cur_alerts]
+                    self.options.get('alerts').extend(ext)
                     self.options.update(config)
 
             except (IOError, ValueError):

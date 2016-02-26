@@ -303,3 +303,17 @@ def test_html_template(reactor):
     assert message
 
     assert len(message._payload) == 2
+
+
+def test_config_dir():
+    from graphite_beacon.core import Reactor
+
+    rr = Reactor()
+    assert rr
+    assert rr.reinit()
+
+    rr = Reactor(include=['examples/'], alerts=[
+        {'name': 'test', 'query': '*', 'rules': ["normal: == 0"]}])
+    assert rr.options['interval'] == '20minute'
+    assert len(rr.alerts) == 3
+

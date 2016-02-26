@@ -242,6 +242,40 @@ Currently two types of alerts are supported:
     }]
 ```
 
+Alert configurations can be split into several separate files and put under `conf.d` directory, for example:
+
+* `config.json`
+```
+  "include": ['/opt/graphite-beacon/conf.d/']
+```
+
+* `conf.d` contents:
+  - alert1.json
+  - alert2.json
+
+* `alert1.json`:
+```
+  "alerts": [
+    {
+      "name": "Host 1, RAM alert",
+      "query": "aliasByNode(collectd.host1.memory.memory-free, 1)",
+      "interval": "10minute",
+      "format": "bytes",
+      "rules": ["warning: < 300MB", "critical: > 200MB"]
+    }
+```
+* `alert2.json`:
+```
+  "alerts": [
+    {
+      "name": "Host 2, RAM alert",
+      "query": "aliasByNode(collectd.host2.memory.memory-free, 1)",
+      "interval": "10minute",
+      "format": "bytes",
+      "rules": ["warning: < 300MB", "critical: > 200MB"]
+    }
+```
+
 ### Historical values
 
 graphite-beacon supports "historical" values as a rule.
