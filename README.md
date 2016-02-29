@@ -10,7 +10,7 @@ Features:
 - Simplest installation - one Python package dependency
 - No 3rd party software dependencies, like databases, AMQP and others
 - Light and fully asynchronous
-- SMTP, HipChat, Slack, PagerDuty, HTTP handlers
+- SMTP, HipChat, Slack, PagerDuty, HTTP, CLI, OpsGenie, VictorOps handlers
 	- Please make a request for additional handlers
 - Easy configurable
 - Historical values support
@@ -214,7 +214,7 @@ Currently two types of alerts are supported:
       // (required) Alert query
       "query": "*.memory.memory-free",
 
-      // (optional) Alert type (graphite, url)
+      // (required) Alert type (graphite, url)
       "source": "graphite",
 
       // (optional) Default values format (none, bytes, s, ms, short)
@@ -258,6 +258,7 @@ Alert configurations can be split into several separate files and put under `con
   "alerts": [
     {
       "name": "Host 1, RAM alert",
+      "source": "graphite",
       "query": "aliasByNode(collectd.host1.memory.memory-free, 1)",
       "interval": "10minute",
       "format": "bytes",
@@ -269,6 +270,7 @@ Alert configurations can be split into several separate files and put under `con
   "alerts": [
     {
       "name": "Host 2, RAM alert",
+      "source": "graphite",
       "query": "aliasByNode(collectd.host2.memory.memory-free, 1)",
       "interval": "10minute",
       "format": "bytes",
@@ -436,6 +438,12 @@ Sends a Telegram message via bot.
 }
 ```
 
+### [VictorOps](https://victorops.com/) handler
+... to be documented
+
+### [OpsGenie](https://www.opsgenie.com/) handler
+... to be documented
+
 ### Command line usage
 
 ```
@@ -468,7 +476,6 @@ Sends a Telegram message via bot.
 ```
 
 ## Issue tracker
-
 
 If you have any suggestions, bug reports or annoyances please report them to
 the issue tracker at https://github.com/klen/graphite-beacon/issues

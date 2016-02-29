@@ -14,9 +14,7 @@ try:
 except ImportError:
     yaml = None
 
-
 LOGGER = log.gen_log
-
 COMMENT_RE = re('//\s+.*$', M)
 
 
@@ -70,6 +68,7 @@ class Reactor(object):
         for config in self.options.pop('include', []):
             if os.path.isdir(config):
                 for chunk in os.listdir(config):
+                    LOGGER.info('Processing config chunk:', chunk)
                     self.include_config(os.path.abspath(os.path.join(config, chunk)))
             else:
                 self.include_config(config)
@@ -90,7 +89,8 @@ class Reactor(object):
             self.alerts.remove(alert)
 
         self.alerts = set(
-            BaseAlert.get(self, **opts).start() for opts in self.options.get('alerts'))
+            BaseAlert.get(self, **opts).start() for opts in self.options.get('alerts', [])
+        )
 
         LOGGER.debug('Loaded with options:')
         LOGGER.debug(json.dumps(self.options, indent=2))
@@ -98,6 +98,9 @@ class Reactor(object):
 
     def include_config(self, config):
         LOGGER.info('Load configuration: %s' % config)
+        # Mandatory alarm record fields
+        mandatory = ['name', 'query', 'rules', 'format', 'source']
+
         if config:
             if yaml and (config.endswith('.yml') or config.endswith('.yaml')):
                 loader = yaml.load
@@ -109,15 +112,31 @@ class Reactor(object):
             try:
                 with open(config) as fconfig:
                     source = COMMENT_RE.sub("", fconfig.read())
-                    config = loader(source)
-                    cur_alerts = [alert['name'] for alert in self.options.get('alerts')]
-                    candidates = config.pop("alerts", [])
-                    ext = [alert for alert in candidates if alert['name'] not in cur_alerts]
-                    self.options.get('alerts').extend(ext)
-                    self.options.update(config)
-
-            except (IOError, ValueError):
+                    data = loader(source)
+            except (IOError, ValueError), e:
                 LOGGER.error('Invalid config file: %s' % config)
+            else:
+                alerts = self.options.get('alerts', [])
+                if not alerts:
+                    alert_names = [alert['name'] for alert in alerts]
+                else:
+                    alert_names = []
+
+                candidates = data.pop("alerts", [])
+                if not candidates:
+                    LOGGER.error("Config file {} does not contain alerts section, skipping.".format(config))
+                else:
+                    for item in candidates:
+                        field_check = True
+                        for field in mandatory:
+                            if field not in item.keys():
+                                field_check = False
+                                LOGGER.error("In config {}, alert is missing mandatory key {}, skipping"
+                                             .format(config, field))
+                        if field_check:
+                            if item['name'] not in alert_names:
+                                self.options.get('alerts').append(item)
+                                self.options.update(data)
 
     def reinit_handlers(self, level='warning'):
         for name in self.options['%s_handlers' % level]:

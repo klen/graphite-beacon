@@ -314,6 +314,25 @@ def test_config_dir():
 
     rr = Reactor(include=['examples/'], alerts=[
         {'name': 'test', 'query': '*', 'rules': ["normal: == 0"]}])
-    assert rr.options['interval'] == '20minute'
-    assert len(rr.alerts) == 3
+    assert len(rr.alerts) == 4
 
+
+def test_no_alerts():
+    from graphite_beacon.core import Reactor
+    rr = Reactor()
+    assert rr
+    assert rr.reinit()
+
+    rr = Reactor(include=['test_data/'], alerts=[])
+    assert len(rr.alerts) == 1
+
+
+def test_config_dir_invalids():
+    from graphite_beacon.core import Reactor
+
+    rr = Reactor()
+    assert rr
+    assert rr.reinit()
+    rr = Reactor(include=['test_data/'], alerts=[
+        {'name': 'test', 'query': '*', 'rules': ["normal: == 0"]}])
+    assert len(rr.alerts) == 2
