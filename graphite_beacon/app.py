@@ -1,12 +1,9 @@
 import signal
-
 from tornado.options import define, options
-
 from .core import Reactor
 
-
-define('config', default=Reactor.defaults['config'], help='Path to an configuration file (YAML)')
-define('pidfile', default=Reactor.defaults['pidfile'], help='Set pid file')
+define('config', default=Reactor.defaults['config'], help='Path to configuration file')
+define('pidfile', default=Reactor.defaults['pidfile'], help='Set PID file')
 define('graphite_url', default=Reactor.defaults['graphite_url'], help='Graphite URL')
 
 

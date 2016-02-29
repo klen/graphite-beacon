@@ -18,6 +18,7 @@
     // A graphite alert
     {
       "name": "Memory",
+      "source": "graphite",
       "query": "aliasByNode(collectd.*.memory.memory-free, 1)",
       "interval": "10minute",
       "format": "bytes",
@@ -29,6 +30,7 @@
       "source": "url",
       "query": "http://google.com",
       "interval": "20second",
+      "format": "",
       "rules": ["critical: != 200"]
     }
   ]

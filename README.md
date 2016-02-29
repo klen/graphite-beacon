@@ -7,11 +7,13 @@ Simple alerting system for [Graphite](http://graphite.wikidot.com/) metrics.
 
 Features:
 
-- Simplest installation (one python package dependency)
-- No software dependencies (Databases, AMQP and etc)
-- Light and full asyncronous
-- SMTP, HipChat, Slack, PagerDuty, HTTP handlers (Please make a request for additional handlers)
-- Easy configurable and supports historical values
+- Simplest installation - one Python package dependency
+- No 3rd party software dependencies, like databases, AMQP and others
+- Light and fully asynchronous
+- SMTP, HipChat, Slack, PagerDuty, HTTP, CLI, OpsGenie, VictorOps handlers
+	- Please make a request for additional handlers
+- Easy configurable
+- Historical values support
 
 [![Build status](http://img.shields.io/travis/klen/graphite-beacon.svg?style=flat-square)](http://travis-ci.org/klen/graphite-beacon)
 [![Coverage](http://img.shields.io/coveralls/klen/graphite-beacon.svg?style=flat-square)](https://coveralls.io/r/klen/graphite-beacon)
@@ -70,17 +72,17 @@ Install the package using apt-get:
 
 ### Ansible role
 
-There is an ansible role to install the package: https://github.com/Stouts/Stouts.graphite-beacon
+There is an Ansible role to install the package: 
+
+	https://github.com/Stouts/Stouts.graphite-beacon
 
 ## Docker
 
-Build a config.json file and run :
+Build a `config.json` file and run :
 
     docker run -v /path/to/config.json:/srv/alerting/etc/config.json deliverous/graphite-beacon
 
-
-Usage
------
+## Usage
 
 Just run `graphite-beacon`:
 
@@ -90,31 +92,24 @@ Just run `graphite-beacon`:
     [I 141025 11:16:23 core:166] Loaded with options:
     ...
 
-### Configuration
-
-___
+## Configuration
 
 Time units:
 
-> '2second', '3.5minute', '4hour', '5.2day', '6week', '7month', '8year'
-
-> short formats are: '2s', '3m', '4.1h' ...
+ - Long formats are: '2second', '3.5minute', '4hour', '5.2day', '6week', '7month', '8year'
+ - Short formats are: '2s', '3m', '4.1h', '5.2d', '6w', '7m', '8y'
 
 Value units:
 
-> short: '2K', '3Mil', '4Bil', '5Tri'
-
-> bytes: '2KB', '3MB', '4GB'
-
-> bits: '2Kb', '3Mb', '4Gb'
-
-> bps: '2Kbps', '3Mbps', '4Gbps'
-
-> time: '2s', '3m', '4h', '5d'
+ - short: '2K', '3Mil', '4Bil', '5Tri'
+ - bytes: '2KB', '3MB', '4GB'
+ - bits: '2Kb', '3Mb', '4Gb'
+ - bps: '2Kbps', '3Mbps', '4Gbps'
+ - time: '2s', '3m', '4h', '5d'
 
 The default options are:
 
-> Note: comments are not allowed in JSON, but graphite-beacon strips them
+> Note: Comments are not allowed in JSON, but graphite-beacon strips them
 
 ```js
 
@@ -201,17 +196,17 @@ You can setup options with a configuration file. See examples for
 A `config.json` file in the same directory that you run `graphite-beacon`
 from will be used automatically.
 
-#### Setup alerts
+### Alerts
 
 Currently two types of alerts are supported:
-- Graphite alert (default) - check graphite metrics
-- URL alert - load http and check status
+- Graphite alert (default) - check Graphite metrics
+- URL alert - load HTTP and check status
 
 > Note: comments are not allowed in JSON, but graphite-beacon strips them
 
-```js
+```
 
-  "alerts": [
+	"alerts": [
     {
       // (required) Alert name
       "name": "Memory",
@@ -219,7 +214,7 @@ Currently two types of alerts are supported:
       // (required) Alert query
       "query": "*.memory.memory-free",
 
-      // (optional) Alert type (graphite, url)
+      // (required) Alert type (graphite, url)
       "source": "graphite",
 
       // (optional) Default values format (none, bytes, s, ms, short)
@@ -244,24 +239,58 @@ Currently two types of alerts are supported:
       // Value (absolute value: 3000000 or short form like 3MB/12minute)
       // Multiple conditions can be separated by AND or OR conditions
       "rules": [ "critical: < 200MB", "warning: < 300MB" ]
-    }
-  ]
+    }]
 ```
 
-##### Historical values
+Alert configurations can be split into several separate files and put under `conf.d` directory, for example:
 
-graphite-beacon supports "historical" values for a rule.
+* `config.json`
+```
+  "include": ['/opt/graphite-beacon/conf.d/']
+```
+
+* `conf.d` contents:
+  - alert1.json
+  - alert2.json
+
+* `alert1.json`:
+```
+  "alerts": [
+    {
+      "name": "Host 1, RAM alert",
+      "source": "graphite",
+      "query": "aliasByNode(collectd.host1.memory.memory-free, 1)",
+      "interval": "10minute",
+      "format": "bytes",
+      "rules": ["warning: < 300MB", "critical: > 200MB"]
+    }
+```
+* `alert2.json`:
+```
+  "alerts": [
+    {
+      "name": "Host 2, RAM alert",
+      "source": "graphite",
+      "query": "aliasByNode(collectd.host2.memory.memory-free, 1)",
+      "interval": "10minute",
+      "format": "bytes",
+      "rules": ["warning: < 300MB", "critical: > 200MB"]
+    }
+```
+
+### Historical values
+
+graphite-beacon supports "historical" values as a rule.
 For example you may want to get warning when CPU usage is greater than 150% of normal usage:
 
     "warning: > historical * 1.5"
 
-Or memory is less than half the usual value:
+Or memory is less than a half the usual value:
 
     "warning: < historical / 2"
 
 
-Historical values for each query are kept. A historical value
-represents the average of all values in history. Rules using a historical value will
+Historical values are kept for each query and it represents the average of all values in history. Rules using a historical value will
 only work after enough values have been collected (see `history_size`).
 
 History values are kept for 1 day by default. You can change this with the `history_size`
@@ -293,7 +322,7 @@ alerts: [
 
 Handlers allow for notifying an external service or process of an alert firing.
 
-#### Email Handler
+#### E-mail handler
 
 Sends an email (enabled by default).
 
@@ -316,7 +345,7 @@ Sends an email (enabled by default).
 }
 ```
 
-#### HipChat Handler
+#### [HipChat](https://www.hipchat.com/) handler
 
 Sends a message to a HipChat room.
 
@@ -332,7 +361,7 @@ Sends a message to a HipChat room.
 }
 ```
 
-#### Webhook Handler (HTTP)
+#### Webhook (HTTP) handler
 
 Triggers a webhook.
 
@@ -346,7 +375,7 @@ Triggers a webhook.
 }
 ```
 
-#### Slack Handler
+#### [Slack](https://slack.com/) handler
 
 Sends a message to a user or channel on Slack.
 
@@ -360,7 +389,7 @@ Sends a message to a user or channel on Slack.
 }
 ```
 
-#### Command Line Handler
+#### Command line handler
 
 Runs a command.
 
@@ -382,7 +411,7 @@ Runs a command.
 }
 ```
 
-#### PagerDuty Handler
+#### [PagerDuty](https://www.pagerduty.com/) handler
 
 Triggers a PagerDuty incident.
 
@@ -396,9 +425,9 @@ Triggers a PagerDuty incident.
 }
 ```
 
-#### Telegram Handler
+#### [Telegram](https://telegram.org/) handler
 
-Sends a Telegram message.
+Sends a Telegram message via bot.
 
 ```js
 {
@@ -409,7 +438,13 @@ Sends a Telegram message.
 }
 ```
 
-### Command Line Usage
+### [VictorOps](https://victorops.com/) handler
+... to be documented
+
+### [OpsGenie](https://www.opsgenie.com/) handler
+... to be documented
+
+### Command line usage
 
 ```
   $ graphite-beacon --help
@@ -440,14 +475,12 @@ Sends a Telegram message.
                                      (default info)
 ```
 
-Bug tracker
------------
+## Issue tracker
 
 If you have any suggestions, bug reports or annoyances please report them to
 the issue tracker at https://github.com/klen/graphite-beacon/issues
 
-Contributors
--------------
+## Contributors
 
 * Andrej Kuročenko (https://github.com/kurochenko)
 * Cody Soyland (https://github.com/codysoyland)
@@ -471,8 +504,7 @@ Contributors
 * dugeem (https://github.com/dugeem)
 * Joakim (https://github.com/VibyJocke)
 
-License
---------
+# License
 
 Licensed under a [MIT license](http://www.linfo.org/mitlicense.html)
 

@@ -1,0 +1,52 @@
+{
+  "alerts": [
+    {
+      "no name": "no alert",
+      "source": "graphite",
+      "query": "aliasByNode(collectd.*.memory.memory-free, 1)",
+      "interval": "10minute",
+      "format": "bytes",
+      "rules": ["warning: < 300MB", "critical: > 200MB"]
+    },
+    {
+      "name": "Invalid alert - no source",
+      "no source": "graphite",
+      "query": "aliasByNode(collectd.*.memory.memory-free, 1)",
+      "interval": "10minute",
+      "format": "bytes",
+      "rules": ["warning: < 300MB", "critical: > 200MB"]
+    },
+    {
+      "name": "Invalid alert - no query",
+      "source": "graphite",
+      "no query": "useless alert",
+      "interval": "10minute",
+      "format": "bytes",
+      "rules": ["warning: < 300MB", "critical: > 200MB"]
+    },
+    {
+      "name": "Invalid alert - no format",
+      "source": "graphite",
+      "query": "aliasByNode(collectd.*.memory.memory-free, 1)",
+      "interval": "10minute",
+      "no format": "invalid rules",
+      "rules": ["warning: < 300MB", "critical: > 200MB"]
+    },
+    {
+      "name": "Invalid alert - no rules",
+      "source": "graphite",
+      "query": "aliasByNode(collectd.*.memory.memory-free, 1)",
+      "interval": "10minute",
+      "format": "bytes",
+      "no rules": "no purpose"
+    },
+    {
+      "name": "Valid alert",
+      "source": "graphite",
+      "query": "aliasByNode(collectd.*.memory.memory-free, 1)",
+      "interval": "10minute",
+      "format": "bytes",
+      "rules": ["warning: < 300MB", "critical: > 200MB"]
+    }
+  ]
+}
