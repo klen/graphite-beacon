@@ -1,0 +1,13 @@
+{
+  "alerts": [
+    {
+      "name": "Site",
+      "source": "url",
+      "query": "http://google.com",
+      "interval": "20second",
+      // format field is mandatory, but will be ignored
+      "format": "",
+      "rules": ["critical: != 200"]
+    }
+  ]
+}

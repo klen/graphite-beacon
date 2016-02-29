@@ -1,0 +1,12 @@
+{
+  "alerts": [
+    {
+      "name": "Red alert",
+      "source": "graphite",
+      "query": "aliasByNode(collectd.*.memory.memory-free, 1)",
+      "interval": "10minute",
+      "format": "bytes",
+      "rules": ["warning: < 300MB", "critical: > 200MB"]
+    }
+  ]
+}

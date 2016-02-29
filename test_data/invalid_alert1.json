@@ -1,0 +1,11 @@
+{
+  "no_alerts": [
+    {
+      "name": "Alert me not",
+      "query": "aliasByNode(collectd.*.memory.memory-free, 1)",
+      "interval": "10minute",
+      "format": "bytes",
+      "rules": ["warning: < 300MB", "critical: > 200MB"]
+    }
+  ]
+}
