@@ -99,7 +99,13 @@ class Reactor(object):
     def include_config(self, config):
         LOGGER.info('Load configuration: %s' % config)
         if config:
-            loader = yaml.load if yaml and config.endswith('.yml') else json.loads
+            if yaml and (config.endswith('.yml') or config.endswith('.yaml')):
+                loader = yaml.load
+                LOGGER.info('Loading YAML.')
+            else:
+                loader = json.loads
+                LOGGER.info('Loading JSON.')
+
             try:
                 with open(config) as fconfig:
                     source = COMMENT_RE.sub("", fconfig.read())
