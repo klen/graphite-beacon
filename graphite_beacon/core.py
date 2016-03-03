@@ -173,7 +173,7 @@ class Reactor(object):
             self.stats['handlers_notified'] += 1
 
     def send_graphite_metric(self, name, value):
-        if self.options.get('carbon_host') != '':
+        if 'carbon_host' in self.options and 'carbon_port' in self.options:
             sock = socket.socket()
             sock.connect((self.options.get('carbon_host'), self.options.get('carbon_port')))
             sock.sendall('%s %s %i\n' % (name, value, time()))
