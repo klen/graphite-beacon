@@ -46,6 +46,7 @@ class Reactor(object):
         'connect_timeout': 20.0,
         'send_initial': False,
         'until': '0second',
+        'validete_cert': True,
         'warning_handlers': ['log', 'smtp'],
         'default_nan_value': 0,
         'ignore_nan': False,
