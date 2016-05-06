@@ -7,7 +7,6 @@ from tornado import ioloop, log
 
 from .alerts import BaseAlert
 from .utils import parse_interval
-from .handlers import registry
 
 try:
     import yaml
@@ -74,12 +73,6 @@ class Reactor(object):
             self.options['public_graphite_url'] = self.options['graphite_url']
 
         LOGGER.setLevel(_get_numeric_log_level(self.options.get('logging', 'info')))
-        registry.clean()
-
-        self.handlers = {'warning': set(), 'critical': set(), 'normal': set()}
-        self.reinit_handlers('warning')
-        self.reinit_handlers('critical')
-        self.reinit_handlers('normal')
 
         for alert in list(self.alerts):
             alert.stop()
@@ -106,12 +99,6 @@ class Reactor(object):
             except (IOError, ValueError):
                 LOGGER.error('Invalid config file: %s' % config)
 
-    def reinit_handlers(self, level='warning'):
-        for name in self.options['%s_handlers' % level]:
-            try:
-                self.handlers[level].add(registry.get(self, name))
-            except Exception as e:
-                LOGGER.error('Handler "%s" did not init. Error: %s' % (name, e))
 
     def repeat(self):
         LOGGER.info('Reset alerts')
@@ -141,7 +128,7 @@ class Reactor(object):
         if ntype is None:
             ntype = alert.source
 
-        for handler in self.handlers.get(level, []):
+        for handler in alert.handlers.get(level, []):
             handler.notify(level, alert, value, target=target, ntype=ntype, rule=rule)
 
 _LOG_LEVELS = {

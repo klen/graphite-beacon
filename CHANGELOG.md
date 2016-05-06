@@ -1,3 +1,7 @@
+## 0.25.5
+
+- Improvement: Add ability to specify alert handlers per alert. (#86)
+
 ## 0.25.4
 
 - Bug fix: don't crash due to lack of SIGHUP on Windows (#94)

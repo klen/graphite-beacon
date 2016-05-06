@@ -13,6 +13,16 @@
     // "from": "myemail@gmail.com",
     // "to": ["myemail@gmail.com"]
   // },
+  // Gmail custom example
+  // "smtp_custom": {
+  // "username": "example_custom@gmail.com",
+  // "password": "password",
+  // "use_tls": true,
+  // "host": "smtp.gmail.com",
+  // "port": 587,
+  // "from": "myemail@gmail.com",
+  // "to": ["myemail@gmail.com"]
+  // },
 
   "alerts": [
     // A graphite alert
@@ -29,7 +39,9 @@
       "source": "url",
       "query": "http://google.com",
       "interval": "20second",
-      "rules": ["critical: != 200"]
+      "rules": ["critical: != 200"],
+      // example of custom email for this alert
+      "warning_handlers": ["smtp_custom"]
     }
   ]
 }
