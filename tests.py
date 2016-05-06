@@ -170,9 +170,16 @@ def test_multiexpressions(reactor):
     assert list(alert.history['metric1']) == [85, 65, 68, 75]
 
 
-def test_invalid_handler(reactor):
-    reactor.reinit(critical_handlers=['log', 'unknown'])
-    assert len(reactor.handlers['critical']) == 1
+def test_invalid_handler():
+    from graphite_beacon.core import Reactor
+    rr = Reactor()
+    assert rr
+    assert rr.reinit()
+
+    rr = Reactor(include=['examples/example-config.json'], alerts=[
+        {'name': 'test', 'query': '*', 'rules': ["normal: == 0"], 'critical_handlers': ['log', 'unknown']}])
+
+    assert len(rr.alerts[0].handlers['critical']) == 1
 
 
 def test_convert():
