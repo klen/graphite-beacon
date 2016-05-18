@@ -35,12 +35,17 @@ class SMTPHandler(AbstractHandler):
     @gen.coroutine
     def notify(self, level, *args, **kwargs):
         LOGGER.debug("Handler (%s) %s", self.name, level)
-
+        
         msg = self.get_message(level, *args, **kwargs)
         msg['Subject'] = self.get_short(level, *args, **kwargs)
-        msg['From'] = self.options['from']
-        msg['To'] = ", ".join(self.options['to'])
-
+        try:
+            msg['From'] = args[0].options["smtp"]["from"]
+        except Exception as e:    
+            msg['From'] = self.options['from']
+        try:
+            msg['To'] = ", ".join(args[0].options["smtp"]["to"]
+        except Exception as e:
+            msg['To'] = ", ".join(self.options['to'])
         smtp = SMTP()
         yield smtp_connect(smtp, self.options['host'], self.options['port'])
 
