@@ -285,7 +285,7 @@ def test_html_template(reactor):
 
     reactor.options['smtp'] = {
         'to': 'user@com.com', 'graphite_url': 'http://graphite.myhost.com'}
-    smtp = SMTPHandler(reactor)
+    smtp = SMTPHandler(reactor, 'smtp')
 
     message = smtp.get_message(
         'critical', galert, 3000000, target=target, ntype='graphite', rule=galert.rules[0])
