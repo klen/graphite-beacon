@@ -15,6 +15,7 @@
   // },
   // Gmail custom example
   // "smtp_custom": {
+  // "handler" : "smtp",  //Note either the handler name is supported handler or this attribute need to be present.
   // "username": "example_custom@gmail.com",
   // "password": "password",
   // "use_tls": true,

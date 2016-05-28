@@ -26,7 +26,12 @@ class HandlerMeta(type):
     @classmethod
     def get(mcs, reactor, name):
         if name not in mcs.loaded:
-            mcs.loaded[name] = mcs.handlers[name](reactor)
+            handlername = name
+
+            if reactor.options.get(name):
+                handlername = reactor.options.get(name).get('handler', name)
+
+            mcs.loaded[name] = mcs.handlers[handlername](reactor, name)
         return mcs.loaded[name]
 
 
@@ -35,12 +40,12 @@ class AbstractHandler(_.with_metaclass(HandlerMeta)):
     name = None
     defaults = {}
 
-    def __init__(self, reactor):
+    def __init__(self, reactor, name):
         self.reactor = reactor
         self.options = dict(self.defaults)
-        self.options.update(self.reactor.options.get(self.name, {}))
+        self.options.update(self.reactor.options.get(name, {}))
         self.init_handler()
-        LOGGER.debug('Handler "%s" has inited: %s', self.name, self.options)
+        LOGGER.debug('Handler "%s" has inited: %s', name, self.options)
 
     def get_short(self, level, alert, value, target=None, ntype=None, rule=None):
         tmpl = TEMPLATES[ntype]['short']
