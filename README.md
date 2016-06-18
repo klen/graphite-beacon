@@ -158,7 +158,7 @@ The default options are:
         // Default loglevel
         "logging": "info",
 
-        // Default method (average, last_value, sum, minimum, maximum).
+        // Default method (average, last_value, sum, minimum, maximum, median, percentile k [eg. percentile 25]).
         // Can be redefined for each alert.
         "method": "average",
 
@@ -225,7 +225,7 @@ Currently two types of alerts are supported:
       // (optional) Default values format (none, bytes, s, ms, short)
       "format": "bytes",
 
-      // (optional) Alert method (average, last_value, sum, minimum, maximum)
+      // (optional) Alert method (average, last_value, sum, minimum, maximum, median, percentile k [eg. percentile 25])
       "method": "average",
 
       // (optional) Alert interval [eg. 15second, 30minute, 2hour, 1day, 3month, 1year]

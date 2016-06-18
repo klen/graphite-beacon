@@ -18,7 +18,7 @@ from itertools import islice
 
 
 LOGGER = log.gen_log
-METHODS = "average", "last_value", "sum", "minimum", "maximum"
+METHODS = "average", "last_value", "sum", "minimum", "maximum", "median", "percentile"
 LEVELS = {
     'critical': 0,
     'warning': 10,
@@ -241,7 +241,14 @@ class GraphiteAlert(BaseAlert):
         self.default_nan_value = options.get(
             'default_nan_value', self.reactor.options['default_nan_value'])
         self.ignore_nan = options.get('ignore_nan', self.reactor.options['ignore_nan'])
-        assert self.method in METHODS, "Method is invalid"
+        method_tokens = self.method.split(maxsplit=1)
+        assert method_tokens[0] in METHODS, "Method is invalid"
+        if method_tokens[0] == 'percentile':
+            try:
+                rank = float(method_tokens[1])
+            except ValueError:
+                raise ValueError('Invalid percentile: %s' % method_tokens[1])
+            assert 0 <= rank <= 100, 'Percentile must be in the range [0,100]'
 
         self.auth_username = self.reactor.options.get('auth_username')
         self.auth_password = self.reactor.options.get('auth_password')
@@ -267,7 +274,7 @@ class GraphiteAlert(BaseAlert):
                     GraphiteRecord(line.decode('utf-8'), self.default_nan_value, self.ignore_nan)
                     for line in response.buffer)
                 data = [
-                    (None if record.empty else getattr(record, self.method), record.target)
+                    (None if record.empty else self._get_record_attr(record), record.target)
                     for record in records]
                 if len(data) == 0:
                     raise ValueError('No data')
@@ -292,6 +299,13 @@ class GraphiteAlert(BaseAlert):
         if raw_data:
             url = "{0}&rawData=true".format(url)
         return url
+
+    def _get_record_attr(self, record):
+        method_tokens = self.method.split()
+        if method_tokens[0] == 'percentile':
+            return record.percentile(float(method_tokens[1]))
+        else:
+            return getattr(record, self.method)
 
 
 class URLAlert(BaseAlert):
