@@ -303,3 +303,38 @@ def test_html_template(reactor):
     assert message
 
     assert len(message._payload) == 2
+
+
+def test_graphite_record():
+    from random import choice, randint
+    from graphite_beacon.graphite import GraphiteRecord
+
+    def record(data):
+        meta = ','.join('0' * 4)
+        data = ','.join(map(str, data))
+        return GraphiteRecord('|'.join([meta, data]))
+
+    cases = [
+        ([0], 0, 0),
+        ([0], 50, 0),
+        ([0], 100, 0),
+        ([1, 0], 0, 0),
+        ([1, 0], 49.9, 0),
+        ([1, 0], 50, 1),
+        ([1, 0], 99.9, 1),
+        ([1, 0], 100, 1),
+        ([2, 1, 0], 0, 0),
+        ([2, 1, 0], 33.3, 0),
+        ([2, 1, 0], 33.4, 1),
+        ([2, 1, 0], 66.6, 1),
+        ([2, 1, 0], 66.7, 2),
+        ([2, 1, 0], 99.9, 2),
+        ([2, 1, 0], 100, 2),
+    ]
+
+    for (data, rank, result) in cases:
+        assert record(data).percentile(rank) == result
+
+    for _ in range(100):
+        data = [choice(range(100)) for _ in range(randint(50, 150))]
+        assert record(data).median == sorted(data)[int(len(data) / 2.0)]
