@@ -5,6 +5,7 @@ from tornado import ioloop, httpclient as hc, gen, log, escape
 from . import _compat as _
 from .graphite import GraphiteRecord
 from .utils import (
+    COMPARISON,
     HISTORICAL,
     LOGICAL_OPERATORS,
     convert_to_format,
@@ -13,6 +14,7 @@ from .utils import (
     parse_rule,
 )
 import math
+import time
 from collections import deque, defaultdict
 from itertools import islice
 
@@ -80,6 +82,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         self.waiting = False
         self.state = {None: "normal", "waiting": "normal", "loading": "normal"}
         self.history = defaultdict(lambda: sliceable_deque([], self.history_size))
+        self.comparing = {}
 
         LOGGER.info("Alert '%s': has inited", self)
 
@@ -205,6 +208,18 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
                 return None
             rvalue = sum(history) / float(len(history))
 
+        if rvalue == COMPARISON:
+            current_time = int(time.time())
+            if self.comparing.has_key(target) and self.comparing[target]['time'] == current_time:
+                rvalue = self.comparing[target]['value']
+            else:
+                rvalue = self.get_graph_comparison()
+                if rvalue != -1:
+                    if not self.comparing.has_key(target):
+                        self.comparing[target] = {}
+                    self.comparing[target]['value'] = rvalue
+                    self.comparing[target]['time'] = current_time
+
         rvalue = expr['mod'](rvalue)
         return rvalue
 
@@ -226,6 +241,10 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         """Load from remote."""
         raise NotImplementedError()
 
+    def get_graph_comparison(self):
+        """Only from graphite."""
+        raise NotImplementedError()
+
 
 class GraphiteAlert(BaseAlert):
 
@@ -241,6 +260,7 @@ class GraphiteAlert(BaseAlert):
         self.default_nan_value = options.get(
             'default_nan_value', self.reactor.options['default_nan_value'])
         self.ignore_nan = options.get('ignore_nan', self.reactor.options['ignore_nan'])
+        self.compare_size = options.get('compare_size', self.reactor.options['compare_size'])
         assert self.method in METHODS, "Method is invalid"
 
         self.auth_username = self.reactor.options.get('auth_username')
@@ -274,6 +294,7 @@ class GraphiteAlert(BaseAlert):
                 self.check(data)
                 self.notify('normal', 'Metrics are loaded', target='loading', ntype='common')
             except Exception as e:
+                LOGGER.debug("ee: %s", str(e))
                 self.notify(
                     self.loading_error, 'Loading error: %s' % e, target='loading', ntype='common')
             self.waiting = False
@@ -292,6 +313,29 @@ class GraphiteAlert(BaseAlert):
         if raw_data:
             url = "{0}&rawData=true".format(url)
         return url
+
+    def get_graph_comparison(self):
+        time_shift = self.compare_size
+        if time_shift[0] != '-':
+            time_shift = '-' + time_shift
+
+        query = 'timeShift(' + self.query + ', "' + time_shift + '")'
+        url = self._graphite_url(
+            query, graphite_url=self.reactor.options.get('graphite_url'), raw_data=True)
+
+        http_client = hc.HTTPClient()
+        try:
+            response = http_client.fetch(url, auth_username=self.auth_username,
+                                         auth_password=self.auth_password,
+                                         request_timeout=self.request_timeout,
+                                         connect_timeout=self.connect_timeout)
+            record = GraphiteRecord(response.body.decode('utf-8'), self.default_nan_value, self.ignore_nan)
+            value = getattr(record, self.method)
+            LOGGER.debug("%s [%s]: %s", self.name, record.target, value)
+            return value
+        except Exception as e:
+            LOGGER.error('No data to compare: %s', str(e))
+            return -1
 
 
 class URLAlert(BaseAlert):

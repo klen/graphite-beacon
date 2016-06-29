@@ -43,6 +43,7 @@ TIME_UNIT_SYN2 = dict([(v, n) for (n, v) in TIME_UNIT_SYN.items()])
 IDENTITY = lambda x: x
 
 
+COMPARISON = 'comparison'
 HISTORICAL = 'historical'
 COMPARATORS = {'>': op.gt, '>=': op.ge, '<': op.lt, '<=': op.le, '==': op.eq, '!=': op.ne}
 OPERATORS = {'*': op.mul, '/': op.truediv, '+': op.add, '-': op.sub}
@@ -51,6 +52,7 @@ LOGICAL_OPERATORS = {'AND': op.and_, 'OR': op.or_}
 RULE_TOKENIZER = make_tokenizer(
     [
         (u'Level', (r'(critical|warning|normal)',)),
+        (u'Comparison', (COMPARISON,)),
         (u'Historical', (HISTORICAL,)),
         (u'Comparator', (r'({0})'.format('|'.join(sorted(COMPARATORS.keys(), reverse=True))),)),
         (u'LogicalOperator', (r'({0})'.format('|'.join(LOGICAL_OPERATORS.keys())),)),
@@ -113,12 +115,13 @@ def _parse_rule(seq):
     level = toktype(u'Level')
     comparator = toktype(u'Comparator') >> COMPARATORS.get
     number = toktype(u'Number') >> float
+    comparison = toktype(u'Comparison')
     historical = toktype(u'Historical')
     unit = toktype(u'Unit')
     operator = toktype(u'Operator')
     logical_operator = toktype(u'LogicalOperator') >> LOGICAL_OPERATORS.get
 
-    exp = comparator + ((number + maybe(unit)) | historical) + maybe(operator + number)
+    exp = comparator + ((number + maybe(unit)) | comparison | historical) + maybe(operator + number)
     rule = (
         level + s_sep(':') + exp + many(logical_operator + exp)
     )
@@ -130,7 +133,7 @@ def _parse_rule(seq):
 def _parse_expr(expr):
     cond, value, mod = expr
 
-    if value != HISTORICAL:
+    if value != HISTORICAL and value != COMPARISON:
         value = convert_from_format(*value)
 
     if mod:
