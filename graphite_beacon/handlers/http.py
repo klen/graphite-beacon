@@ -39,4 +39,9 @@ class HttpHandler(AbstractHandler):
 
         data.update(self.params)
         body = urllib.urlencode(data)
-        yield self.client.fetch(self.url, method=self.method, body=body)
+
+        if self.method == 'GET':
+            url = self.url + '?' + body
+            yield self.client.fetch(url, method=self.method)
+        else:
+            yield self.client.fetch(self.url, method=self.method, body=body)
