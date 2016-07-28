@@ -34,8 +34,7 @@ class SMTPHandler(AbstractHandler):
 
     @gen.coroutine
     def notify(self, level, *args, **kwargs):
-        LOGGER.debug("Handler (%s) %s", self.name, level)
-        
+        LOGGER.debug("Handler (%s) %s", self.name, level) 
         msg = self.get_message(level, *args, **kwargs)
         msg['Subject'] = self.get_short(level, *args, **kwargs)
         try:
@@ -43,7 +42,7 @@ class SMTPHandler(AbstractHandler):
         except Exception as e:    
             msg['From'] = self.options['from']
         try:
-            msg['To'] = ", ".join(args[0].options["smtp"]["to"]
+            msg['To'] = ", ".join(args[0].options["smtp"]["to"])
         except Exception as e:
             msg['To'] = ", ".join(self.options['to'])
         smtp = SMTP()
