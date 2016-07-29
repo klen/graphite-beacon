@@ -41,8 +41,8 @@ class SMTPHandler(AbstractHandler):
             #msg['From'] = args[0].options["smtp"]["from"]
             msg['From'] = ", ".join(args[0].options["smtp"]["from"])
         except Exception as e:    
-            #msg['From'] = self.options['from']
-            msg['From'] = ", ".join(args[0].options["smtp"]["from"])
+            msg['From'] = self.options['from']
+            #msg['From'] = ", ".join(args[0].options["smtp"]["from"])
         try:
             #msg['To'] = args[0].options["smtp"]["to"]
             msg['To'] = ", ".join(args[0].options["smtp"]["to"])
