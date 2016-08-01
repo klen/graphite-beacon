@@ -137,15 +137,11 @@ class Reactor(object):
         """ Provide the event to the handlers. """
 
         LOGGER.info('Notify %s:%s:%s:%s', level, alert, value, target or "")
-        LOGGER.info('HERE$')
         if ntype is None:
             ntype = alert.source
-            LOGGER.info('HERE#')
         for handler in alert.handlers.get(level, []):
             handler.notify(level, alert, value, target=target, ntype=ntype, rule=rule)
-            LOGGER.info('HERE!')
         for handler in self.handlers.get(level, []):
-            LOGGER.info('HERE@')
             if not alert.handlers.get(level,[]):
                 handler.notify(level, alert, value, target=target, ntype=ntype, rule=rule)
 

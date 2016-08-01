@@ -38,17 +38,17 @@ class SMTPHandler(AbstractHandler):
         msg = self.get_message(level, *args, **kwargs)
         msg['Subject'] = self.get_short(level, *args, **kwargs)
         try:
-            #msg['From'] = args[0].options["smtp"]["from"]
-            msg['From'] = ", ".join(args[0].options["smtp"]["from"])
+            msg['From'] = ', '.join(args[0].options["smtp"]["from"])
+            smtpFrom = args[0].options["smtp"]["from"]
         except Exception as e:    
-            msg['From'] = self.options['from']
-            #msg['From'] = ", ".join(args[0].options["smtp"]["from"])
+            msg['From'] = ', '.join(self.options['from'])
+            smtpFrom = self.options["from"]
         try:
-            #msg['To'] = args[0].options["smtp"]["to"]
-            msg['To'] = ", ".join(args[0].options["smtp"]["to"])
+            msg['To'] = ', '.join(args[0].options["smtp"]["to"])
+            smtpTo = args[0].options["smtp"]["to"]
         except Exception as e:
-            #msg['To'] = self.options['to']
-            msg['To'] = ", ".join(self.options['to'])
+            msg['To'] = ', '.join(self.options['to'])
+            smtpTo = self.options['to']
         smtp = SMTP()
         yield smtp_connect(smtp, self.options['host'], self.options['port'])
 
@@ -60,8 +60,7 @@ class SMTPHandler(AbstractHandler):
 
         try:
             LOGGER.debug("Send message to: %s", ", ".join(self.options['to']))
-            smtp.sendmail(msg['From'], msg['To'], msg.as_string())
-            #smtp.sendmail(self.options['from'], self.options['to'], msg.as_string())
+            smtp.sendmail(smtpFrom,smtpTo, msg.as_string())
         finally:
             smtp.quit()
 
