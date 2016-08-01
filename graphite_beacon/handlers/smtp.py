@@ -41,7 +41,7 @@ class SMTPHandler(AbstractHandler):
             msg['From'] = ', '.join(args[0].options["smtp"]["from"])
             smtpFrom = args[0].options["smtp"]["from"]
         except Exception as e:    
-            msg['From'] = ', '.join(self.options['from'])
+            msg['From'] = self.options['from']
             smtpFrom = self.options["from"]
         try:
             msg['To'] = ', '.join(args[0].options["smtp"]["to"])
@@ -60,7 +60,8 @@ class SMTPHandler(AbstractHandler):
 
         try:
             LOGGER.debug("Send message to: %s", ", ".join(self.options['to']))
-            smtp.sendmail(smtpFrom,smtpTo, msg.as_string())
+            LOGGER.info("Message from: %s", msg['From'])
+            smtp.sendmail(msg['From'],smtpTo, msg.as_string())
         finally:
             smtp.quit()
 
