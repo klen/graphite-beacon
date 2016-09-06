@@ -97,8 +97,8 @@ class TelegramHandler(AbstractHandler):
                     elif msp[1] == self.bot_ident and chat_id in self._chats:
                         yield self.client.fetch(
                             self.url + 'sendMessage', body=json.dumps({
-                                'chat_id': update['message']['chat']['id'],
-                                'reply_to_message_id': update['message']['message_id'],
+                                'chat_id': chat_id,
+                                'reply_to_message_id': msg['message_id'],
                                 'text': 'This chat is already activated.'}),
                             method='POST',
                             headers={'Content-Type': 'application/json'})
