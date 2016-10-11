@@ -32,17 +32,17 @@ class PagerdutyHandler(AbstractHandler):
         message = self.get_short(level, alert, value, target=target, ntype=ntype, rule=rule)
         LOGGER.debug('message1:%s', message)
 
-	# Extract unique alert identifiers
+        # Extract unique alert identifiers
         alert_name = message[message.find("<")+1:message.find(">")]
         alert_metric = message[message.find("(")+1:message.find(")")]
-	
+
         # Generate hash 
-	h = hashlib.md5()
-	h.update(alert_name)
-	h.update(alert_metric)
+        h = hashlib.md5()
+        h.update(alert_name)
+        h.update(alert_metric)
 
         # Use hash as incident key to support resolution
-	incident_key = h.hexdigest()
+        incident_key = h.hexdigest()
 
         if level == 'critical':
             event_type = "trigger"
@@ -73,5 +73,5 @@ class PagerdutyHandler(AbstractHandler):
             body=json.dumps(data),
             headers=headers,
             method='POST'
-	)
+        )
 
