@@ -1,4 +1,5 @@
 import json
+import hashlib
 
 from tornado import gen, httpclient as hc
 
@@ -30,27 +31,47 @@ class PagerdutyHandler(AbstractHandler):
         LOGGER.debug("Handler (%s) %s", self.name, level)
         message = self.get_short(level, alert, value, target=target, ntype=ntype, rule=rule)
         LOGGER.debug('message1:%s', message)
-        if level == 'normal':
-            event_type = 'resolve'
+
+	# Extract unique alert identifiers
+        alert_name = message[message.find("<")+1:message.find(">")]
+        alert_metric = message[message.find("(")+1:message.find(")")]
+	
+        # Generate hash 
+	h = hashlib.md5()
+	h.update(alert_name)
+	h.update(alert_metric)
+
+        # Use hash as incident key to support resolution
+	incident_key = h.hexdigest()
+
+        if level == 'critical':
+            event_type = "trigger"
+        elif level == 'warning':
+            event_type = "trigger"
+        elif level == 'normal':
+            event_type = "resolve"
         else:
-            event_type = 'trigger'
+            return
 
         headers = {
             "Content-type": "application/json",
         }
 
-        data = {
+        data  = {
+            "incident_key": incident_key,
             "service_key": self.service_key,
+            "description": message,
             "event_type": event_type,
             "description": message,
             "details": message,
-            "incident_key":  rule['raw'] if rule is not None else 'graphite connect error',
             "client": 'graphite-beacon',
             "client_url": None
         }
+
         yield self.client.fetch(
             "https://events.pagerduty.com/generic/2010-04-15/create_event.json",
             body=json.dumps(data),
             headers=headers,
             method='POST'
-        )
+	)
+
