@@ -248,6 +248,32 @@ Currently two types of alerts are supported:
   ]
 ```
 
+##### Cron expression intervals
+
+In addition to checking metrics at a fixed time interval, graphite-beacon also
+supports cron expressions.
+
+See the below example for how to check a metric every 20 minutes between 8am and 5pm on weekdays:
+
+```js
+alerts: [
+  {
+    "name": "Cron-based alert",
+    // the cron expression
+    "interval": "*/20 8-17 * * 1-5",
+    "query": "Your graphite query here",
+    "rules": [
+      "warning: 10",
+      "critical: 20"
+    ]
+  }
+],
+```
+
+For more information about cron expressions, see https://en.wikipedia.org/wiki/Cron#CRON_expression.
+
+To build and test cron expressions, try http://crontab.guru.
+
 ##### Historical values
 
 graphite-beacon supports "historical" values for a rule.
