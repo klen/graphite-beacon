@@ -13,7 +13,7 @@ branches:
   - master
   - develop
 
-install: pip install --quiet --use-mirrors tox
+install: pip install --quiet tox
 
 script: tox
 
