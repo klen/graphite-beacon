@@ -331,6 +331,7 @@ class GraphiteAlert(BaseAlert):
 
         self.auth_username = self.reactor.options.get('auth_username')
         self.auth_password = self.reactor.options.get('auth_password')
+        self.validate_cert = self.reactor.options.get('validate_cert', True)
 
         self.url = self._graphite_url(
             self.query, graphite_url=self.reactor.options.get('graphite_url'), raw_data=True)
@@ -348,7 +349,8 @@ class GraphiteAlert(BaseAlert):
                 response = yield self.client.fetch(self.url, auth_username=self.auth_username,
                                                    auth_password=self.auth_password,
                                                    request_timeout=self.request_timeout,
-                                                   connect_timeout=self.connect_timeout)
+                                                   connect_timeout=self.connect_timeout,
+                                                   validate_cert=self.validate_cert)
                 records = (
                     GraphiteRecord(line.decode('utf-8'), self.default_nan_value, self.ignore_nan)
                     for line in response.buffer)
