@@ -4,6 +4,21 @@ import logging
 import pytest
 import mock
 
+from graphite_beacon.alerts import BaseAlert
+from graphite_beacon.utils import parse_interval
+from datetime import datetime, timedelta
+
+"""Make every call to check() elapse the alert interval (or 10 minutes)"""
+def check(alert, records, now=datetime.now()):
+    if not alert.is_cron():
+        alert.delta = timedelta(milliseconds=parse_interval(alert.interval))
+    alert._check(records, alert.time)
+    alert.time = alert.time + alert.delta
+
+BaseAlert.time = datetime.now()
+BaseAlert.delta = timedelta(minutes=10)
+BaseAlert._check = BaseAlert.check
+BaseAlert.check = check
 
 @pytest.fixture
 def reactor():
@@ -59,7 +74,7 @@ def test_public_graphite_url():
 
 
 def test_alert(reactor):
-    from graphite_beacon.alerts import BaseAlert, GraphiteAlert, URLAlert
+    from graphite_beacon.alerts import GraphiteAlert, URLAlert
 
     alert1 = BaseAlert.get(reactor, name='Test', query='*', rules=["normal: == 0"])
     assert alert1
@@ -86,8 +101,6 @@ def test_alert(reactor):
 
 
 def test_multimetrics(reactor):
-    from graphite_beacon.alerts import BaseAlert
-
     alert = BaseAlert.get(
         reactor, name="Test", query="*", rules=[
             "critical: > 100", "warning: > 50", "warning: < historical / 2"])
@@ -155,16 +168,17 @@ def test_multimetrics(reactor):
 
 
 def test_multiexpressions(reactor):
-    from graphite_beacon.alerts import BaseAlert
-
     alert = BaseAlert.get(
         reactor, name="Test", query="*", rules=["warning: > historical * 1.05 AND > 70"])
     reactor.alerts = set([alert])
 
     with mock.patch.object(reactor, 'notify'):
-        alert.check([
-            (50, 'metric1'), (65, 'metric1'), (85, 'metric1'), (65, 'metric1'),
-            (68, 'metric1'), (75, 'metric1')])
+        alert.check([(50, 'metric1')])
+        alert.check([(65, 'metric1')])
+        alert.check([(85, 'metric1')])
+        alert.check([(65, 'metric1')])
+        alert.check([(68, 'metric1')])
+        alert.check([(75, 'metric1')])
 
         assert reactor.notify.call_count == 1
 
@@ -218,8 +232,6 @@ def test_convert():
 
 
 def test_parse_interval():
-    from graphite_beacon.utils import parse_interval
-
     assert parse_interval(10) == 10000.0
     assert parse_interval('10') == 10000.0
     assert parse_interval('15s') == 15000.0
@@ -275,7 +287,6 @@ def test_parse_rule():
 
 def test_html_template(reactor):
     from graphite_beacon.handlers.smtp import SMTPHandler
-    from graphite_beacon.alerts import BaseAlert
 
     target = 'node.com'
     galert = BaseAlert.get(reactor, name='Test', query='*', rules=["normal: == 0"])

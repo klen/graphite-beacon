@@ -16,8 +16,7 @@ import math
 from collections import deque, defaultdict
 from itertools import islice
 from croniter import croniter
-from datetime import datetime
-from threading import Lock
+from datetime import datetime, timedelta
 
 
 LOGGER = log.gen_log
@@ -41,11 +40,6 @@ class sliceable_deque(deque):
             return type(self)(islice(self, index.start, index.stop, index.step))
 
 
-def is_cron(expr):
-    """Detect if an expression is a valid cron expression."""
-    return expr is not None and len(expr.split()) == 5
-
-
 class CronCallback(object):
 
     """Callback that runs on a cron schedule."""
@@ -53,7 +47,7 @@ class CronCallback(object):
     def __init__(self, callback, cron):
         """Initialize a CronCallback object with the specified cron schedule and callback."""
         self.callback = callback
-        self.cron = croniter(cron)
+        self.cron = cron
         self.is_running = False
         self.handle = None
 
@@ -79,7 +73,7 @@ class CronCallback(object):
     def scheduled_run(self):
         """Invoke the callback and schedule the next run."""
         if self.is_running:
-            LOGGER.debug("running cron schedule")
+            LOGGER.debug("CronCallback: running cron schedule")
             try:
                 self.callback()
             finally:
@@ -89,12 +83,12 @@ class CronCallback(object):
         """Schedule the next run of this callback."""
         if self.is_running:
             now = datetime.now()
-            next = self.cron.get_next(datetime)
-            while next <= now:
-                next = self.cron.get_next(datetime)
-            LOGGER.debug("now: %s", now)
-            LOGGER.debug("next: %s", next)
-            td = next - now
+            next_time = self.cron.get_next(datetime)
+            while next_time <= now:
+                next_time = self.cron.get_next(datetime)
+            LOGGER.debug("CronCallback: now: %s", now)
+            LOGGER.debug("CronCallback: next_time: %s", next_time)
+            td = next_time - now
             total_seconds = (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / 10**6
             self.handle = ioloop.IOLoop.instance().call_later(total_seconds, self.scheduled_run)
 
@@ -140,7 +134,8 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
 
         self.waiting = False
         self.state = {None: "normal", "waiting": "normal", "loading": "normal"}
-        self.history = defaultdict(lambda: sliceable_deque([], self.history_size))
+        self.history = defaultdict(lambda: sliceable_deque([]))
+        self.history_times = defaultdict(lambda: sliceable_deque([]))
 
         LOGGER.info("Alert '%s': has inited", self)
 
@@ -155,6 +150,10 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
     def __str__(self):
         """String representation."""
         return "%s (%s)" % (self.name, self.interval)
+
+    def is_cron(self):
+        """Detect if an expression is a valid cron expression."""
+        return len(self.interval.split()) in [5, 6]
 
     def configure(self, name=None, rules=None, query=None, **options):
         """Configure the alert."""
@@ -182,29 +181,34 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
 
         self.history_size = options.get('history_size', self.reactor.options['history_size'])
         self.history_size = parse_interval(self.history_size)
+        self.history_size = timedelta(milliseconds=self.history_size)
 
         self.no_data = options.get('no_data', self.reactor.options['no_data'])
         self.loading_error = options.get('loading_error', self.reactor.options['loading_error'])
 
-        interval = options.get('interval', self.reactor.options['interval'])
+        self.interval = options.get('interval', self.reactor.options['interval'])
         time_window = options.get('time_window', None)
 
-        if is_cron(interval):
-            self.interval = interval
+        if self.is_cron():
+            try:
+                cron = croniter(self.interval)
+            except Exception as e:
+                """Raise error if we failed parsing the cron interval"""
+                LOGGER.exception(e)
+                raise ValueError("Invalid cron expression '%s': %s" % (self.interval, e))
             assert time_window, "%s: Must supply time_window for cron scheduled alerts" % self.name
             self.time_window = interval_to_graphite(time_window)
             if self.reactor.options.get('debug'):
                 self.callback = ioloop.PeriodicCallback(self.load, 5000)
             else:
-                self.callback = CronCallback(self.load, interval)
+                self.callback = CronCallback(self.load, cron)
         else:
-            self.interval = interval_to_graphite(interval)
+            self.interval = interval_to_graphite(self.interval)
             interval = parse_interval(self.interval)
             if time_window:
                 self.time_window = interval_to_graphite(time_window)
             else:
                 self.time_window = interval_to_graphite(self.interval)
-            self.history_size = int(math.ceil(self.history_size / interval))
             if self.reactor.options.get('debug'):
                 self.callback = ioloop.PeriodicCallback(self.load, 5000)
             else:
@@ -233,7 +237,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         self.callback.stop()
         return self
 
-    def check(self, records):
+    def check(self, records, now=datetime.now()):
         """Check current value."""
         for value, target in records:
             LOGGER.info("%s [%s]: %s", self.name, target, value)
@@ -241,20 +245,28 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
                 self.notify(self.no_data, value, target)
                 continue
             for rule in self.rules:
-                if self.evaluate_rule(rule, value, target):
+                if self.evaluate_rule(rule, value, target, now):
                     self.notify(rule['level'], value, target, rule=rule)
                     break
             else:
                 self.notify('normal', value, target, rule=rule)
 
-            self.history[target].append(value)
+            history = self.history[target]
+            history.append(value)
+            history_times = self.history_times[target]
+            history_times.append(now)
+            history_threshold = now - self.history_size
+            """Remove historical values older than history_size"""
+            while len(history_times) > 0 and history_times[0] <= history_threshold:
+                history.popleft()
+                history_times.popleft()
 
-    def evaluate_rule(self, rule, value, target):
+    def evaluate_rule(self, rule, value, target, now):
         """Calculate the value."""
         def evaluate(expr):
             if expr in LOGICAL_OPERATORS.values():
                 return expr
-            rvalue = self.get_value_for_expr(expr, target)
+            rvalue = self.get_value_for_expr(expr, target, now)
             if rvalue is None:
                 return False  # ignore this result
             return expr['op'](value, rvalue)
@@ -266,14 +278,16 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
 
         return evaluated[0]
 
-    def get_value_for_expr(self, expr, target):
+    def get_value_for_expr(self, expr, target, now=datetime.now()):
         """I have no idea."""
         if expr in LOGICAL_OPERATORS.values():
             return None
         rvalue = expr['value']
         if rvalue == HISTORICAL:
             history = self.history[target]
-            if len(history) < self.history_size:
+            history_times = self.history_times[target]
+            """Don't return a historical value if the history buffer is not full"""
+            if len(history_times) < 1 or history_times[0] + self.history_size > now:
                 return None
             rvalue = sum(history) / float(len(history))
 
