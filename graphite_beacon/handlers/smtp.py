@@ -34,13 +34,21 @@ class SMTPHandler(AbstractHandler):
 
     @gen.coroutine
     def notify(self, level, *args, **kwargs):
-        LOGGER.debug("Handler (%s) %s", self.name, level)
-
+        LOGGER.debug("Handler (%s) %s", self.name, level) 
         msg = self.get_message(level, *args, **kwargs)
         msg['Subject'] = self.get_short(level, *args, **kwargs)
-        msg['From'] = self.options['from']
-        msg['To'] = ", ".join(self.options['to'])
-
+        try:
+            msg['From'] = ', '.join(args[0].options["smtp"]["from"])
+            smtpFrom = args[0].options["smtp"]["from"]
+        except Exception as e:    
+            msg['From'] = self.options['from']
+            smtpFrom = self.options["from"]
+        try:
+            msg['To'] = ', '.join(args[0].options["smtp"]["to"])
+            smtpTo = args[0].options["smtp"]["to"]
+        except Exception as e:
+            msg['To'] = ', '.join(self.options['to'])
+            smtpTo = self.options['to']
         smtp = SMTP()
         yield smtp_connect(smtp, self.options['host'], self.options['port'])
 
@@ -52,7 +60,8 @@ class SMTPHandler(AbstractHandler):
 
         try:
             LOGGER.debug("Send message to: %s", ", ".join(self.options['to']))
-            smtp.sendmail(self.options['from'], self.options['to'], msg.as_string())
+            LOGGER.info("Message from: %s", msg['From'])
+            smtp.sendmail(msg['From'],smtpTo, msg.as_string())
         finally:
             smtp.quit()
 

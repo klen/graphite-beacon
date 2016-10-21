@@ -28,7 +28,10 @@ class CliHandler(AbstractHandler):
 
         # Run only for whitelisted names if specified
         if not self.whitelist or getAlertName(*args) in self.whitelist:
-            command = substituteVariables(self.commandTemplate, level, *args, **kwargs)
+            try:
+                command=args[0].options["cli"]["command"]
+            except Exception as e:
+                command = substituteVariables(self.commandTemplate, level, *args, **kwargs)
             subprocess.Popen(
                 command,
                 shell=True,

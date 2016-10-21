@@ -15,6 +15,7 @@ from .utils import (
 import math
 from collections import deque, defaultdict
 from itertools import islice
+from .handlers import registry
 
 
 LOGGER = log.gen_log
@@ -106,6 +107,11 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         self.rules = [parse_rule(rule) for rule in rules]
         self.rules = list(sorted(self.rules, key=lambda r: LEVELS.get(r.get('level'), 99)))
 
+        registry.clean()
+        self.handlers = {'warning':set(),'critical':set(),'normal':set()}
+        self.reinit_handlers('warning')
+        self.reinit_handlers('critical')
+        self.reinit_handlers('normal')
         assert query, "%s: Alert's query is invalid" % self.name
         self.query = query
 
@@ -138,6 +144,13 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         else:
             self.callback = ioloop.PeriodicCallback(self.load, interval)
 
+    def reinit_handlers(self, level='warning'):
+        if('%s_handlers' % level) in self.options:
+            for name in self.options['%s_handlers' % level]:
+                try:
+                    self.handlers[level].add(registry.get(self.reactor,name))
+                except Exception as e:
+                    LOGGER.error('Handler "%s" did not init. Error: %s' % (name,e))
     def convert(self, value):
         """Convert self value."""
         return convert_to_format(value, self._format)
