@@ -30,7 +30,8 @@ class TelegramHandler(AbstractHandler):
         assert self.bot_ident, 'Telegram bot ident token is not defined.'
 
         self.chatfile = self.options.get('chatfile')
-        if not self.chatfile: LOGGER.warning(NO_CHATFILE)
+        if not self.chatfile:
+            LOGGER.warning(NO_CHATFILE)
 
         self.client = httpclient.AsyncHTTPClient()
         self.url = 'https://api.telegram.org/bot%s/' % (self.token)
@@ -73,7 +74,7 @@ class TelegramHandler(AbstractHandler):
             update_id = update.get('update_id')
             if not update_id: continue
 
-            message = update.get('message')  # fix key error here
+            message = update.get('message')
             if not message: continue
 
             text = message.get('text')
@@ -132,11 +133,11 @@ class TelegramHandler(AbstractHandler):
             with open(self.chatfile) as fh:
                 return [int(chat) for chat in fh]
         except Exception as e:
-            LOGGER.debug('could not load saved chats:\n%s' % (e))
+            LOGGER.error('could not load saved chats:\n%s' % (e))
             return []
 
     def _prepare_request(self, target, body, method='POST',
-                            headers={"Content-Type": "application/json"}):
+                        headers={"Content-Type": "application/json"}):
 
         return dict(request=self.url + target, body=json.dumps(body),
                     method=method, headers=headers,)
@@ -149,7 +150,7 @@ class TelegramHandler(AbstractHandler):
         """
         splitted = text.split()
         init = splitted[0].strip().lower()
-        init_iscorrect = init.startswith(r'/activate')
+        init_iscorrect = init.startswith('/activate')
 
         if int(chat_id) > 0:
             return init_iscorrect

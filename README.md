@@ -405,7 +405,7 @@ Sends a Telegram message.
     "telegram": {
         "token": "telegram bot token",
         "bot_ident": "token you choose to activate bot in a group"
-        "chatfile": "path to file where chat id`s are saved"
+        "chatfile": "path to file where chat ids are saved, optional field"
     }
 }
 ```
