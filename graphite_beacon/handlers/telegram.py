@@ -49,6 +49,7 @@ class TelegramHandler(AbstractHandler):
         while True:
 
             if self._last_update:
+                # increase offset to filter out older updates
                 update_body.update({"offset": self._last_update + 1})
 
             req = self._prepare_request('getUpdates', update_body)
@@ -71,20 +72,11 @@ class TelegramHandler(AbstractHandler):
         update_content = json.loads(upd.decode())
         for update in update_content['result']:
 
-            update_id = update.get('update_id')
-            if not update_id: continue
+            params = TelegramHandler._traverse(update)
+            if not params['ok']:
+                continue
 
-            message = update.get('message')
-            if not message: continue
-
-            text = message.get('text')
-            if not text: continue
-
-            message_id = message.get('message_id')
-            if not message_id: continue
-
-            chat_id = message.get('chat', {}).get('id')
-            if not chat_id: continue
+            update_id, chat_id, message_id, text = params['data']
 
             if not self._correct_activation(text, chat_id):
                 continue
@@ -142,11 +134,37 @@ class TelegramHandler(AbstractHandler):
         return dict(request=self.url + target, body=json.dumps(body),
                     method=method, headers=headers,)
 
+    @staticmethod
+    def _traverse(update):
+        """As of now (october 2016), Telegram bot api
+        has getUpdates method which returns an array of
+        update objects.
+        update object always has update_id field and (usually) one
+        (and only one) optional field.
+        As of now, the only case we are interested in is when this
+        optional field is a message object, so we filter out updates
+        without message.
+        Message object might also not contain any text. Rest of fields
+        are mandatory.
+        """
+        msg = update.get('message', {})
+        text = msg.get('text')
+        if not all(msg, text):
+            return {'ok': False, 'data':()}
+
+        upd_id = update['id']
+        msg_id = msg['message_id']
+        chat_id = msg['chat']['id']
+
+        return {'ok': True,
+                'data': (upd_id, chat_id, msg_id, text)}
+
     def _correct_activation(self, text, chat_id):
         """Helper method, called from _respond_commands
         when bot gets message from user.
-        If chat_id is positive, we don't call bot from group
-        or channel so there is no need to check bot_ident.
+        chat_id is positive for 'simple' telegram chats, and
+        negative for groups.
+        In the first case, there is no need to check bot_ident.
         """
         splitted = text.split()
         init = splitted[0].strip().lower()
