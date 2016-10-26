@@ -3,4 +3,4 @@
 
 ipdb
 mock
-pytest
+pytest==3.0.3
