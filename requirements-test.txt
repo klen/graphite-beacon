@@ -1,6 +1,6 @@
 -r requirements.txt
 -e .
 
-ipdb
-mock
-pytest
+ipdb==0.10.1
+mock==2.0.0
+pytest==3.0.3
