@@ -2,5 +2,5 @@
 -e .
 
 ipdb==0.10.1
-mock
+mock==2.0.0
 pytest==3.0.3
