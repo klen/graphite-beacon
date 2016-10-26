@@ -1,6 +1,6 @@
 -r requirements.txt
 -e .
 
-ipdb
+ipdb==0.10.1
 mock
 pytest==3.0.3
