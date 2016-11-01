@@ -25,6 +25,7 @@ LEVELS = {
     'normal': 20,
 }
 
+hc.AsyncHTTPClient.configure(None, max_clients=100)
 
 class sliceable_deque(deque):
 
