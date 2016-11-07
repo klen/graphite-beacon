@@ -4,3 +4,6 @@
 ipdb==0.10.1
 mock==2.0.0
 pytest==3.0.3
+pylint==1.6.4
+coverage==4.2
+pep8==1.7.0

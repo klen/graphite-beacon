@@ -11,7 +11,7 @@ class PagerdutyHandler(AbstractHandler):
 
     # Default options
     defaults = {
-        'subdomain':  None,
+        'subdomain': None,
         'apitoken': None,
         'service_key': None
     }

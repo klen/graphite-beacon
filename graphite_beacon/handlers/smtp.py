@@ -42,13 +42,14 @@ class SMTPHandler(AbstractHandler):
         msg['To'] = ", ".join(self.options['to'])
 
         smtp = SMTP()
-        yield smtp_connect(smtp, self.options['host'], self.options['port'])
+        yield smtp_connect(smtp, self.options['host'], self.options['port'])  # pylint: disable=no-value-for-parameter
 
         if self.options['use_tls']:
-            yield smtp_starttls(smtp)
+            yield smtp_starttls(smtp)  # pylint: disable=no-value-for-parameter
 
         if self.options['username'] and self.options['password']:
-            yield smtp_login(smtp, self.options['username'], self.options['password'])
+            yield smtp_login(smtp, self.options['username'],
+                             self.options['password'])  # pylint: disable=no-value-for-parameter
 
         try:
             LOGGER.debug("Send message to: %s", ", ".join(self.options['to']))

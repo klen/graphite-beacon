@@ -14,21 +14,21 @@ class CliHandler(AbstractHandler):
     }
 
     def init_handler(self):
-        self.commandTemplate = self.options.get('command')
+        self.command_template = self.options.get('command')
         self.whitelist = self.options.get('alerts_whitelist')
-        assert self.commandTemplate, 'Command line command is not defined.'
+        assert self.command_template, 'Command line command is not defined.'
 
     def notify(self, level, *args, **kwargs):
         LOGGER.debug("Handler (%s) %s", self.name, level)
 
-        def getAlertName(*args):
+        def get_alert_name(*args):
             name = str(args[0])
             # remove time characteristics e.g. (1minute)
             return name.rsplit(' ', 1)[0].strip()
 
         # Run only for whitelisted names if specified
-        if not self.whitelist or getAlertName(*args) in self.whitelist:
-            command = substituteVariables(self.commandTemplate, level, *args, **kwargs)
+        if not self.whitelist or get_alert_name(*args) in self.whitelist:
+            command = substitute_variables(self.command_template, level, *args, **kwargs)
             subprocess.Popen(
                 command,
                 shell=True,
@@ -38,7 +38,7 @@ class CliHandler(AbstractHandler):
                 close_fds=True)
 
 
-def substituteVariables(command, level, name, value, target=None, **kwargs):
+def substitute_variables(command, level, name, value, target=None, **kwargs):
     """Substitute variables in command fragments by values e.g. ${level} => 'warning'."""
     rule = kwargs.get('rule', {})
     rule_value = rule.get('value', '') if rule else ''

@@ -5,7 +5,7 @@ from funcparserlib.lexer import make_tokenizer, Token
 from funcparserlib.parser import (some, a, maybe, finished, skip, many)
 
 
-NUMBER_RE = re('(\d*\.?\d*)')
+NUMBER_RE = re(r'(\d*\.?\d*)')
 CONVERT = {
     "bytes": (
         ("TB", 1099511627776), ("GB", 1073741824.0), ("MB", 1048576.0), ("KB", 1024.0),
@@ -17,7 +17,7 @@ CONVERT = {
         ("Gbps", 1000000000.0), ("Mbps", 1000000.0), ("Kbps", 1000.0),
     ),
     "short": (
-        ("Tri", 1000000000000.0), ("Bil", 1000000000.0), ("Mil", 1000000.0), ("K",   1000.0),
+        ("Tri", 1000000000000.0), ("Bil", 1000000000.0), ("Mil", 1000000.0), ("K", 1000.0),
     ),
     "s": (
         ("y", 31536000.0),
@@ -76,9 +76,9 @@ def convert_to_format(value, frmt=None):
     else:
         return value
 
-    value /= size
+    value /= size  # pylint: disable=undefined-loop-variable
     value = ("%.1f" % value).rstrip('0').rstrip('.')
-    return "%s%s" % (value, name)
+    return "%s%s" % (value, name)  # pylint: disable=undefined-loop-variable
 
 
 def convert_from_format(num, unit=None):
@@ -106,7 +106,7 @@ def _tokenize_rule(_str):
 
 def _parse_rule(seq):
     tokval = lambda x: x.value
-    toktype = lambda t: some(lambda x: x.type == t) >> tokval
+    toktype = lambda t: some(lambda x: x.type == t) >> tokval  # pylint: disable=undefined-variable
     sep = lambda s: a(Token(u'Sep', s)) >> tokval
     s_sep = lambda s: skip(sep(s))
 
