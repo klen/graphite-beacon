@@ -29,7 +29,7 @@ class TelegramHandler(AbstractHandler):
         self._chats = []
         self._listen_commands()
 
-    def get_message(self, level, alert, value, target=None, ntype=None, rule=None):
+    def get_message(self, level, alert, value, target=None, ntype=None, _=None):
 
         msg_type = 'telegram' if ntype == 'graphite' else 'short'
         tmpl = TEMPLATES[ntype][msg_type]
@@ -39,7 +39,7 @@ class TelegramHandler(AbstractHandler):
     @gen.coroutine
     def _listen_commands(self):
 
-        self._last_update = None
+        self._last_update = None  # pylint: disable=attribute-defined-outside-init
 
         update_body = {"timeout": 2}
 
@@ -71,7 +71,7 @@ class TelegramHandler(AbstractHandler):
                 continue
             message = update["message"]["text"].encode("utf-8")
             msp = message.split()
-            self._last_update = update["update_id"]
+            self._last_update = update["update_id"]  # pylint: disable=attribute-defined-outside-init
             if len(msp) > 1 and msp[0].startswith("/activate"):
                 try:
                     chat_id = update["message"]["chat"]["id"]
@@ -94,7 +94,7 @@ class TelegramHandler(AbstractHandler):
                                 "text": "This chat is already activated."}),
                             method="POST",
                             headers={"Content-Type": "application/json"})
-                except:
+                except Exception:
                     continue
             else:
                 continue
