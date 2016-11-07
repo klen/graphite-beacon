@@ -48,8 +48,8 @@ class SMTPHandler(AbstractHandler):
             yield smtp_starttls(smtp)  # pylint: disable=no-value-for-parameter
 
         if self.options['username'] and self.options['password']:
-            yield smtp_login(smtp, self.options['username'],
-                             self.options['password'])  # pylint: disable=no-value-for-parameter
+            yield smtp_login(smtp, self.options['username'],   # pylint: disable=no-value-for-parameter
+                             self.options['password'])
 
         try:
             LOGGER.debug("Send message to: %s", ", ".join(self.options['to']))
