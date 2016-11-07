@@ -17,7 +17,7 @@ except ImportError:
 
 LOGGER = log.gen_log
 
-COMMENT_RE = re('//\s+.*$', M)
+COMMENT_RE = re(r'//\s+.*$', M)
 
 
 class Reactor(object):
@@ -61,7 +61,7 @@ class Reactor(object):
         self.callback = ioloop.PeriodicCallback(
             self.repeat, parse_interval(self.options['repeat_interval']))
 
-    def reinit(self, *args, **options):
+    def reinit(self, *args, **options):  # pylint: disable=unused-argument
         LOGGER.info('Read configuration')
 
         self.options.update(options)
@@ -86,7 +86,7 @@ class Reactor(object):
             self.alerts.remove(alert)
 
         self.alerts = set(
-            BaseAlert.get(self, **opts).start() for opts in self.options.get('alerts'))
+            BaseAlert.get(self, **opts).start() for opts in self.options.get('alerts'))  # pylint: disable=no-member
 
         LOGGER.debug('Loaded with options:')
         LOGGER.debug(json.dumps(self.options, indent=2))
@@ -118,7 +118,7 @@ class Reactor(object):
         for alert in self.alerts:
             alert.reset()
 
-    def start(self, *args):
+    def start(self, *args):  # pylint: disable=unused-argument
         if self.options.get('pidfile'):
             with open(self.options.get('pidfile'), 'w') as fpid:
                 fpid.write(str(os.getpid()))
@@ -126,7 +126,7 @@ class Reactor(object):
         LOGGER.info('Reactor starts')
         self.loop.start()
 
-    def stop(self, *args):
+    def stop(self, *args):  # pylint: disable=unused-argument
         self.callback.stop()
         self.loop.stop()
         if self.options.get('pidfile'):

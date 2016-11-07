@@ -13,14 +13,14 @@ define('graphite_url', default=Reactor.defaults['graphite_url'], help='Graphite 
 def run():
     options.parse_command_line()
 
-    r = Reactor(**options.as_dict())
+    reactor = Reactor(**options.as_dict())
 
-    signal.signal(signal.SIGTERM, r.stop)
-    signal.signal(signal.SIGINT, r.stop)
+    signal.signal(signal.SIGTERM, reactor.stop)
+    signal.signal(signal.SIGINT, reactor.stop)
     if hasattr(signal, 'SIGHUP'):
-        signal.signal(signal.SIGHUP, r.reinit)
+        signal.signal(signal.SIGHUP, reactor.reinit)
 
-    r.start()
+    reactor.start()
 
 if __name__ == '__main__':
     run()

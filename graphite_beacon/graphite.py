@@ -9,10 +9,7 @@ class GraphiteRecord(object):
         self.default_nan_value = default_nan_value
         self.ignore_nan = ignore_nan
         self.values = list(self._values(data.rsplit(',')))
-        if len(self.values) == 0:
-            self.empty = True
-        else:
-            self.empty = False
+        self.empty = len(self.values) == 0
 
     def _values(self, values):
         for value in values:

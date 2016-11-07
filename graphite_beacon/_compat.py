@@ -1,3 +1,4 @@
+# pylint: skip-file
 """ Compatibility.
 
     Some py2/py3 compatibility support based on a stripped down
@@ -63,10 +64,12 @@ def with_metaclass(meta, *bases):
     class metaclass(meta):
         __call__ = type.__call__
         __init__ = type.__init__
+
         def __new__(cls, name, this_bases, d):
             if this_bases is None:
                 return type.__new__(cls, name, (), d)
             return meta(name, bases, d)
+
     return metaclass('temporary_class', None, {})
 
 
@@ -80,6 +83,7 @@ if hasattr(sys, 'pypy_version_info'):
     class _Mgr(object):
         def __enter__(self):
             return self
+
         def __exit__(self, *args):
             sys.exc_clear()
     try:

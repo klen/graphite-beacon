@@ -1,5 +1,10 @@
 """Implement alerts."""
 
+import math
+
+from collections import deque, defaultdict
+from itertools import islice
+
 from tornado import ioloop, httpclient as hc, gen, log, escape
 
 from . import _compat as _
@@ -12,9 +17,6 @@ from .utils import (
     parse_interval,
     parse_rule,
 )
-import math
-from collections import deque, defaultdict
-from itertools import islice
 
 
 LOGGER = log.gen_log
@@ -26,7 +28,7 @@ LEVELS = {
 }
 
 
-class sliceable_deque(deque):
+class sliceable_deque(deque):  # pylint: disable=invalid-name
 
     """Deque with slices support."""
 
