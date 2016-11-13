@@ -1,3 +1,9 @@
+## 0.26.0
+
+- Improvement: use `validate_cert` for URL alerts (#111)
+- Improvement: better incident key and `client_url` for pagerduty handler (#109)
+- Improvement/bug fixes: enable persistence for the telegram handler and various bug fixes (#130)
+
 ## 0.25.4
 
 - Bug fix: don't crash due to lack of SIGHUP on Windows (#94)
