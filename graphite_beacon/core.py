@@ -3,6 +3,8 @@ from re import compile as re, M
 
 import json
 import logging
+import socket
+from time import time, sleep
 from tornado import ioloop, log
 
 from .alerts import BaseAlert
@@ -34,6 +36,7 @@ class Reactor(object):
         'graphite_url': 'http://localhost',
         'history_size': '1day',
         'interval': '10minute',
+        'stats_report_interval': '1minute',
         'logging': 'info',
         'method': 'average',
         'no_data': 'critical',
@@ -53,13 +56,25 @@ class Reactor(object):
         'alerts': []
     }
 
+    default_stats = {
+        'alerts_reset' : 0,
+        'handlers_notified' : 0,
+        'critical_handlers_notified' : 0,
+        'warning_handlers_notified' : 0,
+        'normal_handlers_notified' : 0,
+    }
+
+
     def __init__(self, **options):
         self.alerts = set()
         self.loop = ioloop.IOLoop.instance()
         self.options = dict(self.defaults)
+        self.stats = dict(self.default_stats)
         self.reinit(**options)
         self.callback = ioloop.PeriodicCallback(
             self.repeat, parse_interval(self.options['repeat_interval']))
+        self.bumpstats = ioloop.PeriodicCallback(
+            self.bump_stats, parse_interval(self.options['stats_report_interval']))
 
     def reinit(self, *args, **options):  # pylint: disable=unused-argument
         LOGGER.info('Read configuration')
@@ -115,8 +130,17 @@ class Reactor(object):
 
     def repeat(self):
         LOGGER.info('Reset alerts')
+        self.stats['alerts_reset'] = 0
+
         for alert in self.alerts:
             alert.reset()
+            self.stats['alerts_reset'] += 1
+
+    def bump_stats(self):
+        hostname = socket.gethostname()
+        LOGGER.debug('Bump stats to carbon for host reactor' + hostname)
+        for metric in self.stats:
+            self.send_graphite_metric('beacon.'+hostname+'.'+metric, self.stats[metric])
 
     def start(self, *args):  # pylint: disable=unused-argument
         if self.options.get('pidfile'):
@@ -124,10 +148,12 @@ class Reactor(object):
                 fpid.write(str(os.getpid()))
         self.callback.start()
         LOGGER.info('Reactor starts')
+        self.bumpstats.start()
         self.loop.start()
 
     def stop(self, *args):  # pylint: disable=unused-argument
         self.callback.stop()
+        self.bumpstats.stop()
         self.loop.stop()
         if self.options.get('pidfile'):
             os.unlink(self.options.get('pidfile'))
@@ -143,6 +169,18 @@ class Reactor(object):
 
         for handler in self.handlers.get(level, []):
             handler.notify(level, alert, value, target=target, ntype=ntype, rule=rule)
+            self.stats[level+'_handlers_notified'] += 1
+            self.stats['handlers_notified'] += 1
+
+    def send_graphite_metric(self, name, value):
+        if 'carbon_host' in self.options and 'carbon_port' in self.options:
+            sock = socket.socket()
+            sock.connect((self.options.get('carbon_host'), self.options.get('carbon_port')))
+            sock.sendall('%s %s %i\n' % (name, value, time()))
+            sock.close()
+            return True
+    
+        return False
 
 _LOG_LEVELS = {
     'DEBUG': logging.DEBUG,
@@ -172,3 +210,4 @@ def _get_numeric_log_level(level):
         except KeyError:
             raise ValueError("Unknown log level: %s" % level)
     return level
+
