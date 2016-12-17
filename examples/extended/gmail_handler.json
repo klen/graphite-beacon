@@ -1,0 +1,30 @@
+{
+  "logging": "info",
+
+  "critical_handlers": ["log", "smtp"],
+  "warning_handlers": ["log", "smtp"],
+  "normal_handlers": ["log", "smtp"],
+
+  "smtp": {
+    "username": "example@gmail.com",
+    "password": "password",
+    "use_tls": true,
+    "host": "smtp.gmail.com",
+    "port": 587,
+    "from": "myemail@gmail.com",
+    "to": ["myemail@gmail.com"]
+  },
+
+  // "graphite_url": "http://localhost",
+
+  "alerts": [
+    // Don't forget to set `graphite_url` correctly.
+    {
+      "name": "Memory",
+      "query": "aliasByNode(collectd.*.memory.memory-free, 1)",
+      "interval": "10minute",
+      "format": "bytes",
+      "rules": ["warning: < 300MB", "critical: > 200MB"]
+    }
+  ]
+}

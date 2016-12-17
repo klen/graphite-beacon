@@ -24,6 +24,11 @@ def test_reactor():
     assert rr.options['interval'] == '20minute'
     assert len(rr.alerts) == 3
 
+    rr = Reactor(include=['examples/example-config.yml'], alerts=[
+        {'name': 'test', 'query': '*', 'rules': ["normal: == 0"]}])
+    assert rr.options['interval'] == '20minute'
+    assert len(rr.alerts) == 3
+
 
 def test_convert_config_log_level():
     from graphite_beacon.core import _get_numeric_log_level

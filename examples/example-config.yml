@@ -1,22 +1,19 @@
 ---
 interval: "20minute"
-logging: "debug"
+logging: info
 
-# Gmail example
-# smtp:
-#   username: "example@gmail.com"
-#   password: "password"
-#   use_tls: true
-#   host: "smtp.gmail.com"
-#   port: 587
-#   from: "myemail@gmail.com"
-#   to:
-#     - "myemail@gmail.com"
+critical_handlers:
+  - log
+warning_handlers:
+  - log
+normal_handlers:
+  - log
+
+# graphite_url: http://localhost
 
 alerts:
-  # A graphite alert
-  -
-    name: "Memory"
+  # A graphite alert - be sure to set `graphite_url` appropriately.
+  - name: "Memory"
     query: "aliasByNode(collectd.*.memory.memory-free, 1)"
     interval: "10minute"
     format: "bytes"
@@ -25,8 +22,7 @@ alerts:
       - "critical: > 200MB"
 
   # A ping alert
-  -
-    name: "Site"
+  - name: "Site"
     source: "url"
     query: "http://google.com"
     interval: "20second"

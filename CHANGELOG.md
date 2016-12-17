@@ -1,3 +1,7 @@
+## Unreleased
+
+- Bug fix: Include pyyaml by default and use YAML config loader for `.yaml` files (#143)
+
 ## 0.26.0
 
 - Improvement: use `validate_cert` for URL alerts (#111)
