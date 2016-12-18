@@ -2,7 +2,7 @@ include LICENSE
 include MANIFEST.in
 include README.rst
 include requirements.txt
-include requirements-tests.txt
+include test-requirements.txt
 
 recursive-include graphite_beacon *
 
