@@ -42,7 +42,7 @@ Example:
 Requirements
 ------------
 
-- python (2.6, 2.7, 3.3, 3.4)
+- python (2.7, 3.3, 3.4)
 - tornado
 - funcparserlib
 - pyyaml

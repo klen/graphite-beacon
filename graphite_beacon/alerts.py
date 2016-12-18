@@ -294,7 +294,7 @@ class GraphiteAlert(BaseAlert):
         url = "{base}/render/?target={query}&from=-{time_window}&until=-{until}".format(
             base=graphite_url, query=query, time_window=self.time_window, until=self.until)
         if raw_data:
-            url = "{0}&rawData=true".format(url)
+            url = "{}&rawData=true".format(url)
         return url
 
 

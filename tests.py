@@ -30,28 +30,6 @@ def test_reactor():
     assert len(rr.alerts) == 3
 
 
-def test_convert_config_log_level():
-    from graphite_beacon.core import _get_numeric_log_level
-
-    assert logging.DEBUG == _get_numeric_log_level('debug')
-    assert logging.DEBUG == _get_numeric_log_level('DEBUG')
-
-    assert logging.INFO == _get_numeric_log_level('info')
-    assert logging.INFO == _get_numeric_log_level('INFO')
-
-    assert logging.WARN == _get_numeric_log_level('warn')
-    assert logging.WARN == _get_numeric_log_level('WARN')
-
-    assert logging.WARNING == _get_numeric_log_level('warning')
-    assert logging.WARNING == _get_numeric_log_level('WARNING')
-
-    assert logging.ERROR == _get_numeric_log_level('error')
-    assert logging.ERROR == _get_numeric_log_level('ERROR')
-
-    assert logging.CRITICAL == _get_numeric_log_level('critical')
-    assert logging.CRITICAL == _get_numeric_log_level('CRITICAL')
-
-
 def test_public_graphite_url():
     from graphite_beacon.core import Reactor
 

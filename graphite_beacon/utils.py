@@ -52,12 +52,12 @@ RULE_TOKENIZER = make_tokenizer(
     [
         (u'Level', (r'(critical|warning|normal)',)),
         (u'Historical', (HISTORICAL,)),
-        (u'Comparator', (r'({0})'.format('|'.join(sorted(COMPARATORS.keys(), reverse=True))),)),
-        (u'LogicalOperator', (r'({0})'.format('|'.join(LOGICAL_OPERATORS.keys())),)),
+        (u'Comparator', (r'({})'.format('|'.join(sorted(COMPARATORS.keys(), reverse=True))),)),
+        (u'LogicalOperator', (r'({})'.format('|'.join(LOGICAL_OPERATORS.keys())),)),
         (u'Sep', (r':',)),
         (u'Operator', (r'(?:\*|\+|-|\/)',)),
         (u'Number', (r'(\d+\.?\d*)',)),
-        (u'Unit', (r'({0})'.format('|'.join(sorted(CONVERT_HASH.keys(), reverse=True))),)),
+        (u'Unit', (r'({})'.format('|'.join(sorted(CONVERT_HASH.keys(), reverse=True))),)),
         (u'Space', (r'\s+',))
     ]
 )

@@ -82,7 +82,7 @@ class Reactor(object):
         if not self.options['public_graphite_url']:
             self.options['public_graphite_url'] = self.options['graphite_url']
 
-        LOGGER.setLevel(_get_numeric_log_level(self.options.get('logging', 'info')))
+        LOGGER.setLevel(self.options.get('logging', 'info').upper())
         registry.clean()
 
         self.handlers = {'warning': set(), 'critical': set(), 'normal': set()}
@@ -167,26 +167,6 @@ _LOG_LEVELS = {
     'ERROR': logging.ERROR,
     'CRITICAL': logging.CRITICAL
 }
-
-
-def _get_numeric_log_level(level):
-    """Convert a textual log level to the numeric constants expected by the
-    :meth:`logging.Logger.setLevel` method.
-
-    This is required for compatibility with Python 2.6 where there is no conversion
-    performed by the ``setLevel`` method. In Python 2.7 textual names are converted
-    to numeric constants automatically.
-
-    :param basestring name: Textual log level name
-    :return: Numeric log level constant
-    :rtype: int
-    """
-    if not isinstance(level, int):
-        try:
-            return _LOG_LEVELS[str(level).upper()]
-        except KeyError:
-            raise ValueError("Unknown log level: %s" % level)
-    return level
 
 
 def _get_loader(config):
