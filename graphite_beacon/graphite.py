@@ -39,3 +39,15 @@ class GraphiteRecord(object):
     @property
     def maximum(self):
         return max(self.values)
+
+    @property
+    def median(self):
+        return self.percentile(50)
+    
+    def percentile(self, rank):
+        values = sorted(self.values)
+        if rank == 100 or len(self.values) == 1:
+            return values[-1]
+        k = int(len(values) * rank / 100.0)
+        return values[k]
+    
