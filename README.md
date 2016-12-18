@@ -196,7 +196,7 @@ The default options are:
 
 You can setup options with a configuration file. See examples for
 [JSON](examples/example-config.json) and
-[YAML](examples/example-config.yaml).
+[YAML](examples/example-config.yml).
 
 A `config.json` file in the same directory that you run `graphite-beacon`
 from will be used automatically.

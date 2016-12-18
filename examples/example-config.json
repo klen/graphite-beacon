@@ -1,21 +1,16 @@
 // Comments are allowed here
 {
   "interval": "20minute",
-  "logging": "debug",
+  "logging": "info",
 
-  // Gmail example
-  // "smtp": {
-    // "username": "example@gmail.com",
-    // "password": "password",
-    // "use_tls": true,
-    // "host": "smtp.gmail.com",
-    // "port": 587,
-    // "from": "myemail@gmail.com",
-    // "to": ["myemail@gmail.com"]
-  // },
+  "critical_handlers": ["log"],
+  "warning_handlers": ["log"],
+  "normal_handlers": ["log"],
+
+  // "graphite_url": "http://localhost",
 
   "alerts": [
-    // A graphite alert
+    // A graphite alert - be sure to set `graphite_url` appropriately.
     {
       "name": "Memory",
       "query": "aliasByNode(collectd.*.memory.memory-free, 1)",
