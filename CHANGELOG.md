@@ -1,5 +1,6 @@
 ## Unreleased
 
+- Upgrade tornado and drop Python 2.6 support (#144)
 - Bug fix: Include pyyaml by default and use YAML config loader for `.yaml` files (#143)
 
 ## 0.26.0
