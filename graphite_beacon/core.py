@@ -9,7 +9,7 @@ from tornado import ioloop, log
 import yaml
 
 from .alerts import BaseAlert
-from .utils import parse_interval
+from .units import MILLISECOND, TimeUnit
 from .handlers import registry
 
 
@@ -56,8 +56,11 @@ class Reactor(object):
         self.loop = ioloop.IOLoop.instance()
         self.options = dict(self.defaults)
         self.reinit(**options)
+
+        repeat_interval = TimeUnit.from_interval(self.options['repeat_interval'])
+        LOGGER.info("Alarm reset interval is {}".format(repeat_interval))
         self.callback = ioloop.PeriodicCallback(
-            self.repeat, parse_interval(self.options['repeat_interval']))
+            self.repeat, repeat_interval.convert_to(MILLISECOND))
 
     def started(self):
         """Check whether the reactor is running.

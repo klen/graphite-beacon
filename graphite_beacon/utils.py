@@ -5,6 +5,9 @@ from funcparserlib.lexer import make_tokenizer, Token
 from funcparserlib.parser import (some, a, maybe, finished, skip, many)
 
 
+# NOTE: the unit conversions below should be considered deprecated and migrated
+# over to `unit.py` instead.
+
 NUMBER_RE = re(r'(\d*\.?\d*)')
 CONVERT = {
     "bytes": (
@@ -36,12 +39,8 @@ CONVERT = {
 CONVERT_HASH = dict((name, value) for _types in CONVERT.values() for (name, value) in _types)
 CONVERT['ms'] = list((n, v * 1000) for n, v in CONVERT['s'])
 CONVERT_HASH['%'] = 1
-TIME_UNIT_SIZE = dict(CONVERT['ms'])
-TIME_UNIT_SYN = {"microsecond": "ms", "second": "s", "minute": "m", "hour": "h", "day": "d",
-                 "week": "w", "month": "M", "year": "y"}
-TIME_UNIT_SYN2 = dict([(v, n) for (n, v) in TIME_UNIT_SYN.items()])
-IDENTITY = lambda x: x
 
+IDENTITY = lambda x: x
 
 HISTORICAL = 'historical'
 COMPARATORS = {'>': op.gt, '>=': op.ge, '<': op.lt, '<=': op.le, '==': op.eq, '!=': op.ne}
@@ -64,11 +63,7 @@ RULE_TOKENIZER = make_tokenizer(
 
 
 def convert_to_format(value, frmt=None):
-    try:
-        value = float(value)
-    except (ValueError, TypeError):
-        return value
-
+    value = float(value)
     units = CONVERT.get(frmt, [])
     for name, size in units:
         if size < value:
@@ -78,26 +73,13 @@ def convert_to_format(value, frmt=None):
 
     value /= size  # pylint: disable=undefined-loop-variable
     value = ("%.1f" % value).rstrip('0').rstrip('.')
-    return "%s%s" % (value, name)  # pylint: disable=undefined-loop-variable
+    return "{}{}".format(value, name)  # pylint: disable=undefined-loop-variable
 
 
 def convert_from_format(num, unit=None):
     if not unit:
         return float(num)
     return float(num) * CONVERT_HASH.get(unit, 1)
-
-
-def parse_interval(interval):
-    """ Convert 1.2day to 103680000.0 (ms)"""
-    _, num, unit = NUMBER_RE.split(str(interval))
-    num = float(num)
-    return num * TIME_UNIT_SIZE.get(unit, TIME_UNIT_SIZE[TIME_UNIT_SYN.get(unit, 's')])
-
-
-def interval_to_graphite(interval):
-    _, num, unit = NUMBER_RE.split(interval)
-    unit = TIME_UNIT_SYN2.get(unit, unit) or 'second'
-    return num + unit
 
 
 def _tokenize_rule(_str):

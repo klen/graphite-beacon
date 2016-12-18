@@ -7,11 +7,11 @@ Simple alerting system for [Graphite](http://graphite.wikidot.com/) metrics.
 
 Features:
 
-- Simplest installation (one python package dependency)
+- Simple installation
 - No software dependencies (Databases, AMQP and etc)
-- Light and full asyncronous
-- SMTP, HipChat, Slack, PagerDuty, HTTP handlers (Please make a request for additional handlers)
-- Easy configurable and supports historical values
+- Light and fully asynchronous
+- SMTP, HipChat, Slack, PagerDuty, HTTP handlers (PRs for additional handlers are welcome!)
+- Easily configurable and supports historical values
 
 [![Build status](http://img.shields.io/travis/klen/graphite-beacon.svg?style=flat-square)](http://travis-ci.org/klen/graphite-beacon)
 [![Coverage](http://img.shields.io/coveralls/klen/graphite-beacon.svg?style=flat-square)](https://coveralls.io/r/klen/graphite-beacon)

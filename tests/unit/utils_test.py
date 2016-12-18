@@ -4,13 +4,9 @@ import pytest
 
 from funcparserlib.lexer import LexerError
 
-
-
 from graphite_beacon.utils import (
     convert_to_format,
     convert_from_format,
-    interval_to_graphite,
-    parse_interval,
     parse_rule as parse_rule,
     IDENTITY
 )
@@ -49,23 +45,6 @@ def test_convert():
 
     assert convert_to_format(79456234, 'ms') == "22.1h"
     assert convert_to_format(34, 'ms') == "34ms"
-
-
-def test_parse_interval():
-    assert parse_interval(10) == 10000.0
-    assert parse_interval('10') == 10000.0
-    assert parse_interval('15s') == 15000.0
-    assert parse_interval('5minute') == 300000.0
-    assert parse_interval('6m') == 360000.0
-    assert parse_interval('1.2day') == 103680000.0
-    assert parse_interval('4d') == 345600000.0
-    assert parse_interval('5month') == 12960000000.0
-
-
-def test_interval_to_graphite():
-    assert interval_to_graphite('10m') == '10minute'
-    assert interval_to_graphite('875') == '875second'
-    assert interval_to_graphite('2hour') == '2hour'
 
 
 def test_parse_rule():
