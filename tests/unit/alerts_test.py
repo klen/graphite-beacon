@@ -1,26 +1,57 @@
 import mock
 
+from graphite_beacon import units
 from graphite_beacon.alerts import BaseAlert, GraphiteAlert, URLAlert
 
 
+BASIC_ALERT_OPTS = {
+    'name': 'GraphiteTest',
+    'query': '*',
+    'rules': ['normal: == 0'],
+}
+
+BASIC_GRAPHITE_ALERT_OPTS = BASIC_ALERT_OPTS
+
+BASIC_URL_ALERT_OPTS = {
+    'name': 'URLTest',
+    'query': '*',
+    'source': 'url',
+    'rules': ['normal: == 0'],
+}
+
+
 def test_alert(reactor):
-    alert1 = BaseAlert.get(reactor, name='Test', query='*', rules=["normal: == 0"])
+    alert1 = BaseAlert.get(reactor, **BASIC_GRAPHITE_ALERT_OPTS)
     assert alert1
     assert isinstance(alert1, GraphiteAlert)
 
-    alert2 = BaseAlert.get(reactor, name='Test', query='*', source='url', rules=["normal: == 0"])
+    alert2 = BaseAlert.get(reactor, **BASIC_URL_ALERT_OPTS)
     assert isinstance(alert2, URLAlert)
 
     assert alert1 != alert2
 
-    alert3 = BaseAlert.get(reactor, name='Test', query='*', interval='2m', rules=["normal: == 0"])
-    assert alert3.interval == '2minute'
+    alert3 = BaseAlert.get(reactor, interval='2m', **BASIC_GRAPHITE_ALERT_OPTS)
+    assert alert3.interval.as_tuple() == (2, units.MINUTE)
 
     assert alert1 == alert3
     assert set([alert1, alert3]) == set([alert1])
 
     alert = BaseAlert.get(reactor, name='Test', query='*', rules=["warning: >= 3MB"])
     assert alert.rules[0]['exprs'][0]['value'] == 3145728
+
+
+def test_history_size(reactor):
+    alert = BaseAlert.get(reactor, interval='1second', history_size='10second',
+                          **BASIC_GRAPHITE_ALERT_OPTS)
+    assert alert.history_size == 10
+
+    alert = BaseAlert.get(reactor, interval='1minute', history_size='5hour',
+                          **BASIC_GRAPHITE_ALERT_OPTS)
+    assert alert.history_size == 60*5
+
+    alert = BaseAlert.get(reactor, interval='5minute', history_size='1minute',
+                          **BASIC_GRAPHITE_ALERT_OPTS)
+    assert alert.history_size == 1
 
 
 def test_multimetrics(reactor):

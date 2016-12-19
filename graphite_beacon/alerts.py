@@ -7,14 +7,13 @@ from itertools import islice
 
 from tornado import ioloop, httpclient as hc, gen, log, escape
 
-from . import _compat as _
+from . import _compat as _, units
 from .graphite import GraphiteRecord
+from .units import MILLISECOND, TimeUnit
 from .utils import (
     HISTORICAL,
     LOGICAL_OPERATORS,
     convert_to_format,
-    interval_to_graphite,
-    parse_interval,
     parse_rule,
 )
 
@@ -111,16 +110,17 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         assert query, "%s: Alert's query is invalid" % self.name
         self.query = query
 
-        self.interval = interval_to_graphite(
-            options.get('interval', self.reactor.options['interval']))
-        interval = parse_interval(self.interval)
+        interval_raw = options.get('interval', self.reactor.options['interval'])
+        self.interval = TimeUnit.from_interval(interval_raw)
 
-        self.time_window = interval_to_graphite(
-            options.get('time_window', options.get('interval', self.reactor.options['interval'])))
-
-        self.until = interval_to_graphite(
-            options.get('until', self.reactor.options['until'])
+        time_window_raw = options.get(
+            'time_window',
+            options.get('interval', interval_raw)
         )
+        self.time_window = TimeUnit.from_interval(time_window_raw)
+
+        until_raw = options.get('until', self.reactor.options['until'])
+        self.until = TimeUnit.from_interval(until_raw)
 
         self._format = options.get('format', self.reactor.options['format'])
         self.request_timeout = options.get(
@@ -128,9 +128,12 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         self.connect_timeout = options.get(
             'connect_timeout', self.reactor.options['connect_timeout'])
 
-        self.history_size = options.get('history_size', self.reactor.options['history_size'])
-        self.history_size = parse_interval(self.history_size)
-        self.history_size = int(math.ceil(self.history_size / interval))
+        interval_ms = self.interval.convert_to(units.MILLISECOND)
+
+        history_size_raw = options.get('history_size', self.reactor.options['history_size'])
+        history_size_unit = TimeUnit.from_interval(history_size_raw)
+        history_size_ms = history_size_unit.convert_to(MILLISECOND)
+        self.history_size = int(math.ceil(history_size_ms / interval_ms))
 
         self.no_data = options.get('no_data', self.reactor.options['no_data'])
         self.loading_error = options.get('loading_error', self.reactor.options['loading_error'])
@@ -138,11 +141,14 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         if self.reactor.options.get('debug'):
             self.callback = ioloop.PeriodicCallback(self.load, 5000)
         else:
-            self.callback = ioloop.PeriodicCallback(self.load, interval)
+            self.callback = ioloop.PeriodicCallback(self.load, interval_ms)
 
     def convert(self, value):
         """Convert self value."""
-        return convert_to_format(value, self._format)
+        try:
+            return convert_to_format(value, self._format)
+        except (ValueError, TypeError):
+            return value
 
     def reset(self):
         """Reset state to normal for all targets.
@@ -292,9 +298,12 @@ class GraphiteAlert(BaseAlert):
         graphite_url = graphite_url or self.reactor.options.get('public_graphite_url')
 
         url = "{base}/render/?target={query}&from=-{time_window}&until=-{until}".format(
-            base=graphite_url, query=query, time_window=self.time_window, until=self.until)
+            base=graphite_url, query=query,
+            time_window=self.time_window.as_graphite(),
+            until=self.until.as_graphite()
+        )
         if raw_data:
-            url = "{}&rawData=true".format(url)
+            url = "{}&format=raw".format(url)
         return url
 
 
