@@ -2,6 +2,7 @@ import mock
 
 from graphite_beacon import units
 from graphite_beacon.alerts import BaseAlert, GraphiteAlert, URLAlert
+from graphite_beacon._compat import urlparse
 
 
 BASIC_ALERT_OPTS = {
@@ -52,6 +53,26 @@ def test_history_size(reactor):
     alert = BaseAlert.get(reactor, interval='5minute', history_size='1minute',
                           **BASIC_GRAPHITE_ALERT_OPTS)
     assert alert.history_size == 1
+
+
+def test_from_time(reactor):
+    alert = BaseAlert.get(reactor, time_window='5minute',
+                          **BASIC_GRAPHITE_ALERT_OPTS)
+
+    url = urlparse.urlparse(alert.get_graph_url('*'))
+    query = urlparse.parse_qs(url.query)
+    assert query['from'] == ['-5min']
+    assert query['until'] == ['-0s']
+
+
+def test_from_time_with_until(reactor):
+    alert = BaseAlert.get(reactor, time_window='5minute', until='1minute',
+                          **BASIC_GRAPHITE_ALERT_OPTS)
+
+    url = urlparse.urlparse(alert.get_graph_url('*'))
+    query = urlparse.parse_qs(url.query)
+    assert query['from'] == ['-6min']
+    assert query['until'] == ['-1min']
 
 
 def test_multimetrics(reactor):

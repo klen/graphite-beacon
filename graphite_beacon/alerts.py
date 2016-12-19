@@ -117,10 +117,13 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
             'time_window',
             options.get('interval', interval_raw)
         )
-        self.time_window = TimeUnit.from_interval(time_window_raw)
+        time_window = TimeUnit.from_interval(time_window_raw)
 
         until_raw = options.get('until', self.reactor.options['until'])
         self.until = TimeUnit.from_interval(until_raw)
+
+        # Adjust the start time to cater for `until`
+        self.from_time = time_window + self.until
 
         self._format = options.get('format', self.reactor.options['format'])
         self.request_timeout = options.get(
@@ -297,10 +300,10 @@ class GraphiteAlert(BaseAlert):
         query = escape.url_escape(query)
         graphite_url = graphite_url or self.reactor.options.get('public_graphite_url')
 
-        url = "{base}/render/?target={query}&from=-{time_window}&until=-{until}".format(
+        url = "{base}/render/?target={query}&from=-{from_time}&until=-{until}".format(
             base=graphite_url, query=query,
-            time_window=self.time_window.as_graphite(),
-            until=self.until.as_graphite()
+            from_time=self.from_time.as_graphite(),
+            until=self.until.as_graphite(),
         )
         if raw_data:
             url = "{}&format=raw".format(url)
