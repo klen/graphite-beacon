@@ -25,6 +25,8 @@ if not PY2:
 
     from io import StringIO
 
+    from urllib import parse as urlparse
+
     def reraise(tp, value, tb=None):
         if value.__traceback__ is not tb:
             raise value.with_traceback(tb)
@@ -42,6 +44,8 @@ else:
     iteritems = lambda d: d.iteritems()
 
     from cStringIO import StringIO
+
+    import urlparse
 
     exec('def reraise(tp, value, tb=None):\n raise tp, value, tb')
 
