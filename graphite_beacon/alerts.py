@@ -1,22 +1,17 @@
 """Implement alerts."""
 
 import math
-
-from collections import deque, defaultdict
+from collections import defaultdict, deque
 from itertools import islice
 
-from tornado import ioloop, httpclient as hc, gen, log, escape
+from tornado import httpclient as hc
+from tornado import escape, gen, ioloop, log
 
-from . import _compat as _, units
+from . import _compat as _
+from . import units
 from .graphite import GraphiteRecord
 from .units import MILLISECOND, TimeUnit
-from .utils import (
-    HISTORICAL,
-    LOGICAL_OPERATORS,
-    convert_to_format,
-    parse_rule,
-)
-
+from .utils import HISTORICAL, LOGICAL_OPERATORS, convert_to_format, parse_rule
 
 LOGGER = log.gen_log
 METHODS = "average", "last_value", "sum", "minimum", "maximum"
@@ -115,15 +110,15 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
 
         time_window_raw = options.get(
             'time_window',
-            options.get('interval', interval_raw)
+            self.reactor.options.get('time_window', interval_raw),
         )
-        time_window = TimeUnit.from_interval(time_window_raw)
+        self.time_window = TimeUnit.from_interval(time_window_raw)
 
         until_raw = options.get('until', self.reactor.options['until'])
         self.until = TimeUnit.from_interval(until_raw)
 
         # Adjust the start time to cater for `until`
-        self.from_time = time_window + self.until
+        self.from_time = self.time_window + self.until
 
         self._format = options.get('format', self.reactor.options['format'])
         self.request_timeout = options.get(
@@ -165,12 +160,10 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         """Start checking."""
         self.callback.start()
         self.load()
-        return self
 
     def stop(self):
         """Stop checking."""
         self.callback.stop()
-        return self
 
     def check(self, records):
         """Check current value."""
@@ -277,7 +270,7 @@ class GraphiteAlert(BaseAlert):
                                                    connect_timeout=self.connect_timeout,
                                                    validate_cert=self.validate_cert)
                 records = (
-                    GraphiteRecord(line.decode('utf-8'), self.default_nan_value, self.ignore_nan)
+                    GraphiteRecord(line, self.default_nan_value, self.ignore_nan)
                     for line in response.buffer)
                 data = [
                     (None if record.empty else getattr(record, self.method), record.target)

@@ -1,9 +1,10 @@
 import mock
 
 from graphite_beacon import units
-from graphite_beacon.alerts import BaseAlert, GraphiteAlert, URLAlert
 from graphite_beacon._compat import urlparse
-
+from graphite_beacon.alerts import BaseAlert, GraphiteAlert, URLAlert
+from graphite_beacon.core import Reactor
+from graphite_beacon.units import SECOND
 
 BASIC_ALERT_OPTS = {
     'name': 'GraphiteTest',
@@ -53,6 +54,28 @@ def test_history_size(reactor):
     alert = BaseAlert.get(reactor, interval='5minute', history_size='1minute',
                           **BASIC_GRAPHITE_ALERT_OPTS)
     assert alert.history_size == 1
+
+
+def test_time_window():
+    # Time window set explicitly on the alert - should be preferred
+    alert = BaseAlert.get(Reactor(), time_window='6second', interval='3second',
+                          **BASIC_GRAPHITE_ALERT_OPTS)
+    assert alert.time_window.as_tuple() == (6, SECOND)
+
+    # Time window set explicitly at the root - should be preferred next
+    reactor = Reactor(interval='10second', time_window='4second')
+    alert = BaseAlert.get(reactor, interval='3second', **BASIC_GRAPHITE_ALERT_OPTS)
+    assert alert.time_window.as_tuple() == (4, SECOND)
+
+    # No time window set, but interval set directly on the alert
+    reactor = Reactor(interval='10second')
+    alert = BaseAlert.get(reactor, interval='1second', **BASIC_GRAPHITE_ALERT_OPTS)
+    assert alert.time_window.as_tuple() == (1, SECOND)
+
+    # Only time interval set at root
+    reactor = Reactor(interval='10second')
+    alert = BaseAlert.get(reactor, **BASIC_GRAPHITE_ALERT_OPTS)
+    assert alert.time_window.as_tuple() == (10, SECOND)
 
 
 def test_from_time(reactor):

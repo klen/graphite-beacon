@@ -1,4 +1,4 @@
-from graphite_beacon.handlers import AbstractHandler, LOGGER
+from graphite_beacon.handlers import LOGGER, AbstractHandler
 
 
 class LogHandler(AbstractHandler):

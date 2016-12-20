@@ -1,12 +1,14 @@
 import json
+
+from tornado import httpclient as hc
+from tornado import gen
+
+from graphite_beacon.handlers import LOGGER, AbstractHandler
+
 try:
     from urlparse import urljoin
 except ImportError:
     from urllib.parse import urljoin
-
-from tornado import gen, httpclient as hc
-
-from graphite_beacon.handlers import AbstractHandler, LOGGER
 
 
 class VictorOpsHandler(AbstractHandler):

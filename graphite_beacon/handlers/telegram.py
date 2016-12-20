@@ -2,10 +2,12 @@
 
 import json
 from os.path import exists
+
 from tornado import gen, httpclient
 
-from graphite_beacon.handlers import AbstractHandler, LOGGER
+from graphite_beacon.handlers import LOGGER, AbstractHandler
 from graphite_beacon.template import TEMPLATES
+
 
 HELP_MESSAGE = """Telegram handler for graphite-beacon
 *usage* /command [parameters]

@@ -1,7 +1,13 @@
 class GraphiteRecord(object):
 
     def __init__(self, metric_string, default_nan_value=None, ignore_nan=False):
-        meta, data = metric_string.split('|')
+        try:
+            meta, data = metric_string.split('|')
+        except ValueError:
+            peek = ((metric_string[:40] + '..')
+                    if len(metric_string) > 40 else metric_string)
+            raise ValueError("Unable to parse graphite record: {}".format(peek))
+
         self.target, start_time, end_time, step = meta.rsplit(',', 3)
         self.start_time = int(start_time)
         self.end_time = int(end_time)

@@ -1,15 +1,11 @@
 import operator as op
 
 import pytest
-
 from funcparserlib.lexer import LexerError
 
-from graphite_beacon.utils import (
-    convert_to_format,
-    convert_from_format,
-    parse_rule as parse_rule,
-    IDENTITY
-)
+from graphite_beacon.utils import parse_rule as parse_rule
+from graphite_beacon.utils import (IDENTITY, convert_from_format,
+                                   convert_to_format)
 
 
 def test_convert():

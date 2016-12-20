@@ -7,7 +7,6 @@ from tornado.options import define, options, print_help
 
 from .core import Reactor
 
-
 LOGGER = log.gen_log
 DEFAULT_CONFIG_PATH = 'config.json'
 
@@ -32,10 +31,13 @@ def run():
 
     reactor = Reactor(**options_dict)
 
-    signal.signal(signal.SIGTERM, reactor.stop)
-    signal.signal(signal.SIGINT, reactor.stop)
+    stop = lambda *args: reactor.stop()
+    reinit = lambda *args: reactor.reinit()
+
+    signal.signal(signal.SIGTERM, stop)
+    signal.signal(signal.SIGINT, stop)
     if hasattr(signal, 'SIGHUP'):
-        signal.signal(signal.SIGHUP, reactor.reinit)
+        signal.signal(signal.SIGHUP, reinit)
 
     reactor.start()
 

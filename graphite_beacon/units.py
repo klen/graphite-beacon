@@ -2,7 +2,6 @@ from __future__ import division
 
 import re
 
-
 NUMBER_RE = re.compile(r'(?P<value>\-?\d*\.?\d*)(?P<unit>\w+)')
 
 # Time units
@@ -64,7 +63,7 @@ class TimeUnit(object):
         if self.value < 0:
             raise ValueError("Negative time units are not supported: {}".format(value))
         if not self.unit:
-            raise ValueError("Unable to parse time unit: {}".format(value))
+            raise ValueError("Unable to parse time unit: {}{}".format(value, unit))
 
     def display_value(self):
         return int(self.value) if self.value.is_integer() else self.value

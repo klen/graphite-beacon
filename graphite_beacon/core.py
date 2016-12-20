@@ -1,17 +1,16 @@
-import sys
-import os
-from re import compile as re, M
-
 import json
 import logging
+import os
+import sys
+from re import compile as re
+from re import M
 
-from tornado import ioloop, log
 import yaml
+from tornado import ioloop, log
 
 from .alerts import BaseAlert
-from .units import MILLISECOND, TimeUnit
 from .handlers import registry
-
+from .units import MILLISECOND, TimeUnit
 
 LOGGER = log.gen_log
 
@@ -62,14 +61,14 @@ class Reactor(object):
         self.callback = ioloop.PeriodicCallback(
             self.repeat, repeat_interval.convert_to(MILLISECOND))
 
-    def started(self):
+    def is_running(self):
         """Check whether the reactor is running.
 
         :rtype: bool
         """
         return hasattr(self, 'callback') and self.callback.is_running()
 
-    def reinit(self, *args, **options):  # pylint: disable=unused-argument
+    def reinit(self, **options):  # pylint: disable=unused-argument
         LOGGER.info('Read configuration')
 
         self.options.update(options)
@@ -79,7 +78,7 @@ class Reactor(object):
             config_valid = config_valid and self.include_config(config)
 
         # If we haven't started the ioloop yet and config is invalid then fail fast.
-        if not self.started() and not config_valid:
+        if not self.is_running() and not config_valid:
             sys.exit(1)
 
         if not self.options['public_graphite_url']:
@@ -98,11 +97,19 @@ class Reactor(object):
             self.alerts.remove(alert)
 
         self.alerts = set(
-            BaseAlert.get(self, **opts).start() for opts in self.options.get('alerts'))  # pylint: disable=no-member
+            BaseAlert.get(self, **opts) for opts in self.options.get('alerts'))  # pylint: disable=no-member
+
+        # Only auto-start alerts if the reactor is already running
+        if self.is_running():
+            self.start_alerts()
 
         LOGGER.debug('Loaded with options:')
         LOGGER.debug(json.dumps(self.options, indent=2))
         return self
+
+    def start_alerts(self):
+        for alert in self.alerts:
+            alert.start()
 
     def include_config(self, config):
         LOGGER.info('Load configuration: %s' % config)
@@ -136,15 +143,23 @@ class Reactor(object):
         for alert in self.alerts:
             alert.reset()
 
-    def start(self, *args):  # pylint: disable=unused-argument
+    def start(self, start_loop=True):
+        """Start all the things.
+
+        :param start_loop bool: whether to start the ioloop. should be False if
+                                the IOLoop is managed externally
+        """
+        self.start_alerts()
         if self.options.get('pidfile'):
             with open(self.options.get('pidfile'), 'w') as fpid:
                 fpid.write(str(os.getpid()))
         self.callback.start()
         LOGGER.info('Reactor starts')
-        self.loop.start()
 
-    def stop(self, *args):  # pylint: disable=unused-argument
+        if start_loop:
+            self.loop.start()
+
+    def stop(self):
         self.callback.stop()
         self.loop.stop()
         if self.options.get('pidfile'):
