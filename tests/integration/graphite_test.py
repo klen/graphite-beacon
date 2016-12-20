@@ -1,20 +1,14 @@
 import mock
-
-from mock import ANY
-
-from itertools import cycle, imap
-
 import tornado.gen
-
+from mock import ANY
 from tornado import ioloop
-from tornado.httpclient import HTTPResponse, HTTPRequest
+from tornado.httpclient import HTTPRequest, HTTPResponse
 from tornado.testing import AsyncTestCase, gen_test
 
 from graphite_beacon.alerts import GraphiteAlert
 from graphite_beacon.core import Reactor
 
 from ..util import build_graphite_response
-
 
 fetch_mock_url = lambda m: m.call_args_list[0][0][0]
 
@@ -56,7 +50,7 @@ class TestGraphite(AsyncTestCase):
                                           buffer=build_graphite_response(data=metric_data))
 
         mock_fetch.side_effect = iter(tornado.gen.maybe_future(build_resp())
-                                      for _ in xrange(100))
+                                      for _ in range(100))
 
         rr.start(start_loop=False)
         yield tornado.gen.sleep(0.5)

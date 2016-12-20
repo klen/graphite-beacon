@@ -1,9 +1,8 @@
-from re import compile as re
 import operator as op
+from re import compile as re
 
-from funcparserlib.lexer import make_tokenizer, Token
-from funcparserlib.parser import (some, a, maybe, finished, skip, many)
-
+from funcparserlib.lexer import Token, make_tokenizer
+from funcparserlib.parser import a, finished, many, maybe, skip, some
 
 # NOTE: the unit conversions below should be considered deprecated and migrated
 # over to `unit.py` instead.

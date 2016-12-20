@@ -1,11 +1,10 @@
 import mock
 
 from graphite_beacon import units
+from graphite_beacon._compat import urlparse
 from graphite_beacon.alerts import BaseAlert, GraphiteAlert, URLAlert
 from graphite_beacon.core import Reactor
 from graphite_beacon.units import SECOND
-from graphite_beacon._compat import urlparse
-
 
 BASIC_ALERT_OPTS = {
     'name': 'GraphiteTest',

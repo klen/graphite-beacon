@@ -7,7 +7,6 @@ from tornado.options import define, options, print_help
 
 from .core import Reactor
 
-
 LOGGER = log.gen_log
 DEFAULT_CONFIG_PATH = 'config.json'
 

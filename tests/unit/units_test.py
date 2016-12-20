@@ -1,15 +1,8 @@
 import pytest
 
-from graphite_beacon.units import (
-    DAY,
-    HOUR,
-    MILLISECOND,
-    MINUTE,
-    MONTH,
-    SECOND,
-    TimeUnit,
-    YEAR,
-)
+from graphite_beacon.units import (DAY, HOUR, MILLISECOND, MINUTE, MONTH,
+                                   SECOND, YEAR, TimeUnit)
+
 
 class TestTimeUnit(object):
     def test_from_interval(self):

@@ -3,9 +3,9 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from smtplib import SMTP
 
-from tornado import gen, concurrent
+from tornado import concurrent, gen
 
-from graphite_beacon.handlers import AbstractHandler, TEMPLATES, LOGGER
+from graphite_beacon.handlers import LOGGER, TEMPLATES, AbstractHandler
 
 
 class SMTPHandler(AbstractHandler):

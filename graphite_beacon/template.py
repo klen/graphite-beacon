@@ -2,7 +2,6 @@ import os.path as op
 
 from tornado import template
 
-
 LOADER = template.Loader(op.join(op.dirname(op.abspath(__file__)), 'templates'), autoescape=None)
 TEMPLATES = {
     'graphite': {

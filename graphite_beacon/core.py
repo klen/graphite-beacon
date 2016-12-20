@@ -1,17 +1,16 @@
-import sys
-import os
-from re import compile as re, M
-
 import json
 import logging
+import os
+import sys
+from re import compile as re
+from re import M
 
-from tornado import ioloop, log
 import yaml
+from tornado import ioloop, log
 
 from .alerts import BaseAlert
-from .units import MILLISECOND, TimeUnit
 from .handlers import registry
-
+from .units import MILLISECOND, TimeUnit
 
 LOGGER = log.gen_log
 

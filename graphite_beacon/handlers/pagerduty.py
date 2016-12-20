@@ -1,8 +1,9 @@
 import json
 
-from tornado import gen, httpclient as hc
+from tornado import httpclient as hc
+from tornado import gen
 
-from graphite_beacon.handlers import AbstractHandler, LOGGER
+from graphite_beacon.handlers import LOGGER, AbstractHandler
 
 
 class PagerdutyHandler(AbstractHandler):

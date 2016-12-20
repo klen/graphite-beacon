@@ -1,22 +1,17 @@
 """Implement alerts."""
 
 import math
-
-from collections import deque, defaultdict
+from collections import defaultdict, deque
 from itertools import islice
 
-from tornado import ioloop, httpclient as hc, gen, log, escape
+from tornado import httpclient as hc
+from tornado import escape, gen, ioloop, log
 
-from . import _compat as _, units
+from . import _compat as _
+from . import units
 from .graphite import GraphiteRecord
 from .units import MILLISECOND, TimeUnit
-from .utils import (
-    HISTORICAL,
-    LOGICAL_OPERATORS,
-    convert_to_format,
-    parse_rule,
-)
-
+from .utils import HISTORICAL, LOGICAL_OPERATORS, convert_to_format, parse_rule
 
 LOGGER = log.gen_log
 METHODS = "average", "last_value", "sum", "minimum", "maximum"
@@ -275,7 +270,7 @@ class GraphiteAlert(BaseAlert):
                                                    connect_timeout=self.connect_timeout,
                                                    validate_cert=self.validate_cert)
                 records = (
-                    GraphiteRecord(line.decode('utf-8'), self.default_nan_value, self.ignore_nan)
+                    GraphiteRecord(line, self.default_nan_value, self.ignore_nan)
                     for line in response.buffer)
                 data = [
                     (None if record.empty else getattr(record, self.method), record.target)

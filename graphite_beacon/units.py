@@ -2,7 +2,6 @@ from __future__ import division
 
 import re
 
-
 NUMBER_RE = re.compile(r'(?P<value>\-?\d*\.?\d*)(?P<unit>\w+)')
 
 # Time units

@@ -1,5 +1,5 @@
-from graphite_beacon.handlers.smtp import SMTPHandler
 from graphite_beacon.alerts import BaseAlert
+from graphite_beacon.handlers.smtp import SMTPHandler
 
 
 def test_html_template(reactor):
