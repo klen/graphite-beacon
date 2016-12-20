@@ -32,10 +32,13 @@ def run():
 
     reactor = Reactor(**options_dict)
 
-    signal.signal(signal.SIGTERM, reactor.stop)
-    signal.signal(signal.SIGINT, reactor.stop)
+    stop = lambda *args: reactor.stop()
+    reinit = lambda *args: reactor.reinit()
+
+    signal.signal(signal.SIGTERM, stop)
+    signal.signal(signal.SIGINT, stop)
     if hasattr(signal, 'SIGHUP'):
-        signal.signal(signal.SIGHUP, reactor.reinit)
+        signal.signal(signal.SIGHUP, reinit)
 
     reactor.start()
 

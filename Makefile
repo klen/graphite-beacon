@@ -125,5 +125,5 @@ run: $(VIRTUALENV)
 
 .PHONY: t
 # target: t - Runs tests
-t: $(VIRTUALENV)/bin/py.test
-	$(VIRTUALENV)/bin/py.test -xs
+t: $(VIRTUALENV)/bin/py.test tests
+	$(VIRTUALENV)/bin/py.test -xs tests

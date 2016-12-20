@@ -115,15 +115,15 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
 
         time_window_raw = options.get(
             'time_window',
-            options.get('interval', interval_raw)
+            self.reactor.options.get('time_window', interval_raw),
         )
-        time_window = TimeUnit.from_interval(time_window_raw)
+        self.time_window = TimeUnit.from_interval(time_window_raw)
 
         until_raw = options.get('until', self.reactor.options['until'])
         self.until = TimeUnit.from_interval(until_raw)
 
         # Adjust the start time to cater for `until`
-        self.from_time = time_window + self.until
+        self.from_time = self.time_window + self.until
 
         self._format = options.get('format', self.reactor.options['format'])
         self.request_timeout = options.get(
@@ -165,12 +165,10 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         """Start checking."""
         self.callback.start()
         self.load()
-        return self
 
     def stop(self):
         """Stop checking."""
         self.callback.stop()
-        return self
 
     def check(self, records):
         """Check current value."""
