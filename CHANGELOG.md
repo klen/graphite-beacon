@@ -1,6 +1,7 @@
 ## Unreleased
 
 - Upgrade tornado and drop Python 2.6 support (#144)
+- Improvement: Fail-fast with better error messages on fatal errors (e.g no config file)
 - Bug fix: Include pyyaml by default and use YAML config loader for `.yaml` files (#143)
 - Bug fix: Ensure `time_window` is honored when `until` is non-zero. Previously, the value
   of `until` would reduce that of `time_window`. (#147)

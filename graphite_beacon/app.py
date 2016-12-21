@@ -11,7 +11,8 @@ LOGGER = log.gen_log
 DEFAULT_CONFIG_PATH = 'config.json'
 
 
-define('config', default=None, help='Path to a configuration file (JSON/YAML)')
+define('config', default=None,
+       help='Path to a JSON or YAML config file (default config.json)')
 define('pidfile', default=Reactor.defaults['pidfile'], help='Set pid file')
 define('graphite_url', default=Reactor.defaults['graphite_url'], help='Graphite URL')
 
