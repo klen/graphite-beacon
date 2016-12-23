@@ -1,5 +1,4 @@
 import json
-import logging
 import os
 import sys
 from re import compile as re
@@ -92,9 +91,7 @@ class Reactor(object):
         self.reinit_handlers('critical')
         self.reinit_handlers('normal')
 
-        for alert in list(self.alerts):
-            alert.stop()
-            self.alerts.remove(alert)
+        self.remove_alerts()
 
         self.alerts = set(
             BaseAlert.get(self, **opts) for opts in self.options.get('alerts'))  # pylint: disable=no-member
@@ -106,6 +103,11 @@ class Reactor(object):
         LOGGER.debug('Loaded with options:')
         LOGGER.debug(json.dumps(self.options, indent=2))
         return self
+
+    def remove_alerts(self):
+        for alert in list(self.alerts):
+            alert.stop()
+            self.alerts.remove(alert)
 
     def start_alerts(self):
         for alert in self.alerts:
@@ -159,9 +161,11 @@ class Reactor(object):
         if start_loop:
             self.loop.start()
 
-    def stop(self):
+    def stop(self, stop_loop=True):
         self.callback.stop()
-        self.loop.stop()
+        self.remove_alerts()
+        if stop_loop:
+            self.loop.stop()
         if self.options.get('pidfile'):
             os.unlink(self.options.get('pidfile'))
         LOGGER.info('Reactor has stopped')
@@ -176,15 +180,6 @@ class Reactor(object):
 
         for handler in self.handlers.get(level, []):
             handler.notify(level, alert, value, target=target, ntype=ntype, rule=rule)
-
-_LOG_LEVELS = {
-    'DEBUG': logging.DEBUG,
-    'INFO': logging.INFO,
-    'WARN': logging.WARN,
-    'WARNING': logging.WARNING,
-    'ERROR': logging.ERROR,
-    'CRITICAL': logging.CRITICAL
-}
 
 
 def _get_loader(config):

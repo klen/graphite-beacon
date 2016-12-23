@@ -1,6 +1,6 @@
 import random
 
-from graphite_beacon._compat import StringIO
+
 
 
 def build_graphite_response(target_name='*', start_timestamp=1480000000,
@@ -18,7 +18,8 @@ def build_graphite_response(target_name='*', start_timestamp=1480000000,
     :rtype: StringIO
     """
     data = data or []
-    return StringIO(
-        "{},{},{},{}|{}".format(target_name, start_timestamp, end_timestamp,
-                                series_step, ','.join(str(d) for d in data))
+    return (
+        "{},{},{},{}|{}"
+        .format(target_name, start_timestamp, end_timestamp, series_step,
+                ','.join(str(d) for d in data))
     )

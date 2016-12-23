@@ -5,7 +5,7 @@ from tornado import ioloop
 from tornado.httpclient import HTTPRequest, HTTPResponse
 from tornado.testing import AsyncTestCase, gen_test
 
-from graphite_beacon.alerts import GraphiteAlert
+from graphite_beacon.alerts import URLAlert
 from graphite_beacon.core import Reactor
 from graphite_beacon._compat import StringIO
 
@@ -15,6 +15,8 @@ fetch_mock_url = lambda m: m.call_args_list[0][0][0]
 
 
 class TestGraphite(AsyncTestCase):
+
+    target_url = 'http://localhost/check'
 
     def get_new_ioloop(self):
         return ioloop.IOLoop.instance()
@@ -27,28 +29,27 @@ class TestGraphite(AsyncTestCase):
             alerts=[
                 {
                     'name': 'test',
-                    'query': '*',
-                    'rules': ["normal: == 0", "warning: >= 5"]
-                },
+                    'source': 'url',
+                    'query': self.target_url,
+                    'rules': ['warning: != 200']
+                }
             ],
             smtp={
                 'from': 'graphite@localhost',
                 'to': ['alerts@localhost'],
             },
             interval='0.25second',
-            time_window='10minute',
-            until='1minute',
         )
 
         assert not self.reactor.is_running()
 
         alert = list(self.reactor.alerts)[0]
         assert len(self.reactor.alerts) == 1
-        assert isinstance(alert, GraphiteAlert)
+        assert isinstance(alert, URLAlert)
 
         metric_data = [5, 7, 9]
-        build_resp = lambda: HTTPResponse(HTTPRequest('http://localhost:80/graphite'), 200,
-                                          buffer=StringIO(build_graphite_response(data=metric_data)))
+        build_resp = lambda: HTTPResponse(HTTPRequest(self.target_url), 500,
+                                          buffer=StringIO(''))
 
         mock_fetch.side_effect = iter(tornado.gen.maybe_future(build_resp())
                                       for _ in range(10))
@@ -58,19 +59,16 @@ class TestGraphite(AsyncTestCase):
 
         # There should be at least 1 immediate fetch + 1 instance of the PeriodicCallback
         assert mock_fetch.call_count >= 2
+        assert fetch_mock_url(mock_fetch) == self.target_url
 
-        expected = 'http://localhost/render/?target=%2A&from=-11min&until=-1min&format=raw'
-        assert fetch_mock_url(mock_fetch) == expected
-
-        assert alert.state['*'] == 'warning'
-
+        assert alert.state[self.target_url] == 'warning'
         assert mock_smpt_notify.call_count == 1
         mock_smpt_notify.assert_called_once_with(
             'warning',
             alert,
-            7.0,
-            ntype='graphite',
+            500.0,
+            ntype='url',
             rule=ANY,
-            target='*')
+            target=self.target_url)
 
         self.reactor.stop(stop_loop=False)
