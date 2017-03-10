@@ -8,4 +8,4 @@ WantedBy=multi-user.target
 User=root
 Group=root
 WorkingDirectory=/opt/graphite/beacon
-ExecStart=/usr/bin/python -m graphite_beacon.app --config=/etc/graphite-beacon.json
+ExecStart=/usr/bin/python -m graphite_beacon.app
