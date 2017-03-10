@@ -1,3 +1,3 @@
 #!/bin/sh
 
-pip install tornado funcparserlib
+python -m pip install tornado funcparserlib

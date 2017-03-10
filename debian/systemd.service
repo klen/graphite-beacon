@@ -5,6 +5,7 @@ Description=graphite-beacon example
 WantedBy=multi-user.target
 
 [Service]
-User=nobody
-Group=daemon
+User=root
+Group=root
+WorkingDirectory=/opt/graphite/beacon
 ExecStart=/usr/bin/python -m graphite_beacon.app --config=/etc/graphite-beacon.json
