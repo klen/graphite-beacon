@@ -13,7 +13,7 @@ def test_html_template(reactor):
 
     message = smtp.get_message(
         'critical', galert, 3000000, target=target, ntype='graphite', rule=galert.rules[0])
-    assert message
+    assert message.as_string()
 
     assert len(message._payload) == 2
     text, html = message._payload
@@ -22,7 +22,7 @@ def test_html_template(reactor):
     ualert = BaseAlert.get(
         reactor, source='url', name='Test', query='http://google.com', rules=["critical: != 200"])
     message = smtp.get_message('critical', ualert, '3000000', target, 'url')
-    assert message
+    assert message.as_string()
 
     assert len(message._payload) == 2
     _, html = message._payload
@@ -31,6 +31,6 @@ def test_html_template(reactor):
     ealert = BaseAlert.get(reactor, name='Test', query='*', rules=["critical: > 5 AND < 10"])
     message = smtp.get_message(
         'critical', ealert, 8, target=target, ntype='graphite', rule=ealert.rules[0])
-    assert message
+    assert message.as_string()
 
     assert len(message._payload) == 2

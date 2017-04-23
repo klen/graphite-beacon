@@ -38,7 +38,8 @@ class SlackHandler(AbstractHandler):
         msg_type = 'slack' if ntype == 'graphite' else 'short'
         tmpl = TEMPLATES[ntype][msg_type]
         return tmpl.generate(
-            level=level, reactor=self.reactor, alert=alert, value=value, target=target).strip()
+            level=level, reactor=self.reactor, alert=alert,
+            value=value, target=target).decode().strip()
 
     @gen.coroutine
     def notify(self, level, *args, **kwargs):
