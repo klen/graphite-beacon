@@ -40,6 +40,12 @@ class SlackHandler(AbstractHandler):
         return tmpl.generate(
             level=level, reactor=self.reactor, alert=alert, value=value, target=target).strip()
 
+    def get_graph_url(self, level, alert, value, target=None, ntype=None, rule=None):  # pylint: disable=unused-argument
+        if target is not None:
+            return alert.get_graph_url(target)
+        else:
+            return None
+
     @gen.coroutine
     def notify(self, level, *args, **kwargs):
         LOGGER.debug("Handler (%s) %s", self.name, level)
@@ -51,6 +57,15 @@ class SlackHandler(AbstractHandler):
         data['icon_emoji'] = self.emoji.get(level, ':warning:')
         if self.channel:
             data['channel'] = self.channel
+
+        graph_url = get_graph_url
+        if graph_url is not None:
+            data['attachments'] = {
+                'fallback':  'Graph',
+                'title': 'Graph',
+                'title_link': graph_url,
+                'image_url': graph_url,
+            }
 
         body = json.dumps(data)
         yield self.client.fetch(
