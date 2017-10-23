@@ -40,7 +40,9 @@ class SlackHandler(AbstractHandler):
         return tmpl.generate(
             level=level, reactor=self.reactor, alert=alert, value=value, target=target).strip()
 
-    def get_graph_url(self, level, alert, value, target=None, ntype=None, rule=None):  # pylint: disable=unused-argument
+    # pylint: disable=no-self-use
+    # pylint: disable=unused-argument
+    def get_graph_url(self, level, alert, value, target=None, ntype=None, rule=None):
         if target is not None:
             return alert.get_graph_url(target)
         return None
