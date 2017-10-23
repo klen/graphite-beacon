@@ -60,7 +60,7 @@ class SlackHandler(AbstractHandler):
         graph_url = self.get_graph_url
         if graph_url is not None:
             data['attachments'] = {
-                'fallback':  'Graph',
+                'fallback': 'Graph',
                 'title': 'Graph',
                 'title_link': graph_url,
                 'image_url': graph_url,
