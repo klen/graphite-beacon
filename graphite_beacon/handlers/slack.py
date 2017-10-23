@@ -43,8 +43,7 @@ class SlackHandler(AbstractHandler):
     def get_graph_url(self, level, alert, value, target=None, ntype=None, rule=None):  # pylint: disable=unused-argument
         if target is not None:
             return alert.get_graph_url(target)
-        else:
-            return None
+        return None
 
     @gen.coroutine
     def notify(self, level, *args, **kwargs):
