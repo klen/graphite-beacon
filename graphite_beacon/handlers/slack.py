@@ -58,7 +58,7 @@ class SlackHandler(AbstractHandler):
         if self.channel:
             data['channel'] = self.channel
 
-        graph_url = get_graph_url
+        graph_url = self.get_graph_url
         if graph_url is not None:
             data['attachments'] = {
                 'fallback':  'Graph',
