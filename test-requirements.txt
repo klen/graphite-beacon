@@ -2,7 +2,7 @@
 -e .
 
 mock==2.0.0
-pytest==3.0.5
+pytest==3.3.2
 pylint==1.6.4
 coverage==4.3
 pep8==1.7.0
