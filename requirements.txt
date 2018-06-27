@@ -1,3 +1,3 @@
 tornado == 4.4.2
 funcparserlib==0.3.6
-pyyaml==3.12
+pyyaml==4.1
