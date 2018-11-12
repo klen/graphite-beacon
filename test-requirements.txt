@@ -4,5 +4,5 @@
 mock==2.0.0
 pytest==3.10.1
 pylint==1.6.4
-coverage==4.3
+coverage==4.5.2
 pep8==1.7.0
