@@ -1,4 +1,5 @@
 import json
+import hashlib
 
 from tornado import httpclient as hc
 from tornado import gen
@@ -43,9 +44,10 @@ class PagerdutyHandler(AbstractHandler):
         client_url = None
         if target:
             client_url = alert.get_graph_url(target)
-        incident_key = 'graphite connect error'
-        if rule:
-            incident_key = "alert={},rule={}".format(alert.name, rule['raw'])
+        m = hashlib.md5()
+        incident_key_str = "alert={},client_url={}".format(alert.name, client_url)
+        m.update(incident_key_str)
+        incident_key = m.hexdigest()
 
         data = {
             "service_key": self.service_key,
