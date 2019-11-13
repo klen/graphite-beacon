@@ -31,16 +31,21 @@ class HipChatHandler(AbstractHandler):
         self.client = hc.AsyncHTTPClient()
 
     @gen.coroutine
-    def notify(self, level, *args, **kwargs):
+    def notify(self, level, alert, *args, **kwargs):
         LOGGER.debug("Handler (%s) %s", self.name, level)
 
+        room = self.room
+        if alert.override and self.name in alert.override:
+            override = alert.override[self.name]
+            room = override.get('room', room)
+
         data = {
-            'message': self.get_short(level, *args, **kwargs).decode('UTF-8'),
+            'message': self.get_short(level, alert, *args, **kwargs).decode('UTF-8'),
             'notify': True,
             'color': self.colors.get(level, 'gray'),
             'message_format': 'text',
         }
 
         yield self.client.fetch('{url}/v2/room/{room}/notification?auth_token={token}'.format(
-            url=self.options.get('url'), room=self.room, token=self.key), headers={
+            url=self.options.get('url'), room=room, token=self.key), headers={
                 'Content-Type': 'application/json'}, method='POST', body=json.dumps(data))

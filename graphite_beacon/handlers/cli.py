@@ -18,7 +18,7 @@ class CliHandler(AbstractHandler):
         self.whitelist = self.options.get('alerts_whitelist')
         assert self.command_template, 'Command line command is not defined.'
 
-    def notify(self, level, *args, **kwargs):
+    def notify(self, level, alert, *args, **kwargs):
         LOGGER.debug("Handler (%s) %s", self.name, level)
 
         def get_alert_name(*args):
@@ -26,9 +26,14 @@ class CliHandler(AbstractHandler):
             # remove time characteristics e.g. (1minute)
             return name.rsplit(' ', 1)[0].strip()
 
+        command_template = self.command_template
+        if alert.override and self.name in alert.override:
+            override = alert.override[self.name]
+            command_template = override.get('command', command_template)
+
         # Run only for whitelisted names if specified
         if not self.whitelist or get_alert_name(*args) in self.whitelist:
-            command = substitute_variables(self.command_template, level, *args, **kwargs)
+            command = substitute_variables(command_template, level, alert, *args, **kwargs)
             subprocess.Popen(
                 command,
                 shell=True,

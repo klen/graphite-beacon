@@ -91,7 +91,7 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
         """String representation."""
         return "%s (%s)" % (self.name, self.interval)
 
-    def configure(self, name=None, rules=None, query=None, **options):
+    def configure(self, name=None, rules=None, query=None, override=None, **options):
         """Configure the alert."""
         self.name = name
         if not name:
@@ -104,6 +104,8 @@ class BaseAlert(_.with_metaclass(AlertFabric)):
 
         assert query, "%s: Alert's query is invalid" % self.name
         self.query = query
+
+        self.override = override
 
         interval_raw = options.get('interval', self.reactor.options['interval'])
         self.interval = TimeUnit.from_interval(interval_raw)
