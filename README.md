@@ -140,7 +140,7 @@ The default options are:
         // Can be redefined for each alert.
         "format": "short",
 
-        // Default query interval
+        // Default query interval and time window when "time_window" is unset
         // Can be redefined for each alert.
         "interval": "10minute",
 
