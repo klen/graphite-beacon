@@ -49,7 +49,7 @@
                 <b>Tested value:</b> {{ alert.convert(alert.get_value_for_expr(expr, target)) }}</b> <br/>
             {% end %}
             {% end %}
-
+            <b> Errors : {{ alert.options.get('errorstr') }} </b>
         </td>
     </tr>
     <tr>

@@ -46,7 +46,9 @@ class Reactor(object):
         'default_nan_value': 0,
         'ignore_nan': False,
         'loading_error': 'critical',
-        'alerts': []
+        'alerts': [],
+        'url_retries': 0,
+        'url_retry_delay': 0
     }
 
     def __init__(self, **options):
