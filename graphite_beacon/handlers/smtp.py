@@ -64,11 +64,11 @@ class SMTPHandler(AbstractHandler):
             reactor=self.reactor, alert=alert, value=value, level=level, target=target,
             dt=dt, rule=rule, **self.options)
         msg = MIMEMultipart('alternative')
-        plain = MIMEText(str(txt_tmpl.generate(**ctx)), 'plain')
+        plain = MIMEText(txt_tmpl.generate(**ctx).decode('utf8'), 'plain')
         msg.attach(plain)
         if self.options['html']:
             html_tmpl = TEMPLATES[ntype]['html']
-            html = MIMEText(str(html_tmpl.generate(**ctx)), 'html')
+            html = MIMEText(html_tmpl.generate(**ctx).decode('utf8'), 'html')
             msg.attach(html)
         return msg
 

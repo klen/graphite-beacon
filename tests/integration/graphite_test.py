@@ -7,7 +7,7 @@ from tornado.testing import AsyncTestCase, gen_test
 
 from graphite_beacon.alerts import GraphiteAlert
 from graphite_beacon.core import Reactor
-from graphite_beacon._compat import StringIO
+from io import BytesIO
 
 from ..util import build_graphite_response
 
@@ -47,8 +47,9 @@ class TestGraphite(AsyncTestCase):
         assert isinstance(alert, GraphiteAlert)
 
         metric_data = [5, 7, 9]
+        payload = build_graphite_response(data=metric_data).encode('utf8')
         build_resp = lambda: HTTPResponse(HTTPRequest('http://localhost:80/graphite'), 200,
-                                          buffer=StringIO(build_graphite_response(data=metric_data)))
+                                          buffer=BytesIO(payload))
 
         mock_fetch.side_effect = iter(tornado.gen.maybe_future(build_resp())
                                       for _ in range(10))

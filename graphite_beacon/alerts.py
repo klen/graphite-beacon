@@ -270,7 +270,7 @@ class GraphiteAlert(BaseAlert):
                                                    connect_timeout=self.connect_timeout,
                                                    validate_cert=self.validate_cert)
                 records = (
-                    GraphiteRecord(line, self.default_nan_value, self.ignore_nan)
+                    GraphiteRecord(line.decode('utf8'), self.default_nan_value, self.ignore_nan)
                     for line in response.buffer)
                 data = [
                     (None if record.empty else getattr(record, self.method), record.target)
